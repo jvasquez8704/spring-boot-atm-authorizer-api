@@ -1,0 +1,247 @@
+package com.bancatlan.atmauthorizer.service.impl;
+
+import com.bancatlan.atmauthorizer.component.Constants;
+import com.bancatlan.atmauthorizer.component.IUtilComponent;
+import com.bancatlan.atmauthorizer.component.impl.UtilComponentImpl;
+import com.bancatlan.atmauthorizer.dto.VoucherTransactionDTO;
+import com.bancatlan.atmauthorizer.exception.AuthorizerError;
+import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
+import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
+import com.bancatlan.atmauthorizer.model.Customer;
+import com.bancatlan.atmauthorizer.model.Transaction;
+import com.bancatlan.atmauthorizer.model.Voucher;
+import com.bancatlan.atmauthorizer.repo.IVoucherRepo;
+import com.bancatlan.atmauthorizer.service.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class VoucherServiceImpl implements IVoucherService {
+    @Autowired
+    IVoucherRepo repo;
+
+    @Autowired
+    ITransactionService transaction;
+
+    @Autowired
+    ICustomerService customer;
+
+    @Autowired
+    IUserCaseSevice useCase;
+
+    @Autowired
+    ICurrencyService currency;
+
+    @Autowired
+    IBankService bankService;
+
+    @Autowired
+    IUtilComponent utilComponent;
+
+    @Override
+    public Voucher create(Voucher voucher) {
+        voucher.setCreationDate(LocalDateTime.now());
+        voucher.setExpirationDate(LocalDateTime.now().plusDays(3));
+        voucher.setCustomer(voucher.getTxnCreatedBy().getPayee());
+        return repo.save(voucher);
+    }
+
+    //@Transactional
+    @Override
+    public Voucher process(VoucherTransactionDTO dto) {
+        if (dto.getSessionKey() == null || dto.getSessionKey().equals("")) {
+            throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_OCB_SESSION_KEY);
+        }
+        UtilComponentImpl.setSessionKey(dto.getSessionKey());
+        //Transaction txnVoucher = new Transaction();
+        //txnVoucher.setUseCase(useCase.getById(Constants.VOUCHER_USE_CASE));
+        dto.getTransaction().setUseCase(useCase.getById(Constants.VOUCHER_USE_CASE));
+
+        //(1)
+        Transaction txnVoucher = transaction.initTxn(dto.getTransaction());
+        dto.getTransaction().setId(txnVoucher.getId());
+
+        //(2)
+        transaction.preAuthorizationTxn(txnVoucher);
+
+        //(3)
+        transaction.authorizationTxn(dto.getTransaction());
+        /*authorize txn => verify access, privileges, limits of payer and payee txn*/
+
+        //(4)
+        transaction.verifyTxn(dto.getTransaction());
+        //throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.VERIFYING_PARTICIPANTS);
+
+        String pickupCode = utilComponent.getPickupCodeByCellPhoneNumber(dto.getTransaction().getPayee().getMsisdn());
+
+        dto.getVoucher().setPickupCode(pickupCode);
+        dto.getVoucher().setTxnCreatedBy(txnVoucher);
+        dto.getVoucher().setAmountInitial(txnVoucher.getAmount());
+        dto.getVoucher().setAmountCurrent(txnVoucher.getAmount());
+
+        //(5)
+        transaction.confirmTxn(dto.getTransaction());
+        Voucher voucherResult = this.create(dto.getVoucher());
+
+        String template = Constants.TEMPLATE_NOTIFICATION_SMS;//Todo get template from DB
+        String sms = String.format(template, String.valueOf(txnVoucher.getAmount()), pickupCode);
+        if(voucherResult != null){
+            bankService.sendNotification(dto.getTransaction().getPayee().getMsisdn(),"",sms,Constants.BANK_NOTIFICATION_SMS);
+        }
+
+        return voucherResult;
+    }
+
+    @Override
+    public VoucherTransactionDTO verify(VoucherTransactionDTO dto) {
+        if (dto.getSessionKey() == null || dto.getSessionKey().equals("")) {
+            throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_OCB_SESSION_KEY);
+        }
+        UtilComponentImpl.setSessionKey(dto.getSessionKey());
+        dto.getTransaction().setUseCase(useCase.getById(Constants.VOUCHER_USE_CASE));
+        transaction.authorizationTxn(dto.getTransaction());
+        //(1)
+        Transaction txnVoucher = transaction.initTxn(dto.getTransaction());
+
+        //(2)
+        transaction.preAuthorizationTxn(txnVoucher);
+
+        //(3)
+        //transaction.authorizationTxn(txnVoucher);
+        /*authorize txn => verify access, privileges, limits of payer and payee txn*/
+
+        //(4)
+        dto.setTransaction(transaction.verifyTxn(txnVoucher));
+        return dto;
+    }
+
+    @Override
+    public Voucher confirm(VoucherTransactionDTO dto) {
+        if(dto.getTransaction() == null || dto.getTransaction().getId() == null){
+            throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_TXN_ON_REQUEST);
+        }
+
+        Transaction txnVoucher = transaction.getById(dto.getTransaction().getId());
+        if(txnVoucher == null){
+            throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_TXN_DOES_NOT_EXIST);
+        }
+
+        dto.getVoucher().setTxnCreatedBy(txnVoucher);
+        dto.getVoucher().setAmountInitial(txnVoucher.getAmount());
+        dto.getVoucher().setAmountCurrent(txnVoucher.getAmount());
+
+        String pickupCode = utilComponent.getPickupCodeByCellPhoneNumber(dto.getTransaction().getPayee().getMsisdn());
+        dto.getVoucher().setPickupCode(pickupCode);
+        //(5)
+        transaction.confirmTxn(dto.getTransaction());
+
+        Voucher voucherResult = this.create(dto.getVoucher());
+
+        String template = Constants.TEMPLATE_NOTIFICATION_SMS;//Todo get template from DB
+        String sms = String.format(template, String.valueOf(txnVoucher.getAmount()), pickupCode);
+        if(voucherResult != null){
+            bankService.sendNotification(dto.getTransaction().getPayee().getMsisdn(),"",sms,Constants.BANK_NOTIFICATION_SMS);
+        }
+
+        return voucherResult;
+    }
+
+    @Override
+    public Voucher withdraw(VoucherTransactionDTO dto) {
+        //find customer
+        Customer cst = customer.getByMsisdn(dto.getTransaction().getPayer().getMsisdn());
+        if(cst == null){
+            //execStatus.setErrorCode("57");
+            throw new ModelNotFoundException("User with Cellphone - " +
+                    dto.getTransaction().getPayee().getMsisdn() + " - not found");
+        }
+
+        Voucher voucher = repo.findByPickupCodeAndSecretCodeAndCustomer(dto.getVoucher().getPickupCode(),dto.getVoucher().getSecretCode(), cst);
+        if(voucher == null || voucher.getAmountCurrent() == 0L || dto.getTransaction().getAmount() > voucher.getAmountCurrent()){//is missing if it's active
+            throw new ModelNotFoundException(" Voucher with pickupCode " +
+                    dto.getVoucher().getPickupCode() + " and secretCode " + dto.getVoucher().getSecretCode() + " - not found");
+        }
+
+        //confirm txn
+        Transaction txn = new Transaction();
+        txn.setCurrency(currency.getById(Constants.HN_CURRENCY_ID));
+        txn.setUseCase(useCase.getById(Constants.WITHDRAW_VOUCHER_USE_CASE));
+        txn.setAmount(dto.getTransaction().getAmount());
+        txn.setPayer(cst);
+        //txn.setPayee(atmUser));
+        txn.setAtmReference(dto.getTransaction().getAtmReference());
+        txn.setVoucher(voucher);
+        Transaction txnPaidBy = transaction.confirmTxn(txn);
+        Double currentAmount = voucher.getAmountCurrent() - txnPaidBy.getAmount();
+
+        //mark voucher
+        voucher.setAmountCurrent(currentAmount);
+        voucher.setTxnPaidOutBy(txnPaidBy);
+        voucher.setCustomerUpdate(cst);
+        return this.update(voucher);
+    }
+
+    @Override
+    public Voucher cancelWithdraw(VoucherTransactionDTO dto) {
+        //find customer
+        Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference());
+        if(txn == null){
+            //execStatus.setErrorCode("57");
+            throw new ModelNotFoundException("Txn and Voucher by this atm reference - " +
+                    dto.getTransaction().getAtmReference() + " - not found");
+        }
+
+        Voucher voucher = this.getById(txn.getVoucher().getId());
+        if(voucher == null){//is missing if it's active
+            throw new ModelNotFoundException(" Voucher with txn " +
+                    txn.getId() + " - not found");
+        }
+
+        //cancel txn
+        Transaction txnPaidBy = transaction.cancelConfirmTxn(txn);
+        Double currentAmount = voucher.getAmountCurrent() + txnPaidBy.getAmount();
+
+        //mark voucher
+        voucher.setAmountCurrent(currentAmount);
+        voucher.setCustomerUpdate(voucher.getCustomer());
+        return this.update(voucher);
+    }
+
+    @Override
+    public List<Voucher> getAllByOcbUser(String ocbUser) {
+        return repo.findAllByOcbUser(ocbUser);
+    }
+
+    @Override
+    public Voucher update(Voucher voucher) {
+        voucher.setUpdateDate(LocalDateTime.now());
+        return repo.save(voucher);
+    }
+
+    @Override
+    public List<Voucher> getAll() {
+        return repo.findAll();
+    }
+
+    @Override
+    public Voucher getById(Long id) {
+        Optional<Voucher> voucher = repo.findById(id);
+        return voucher.isPresent() ? voucher.get() : null;
+    }
+
+    @Override
+    public Boolean delete(Long id) {
+        Boolean retVal = true;
+        try {
+            repo.deleteById(id);
+        }catch (Exception ex){
+            retVal = false;
+            System.out.println(ex);
+        }
+        return retVal;
+    }
+}
