@@ -13,7 +13,7 @@ public class Constants {
     public static final String BANK_ACCOUNT_TYPE_2 = "2";
 
     /*STATUS TXN CODES*/
-    public static final long INITIAL_TXN_STATUS = 0;
+    public static final long INITIAL_TXN_STATUS = 1;
     public static final long PRE_AUTHORIZED_TXN_STATUS = 2;
     public static final long AUTHENTICATED_TXN_STATUS = 10;
     public static final long AUTHORIZED_TXN_STATUS = 20;
