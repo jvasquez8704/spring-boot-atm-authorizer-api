@@ -7,6 +7,7 @@ import com.bancatlan.atmauthorizer.service.IPaymentInstrumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,7 @@ public class PaymentInstrumentServiceImpl implements IPaymentInstrumentService {
 
     @Override
     public PaymentInstrument create(PaymentInstrument pi) {
+        pi.setCreationDate(LocalDateTime.now());
         return repo.save(pi);
     }
 
