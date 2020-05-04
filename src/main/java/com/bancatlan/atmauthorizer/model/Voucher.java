@@ -22,40 +22,45 @@ public class Voucher {
     @Column(name = "secretCode", nullable = false, length = 8)
     private String secretCode;
 
-    @Column(name = "atmReference", nullable = true, length = 40)
+    @Column(name = "atmReference",  length = 40)
     private String atmReference;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer", nullable = true, foreignKey = @ForeignKey(name = "fk_voucher_customer"))
+    @JoinColumn(name = "id_customer",  foreignKey = @ForeignKey(name = "fk_voucher_customer"))
     private Customer customer;
 
-    @ManyToOne
-    @JoinColumn(name = "id_payer", nullable = true, foreignKey = @ForeignKey(name = "fk_voucher_payer"))
-    private Customer payer;
+    @Column(name = "isActive")
+    private Boolean isActive;
+
+    @Column(name = "isCanceled")
+    private Boolean isCanceled;
+
+    @Column(name = "isDeleted")
+    private Boolean isDeleted;
 
     @OneToOne
-    @JoinColumn(name = "id_txn_paid_out_by", nullable = true, foreignKey = @ForeignKey(name = "fk_txn_paid_out_by"))
+    @JoinColumn(name = "id_txn_paid_out_by",  foreignKey = @ForeignKey(name = "fk_txn_paid_out_by"))
     private Transaction txnPaidOutBy;
 
     @OneToOne
     @JoinColumn(name = "id_txn_created_by", nullable = false, foreignKey = @ForeignKey(name = "fk_txn_created_by"))
     private Transaction txnCreatedBy;
 
-    @Column(name = "expirationDate", nullable = true, length = 30)
+    @Column(name = "expirationDate",  length = 30)
     private LocalDateTime expirationDate;
 
-    @Column(name = "creationDate", nullable = true, length = 30)
+    @Column(name = "creationDate",  length = 30)
     private LocalDateTime creationDate;
 
-    @Column(name = "updateDate", nullable = true, length = 30)
+    @Column(name = "updateDate",  length = 30)
     private LocalDateTime updateDate;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer_creation", nullable = true, foreignKey = @ForeignKey(name = "fk_voucher_customer_c"))
+    @JoinColumn(name = "id_customer_creation",  foreignKey = @ForeignKey(name = "fk_voucher_customer_c"))
     private Customer customerCreation;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer_update", nullable = true, foreignKey = @ForeignKey(name = "fk_voucher_customer_u"))
+    @JoinColumn(name = "id_customer_update",  foreignKey = @ForeignKey(name = "fk_voucher_customer_u"))
     private Customer customerUpdate;
 
     public Long getId() {
@@ -114,12 +119,28 @@ public class Voucher {
         this.customer = customer;
     }
 
-    public Customer getPayer() {
-        return payer;
+    public Boolean getActive() {
+        return isActive;
     }
 
-    public void setPayer(Customer payer) {
-        this.payer = payer;
+    public void setActive(Boolean active) {
+        isActive = active;
+    }
+
+    public Boolean getCanceled() {
+        return isCanceled;
+    }
+
+    public void setCanceled(Boolean canceled) {
+        isCanceled = canceled;
+    }
+
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
     }
 
     public Transaction getTxnPaidOutBy() {

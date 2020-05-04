@@ -44,17 +44,17 @@ public class VoucherController {
         return new ResponseEntity<Voucher>(voucher, HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/process")
     private ResponseEntity<VoucherTransactionDTO> processVoucher(@RequestBody VoucherTransactionDTO dto) {
         return new ResponseEntity<VoucherTransactionDTO>(service.bankPaymentProcess(dto), HttpStatus.CREATED);
     }
 
-    @PutMapping("/withdraw")
+    @PostMapping("/withdraw")
     private ResponseEntity<Voucher> withdrawVoucher(@RequestBody VoucherTransactionDTO dto){
         return new ResponseEntity<Voucher>(service.withdraw(dto),HttpStatus.OK);
     }
 
-    @PutMapping("/cancel")
+    @PostMapping("/cancel")
     private ResponseEntity<Voucher> updateVoucher(@RequestBody VoucherTransactionDTO dto){
          return new ResponseEntity<Voucher>(service.cancelWithdraw(dto),HttpStatus.OK);
     }

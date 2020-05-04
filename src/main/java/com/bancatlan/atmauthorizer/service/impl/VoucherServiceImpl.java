@@ -53,21 +53,17 @@ public class VoucherServiceImpl implements IVoucherService {
     //@Transactional
     @Override
     public VoucherTransactionDTO bankPaymentProcess(VoucherTransactionDTO dto) {
-        VoucherTransactionDTO retVal = null;
         if (dto.getAction() == null || dto.getAction().equals("")) {
             throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_BANK_PAYMENT_SERVICE_ACTION);
         }
         switch (dto.getAction().toUpperCase()){
             case "C":
-                retVal = this.bankVerifyPayment(dto);
-                break;
+                return this.bankVerifyPayment(dto);
             case "P":
-                retVal = this.bankConfirmPayment(dto);
-                break;
+                return this.bankConfirmPayment(dto);
             default:
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORTED_BANK_PAYMENT_SERVICE_ACTION);
         }
-        return retVal;
     }
 
     @Override
@@ -109,7 +105,7 @@ public class VoucherServiceImpl implements IVoucherService {
             throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_TXN_DOES_NOT_EXIST);
         }
 
-        if (txnVoucher != null && txnVoucher.getTxnStatus().getId() != null && txnVoucher.getTxnStatus().getId() >= Constants.CONFIRM_TXN_STATUS) {
+        if (txnVoucher.getTxnStatus() != null && txnVoucher.getTxnStatus().getId() != null && txnVoucher.getTxnStatus().getId() >= Constants.CONFIRM_TXN_STATUS) {
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.ALREADY_PROCESSED_TXN);
         }
         //(5)
@@ -149,20 +145,23 @@ public class VoucherServiceImpl implements IVoucherService {
             throw new ModelNotFoundException(" Voucher with pickupCode " +
                     dto.getVoucher().getPickupCode() + " and secretCode " + dto.getVoucher().getSecretCode() + " - not found");
         }
-
+        //Todo agregar validacion de limites privilegios ciclo de vida de txns
         //confirm txn
         Transaction txn = new Transaction();
         txn.setCurrency(currency.getById(Constants.HN_CURRENCY_ID));
         txn.setUseCase(useCase.getById(Constants.WITHDRAW_VOUCHER_USE_CASE));
         txn.setAmount(dto.getTransaction().getAmount());
         txn.setPayer(cst);
-        //txn.setPayee(atmUser));
+        txn.setPayee(customer.getById(Constants.ATM_USER_ID));
         txn.setAtmReference(dto.getTransaction().getAtmReference());
-        txn.setVoucher(voucher);
+        txn.setVoucher(voucher);//Todo Es mejor crear una tabla maestra
         Transaction txnPaidBy = transaction.confirmTxn(txn);
         Double currentAmount = voucher.getAmountCurrent() - txnPaidBy.getAmount();
 
         //mark voucher
+        if (currentAmount == 0) {
+            voucher.setActive(false);
+        }
         voucher.setAmountCurrent(currentAmount);
         voucher.setTxnPaidOutBy(txnPaidBy);
         voucher.setCustomerUpdate(cst);
@@ -173,10 +172,10 @@ public class VoucherServiceImpl implements IVoucherService {
     public Voucher cancelWithdraw(VoucherTransactionDTO dto) {
         //find customer
         Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference());
-        if(txn == null){
+        if(txn == null  || txn.getTxnStatus().getId().equals(Constants.CANCEL_CONFIRM_TXN_STATUS)){
             //execStatus.setErrorCode("57");
             throw new ModelNotFoundException("Txn and Voucher by this atm reference - " +
-                    dto.getTransaction().getAtmReference() + " - not found");
+                    dto.getTransaction().getAtmReference() + " - not found or already canceled");
         }
 
         Voucher voucher = this.getById(txn.getVoucher().getId());
@@ -184,12 +183,13 @@ public class VoucherServiceImpl implements IVoucherService {
             throw new ModelNotFoundException(" Voucher with txn " +
                     txn.getId() + " - not found");
         }
-
+        //Todo regresar el dinero de la cuenta de cajeros a la cuenta de ATM (o en el caso de Oscar P. regresar el dinero al usuario (pero en estado de congelado))
         //cancel txn
         Transaction txnPaidBy = transaction.cancelConfirmTxn(txn);
         Double currentAmount = voucher.getAmountCurrent() + txnPaidBy.getAmount();
 
         //mark voucher
+        voucher.setActive(true);
         voucher.setAmountCurrent(currentAmount);
         voucher.setCustomerUpdate(voucher.getCustomer());
         return this.update(voucher);
