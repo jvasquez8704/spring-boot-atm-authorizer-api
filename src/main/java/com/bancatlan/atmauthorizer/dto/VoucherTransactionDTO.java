@@ -7,6 +7,7 @@ public class VoucherTransactionDTO {
     private Voucher voucher;
     private Transaction transaction;
     private String sessionKey;
+    private String action;
 
     public Voucher getVoucher() {
         return voucher;
@@ -30,5 +31,13 @@ public class VoucherTransactionDTO {
 
     public void setSessionKey(String sessionKey) {
         this.sessionKey = sessionKey;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
     }
 }

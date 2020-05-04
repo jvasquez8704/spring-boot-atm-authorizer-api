@@ -40,4 +40,9 @@ public class CurrencyServiceImpl implements ICurrencyService {
     public Boolean delete(Long id) {
         return null;
     }
+
+    @Override
+    public Currency getCurrencyByCode(String code) {
+        return repo.getCurrencyByCode(code);
+    }
 }

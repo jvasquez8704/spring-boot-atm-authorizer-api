@@ -4,10 +4,7 @@ import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
-import com.bancatlan.atmauthorizer.model.Customer;
-import com.bancatlan.atmauthorizer.model.PaymentInstrument;
-import com.bancatlan.atmauthorizer.model.Transaction;
-import com.bancatlan.atmauthorizer.model.UseCase;
+import com.bancatlan.atmauthorizer.model.*;
 import com.bancatlan.atmauthorizer.repo.ITransactionRepo;
 import com.bancatlan.atmauthorizer.service.*;
 import org.slf4j.Logger;
@@ -38,6 +35,9 @@ public class TransactionServiceImpl implements ITransactionService {
 
     @Autowired
     private  IBankService bankService;
+
+    @Autowired
+    private  ICurrencyService currencyService;
 
     @Override
     public Transaction create(Transaction txn) {
@@ -74,13 +74,26 @@ public class TransactionServiceImpl implements ITransactionService {
         return retVal;
     }
 
-
     @Override
     public Transaction initTxn(Transaction txn) {
         Transaction initTxn = new Transaction();
+        if (txn.getUseCase() == null || txn.getUseCase().getId() == null) {
+            throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_USE_CASE);
+        }
+
+        if (txn.getCurrency() == null || txn.getCurrency().getCode() == null || txn.getCurrency().getCode().equals("")) {
+            throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_CURRENCY_IN_REQ);
+        }
+
+        Currency currency = currencyService.getCurrencyByCode(txn.getCurrency().getCode());
+        if(currency == null){
+            throw new ModelCustomErrorException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_CURRENCY);
+        }
+
         initTxn.setTxnStatus(status.getById(Constants.INITIAL_TXN_STATUS));
         initTxn.setAmount(txn.getAmount());
         initTxn.setUseCase(txn.getUseCase());
+        initTxn.setCurrency(currency);
         return this.create(initTxn);
     }
 

@@ -45,18 +45,8 @@ public class VoucherController {
     }
 
     @PostMapping
-    private ResponseEntity<Voucher> processVoucher(@RequestBody VoucherTransactionDTO dto){
-        return new ResponseEntity<Voucher>(service.process(dto),HttpStatus.CREATED);
-    }
-
-    @PostMapping("/verify")
-    private ResponseEntity<VoucherTransactionDTO> verifyVoucher(@RequestBody VoucherTransactionDTO dto){
-        return new ResponseEntity<VoucherTransactionDTO>(service.verify(dto),HttpStatus.CREATED);
-    }
-
-    @PostMapping("/confirm")
-    private ResponseEntity<Voucher> confirmVoucher(@RequestBody VoucherTransactionDTO dto){
-        return new ResponseEntity<Voucher>(service.confirm(dto),HttpStatus.CREATED);
+    private ResponseEntity<VoucherTransactionDTO> processVoucher(@RequestBody VoucherTransactionDTO dto) {
+        return new ResponseEntity<VoucherTransactionDTO>(service.bankPaymentProcess(dto), HttpStatus.CREATED);
     }
 
     @PutMapping("/withdraw")

@@ -18,26 +18,29 @@ public class Transaction {
     @Column(name = "amount", nullable = false, length = 20)
     private Double amount;
 
-    @Column(name = "atmReference", nullable = true, length = 25)
+    @Column(name = "atmReference", nullable = true, length = 50)
     private String atmReference;
 
-    @Column(name = "citizenIdentity", nullable = true, length = 25)
+    @Column(name = "citizenIdentity", nullable = true, length = 50)
     private String citizenIdentity;
 
-    @Column(name = "ocbReference", nullable = true, length = 25)
+    @Column(name = "ocbReference", nullable = true, length = 50)
     private String ocbReference;
 
-    @Column(name = "coreReference", nullable = true, length = 25)
+    @Column(name = "coreReference", nullable = true, length = 50)
     private String coreReference;
 
-    @Column(name = "baseServiceReference", nullable = true, length = 25)
+    @Column(name = "baseServiceReference", nullable = true, length = 50)
     private String baseServiceReference;
 
-    @Column(name = "integrationBusReference", nullable = true, length = 25)
+    @Column(name = "integrationBusReference", nullable = true, length = 50)
     private String integrationBusReference;
 
-    @Column(name = "channelReference", nullable = true, length = 25)
+    @Column(name = "channelReference", nullable = true, length = 50)
     private String channelReference;
+
+    @Column(name = "applicationReference", nullable = true, length = 50)
+    private String applicationReference;
 
     @Column(name = "id_order", nullable = true, length = 30)
     private String id_order;
@@ -269,6 +272,14 @@ public class Transaction {
 
     public void setChannel(Channel channel) {
         this.channel = channel;
+    }
+
+    public String getApplicationReference() {
+        return applicationReference;
+    }
+    
+    public void setApplicationReference(String applicationReference) {
+        this.applicationReference = applicationReference;
     }
 
     public LocalDateTime getExpirationDate() {

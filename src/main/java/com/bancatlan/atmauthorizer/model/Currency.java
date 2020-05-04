@@ -2,7 +2,9 @@ package com.bancatlan.atmauthorizer.model;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-
+/**
+ * Model base on ISO 4217
+ */
 @Entity
 @Table(name = "currency")
 public class Currency {
@@ -10,8 +12,20 @@ public class Currency {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = true, length = 50)
-    private String title;
+    @Column(name = "name", nullable = true, length = 20)
+    private String name;
+
+    @Column(name = "code", nullable = true, length = 5)
+    private String code;
+
+    @Column(name = "num", nullable = true, length = 5)
+    private Integer num;
+
+    @Column(name = "decimals", nullable = true, length = 1)
+    private Integer decimals;
+
+    @Column(name = "sign", nullable = true, length = 10)
+    private String sign;
 
     @Column(name = "description", nullable = true, length = 50)
     private String description;
@@ -48,12 +62,44 @@ public class Currency {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public Integer getNum() {
+        return num;
+    }
+
+    public void setNum(Integer num) {
+        this.num = num;
+    }
+
+    public Integer getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(Integer decimals) {
+        this.decimals = decimals;
+    }
+
+    public String getSign() {
+        return sign;
+    }
+
+    public void setSign(String sign) {
+        this.sign = sign;
     }
 
     public String getDescription() {

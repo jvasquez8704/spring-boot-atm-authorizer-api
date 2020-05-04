@@ -11,7 +11,7 @@ public class AtmAuthorizerApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(AtmAuthorizerApplication.class, args);
-		System.out.println("Testing bro");
+		System.out.println("ATM AUTHORIZER WAS INITIALIZED SUCCESSFUL");
 	}
 
 }

@@ -52,18 +52,38 @@ public class VoucherServiceImpl implements IVoucherService {
 
     //@Transactional
     @Override
-    public Voucher process(VoucherTransactionDTO dto) {
+    public VoucherTransactionDTO bankPaymentProcess(VoucherTransactionDTO dto) {
+        VoucherTransactionDTO retVal = null;
+        if (dto.getAction() == null || dto.getAction().equals("")) {
+            throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_BANK_PAYMENT_SERVICE_ACTION);
+        }
+        switch (dto.getAction().toUpperCase()){
+            case "C":
+                retVal = this.bankVerifyPayment(dto);
+                break;
+            case "P":
+                retVal = this.bankConfirmPayment(dto);
+                break;
+            default:
+                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORTED_BANK_PAYMENT_SERVICE_ACTION);
+        }
+        return retVal;
+    }
+
+    @Override
+    public VoucherTransactionDTO bankVerifyPayment(VoucherTransactionDTO dto) {
+        if (dto.getTransaction() != null && dto.getTransaction().getId() != null) {
+            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORTED_TXN_ID_BANK_PAYMENT_SERVICE_ACTION);
+        }
+
         if (dto.getSessionKey() == null || dto.getSessionKey().equals("")) {
             throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_OCB_SESSION_KEY);
         }
         UtilComponentImpl.setSessionKey(dto.getSessionKey());
-        //Transaction txnVoucher = new Transaction();
-        //txnVoucher.setUseCase(useCase.getById(Constants.VOUCHER_USE_CASE));
-        dto.getTransaction().setUseCase(useCase.getById(Constants.VOUCHER_USE_CASE));
-
         //(1)
         Transaction txnVoucher = transaction.initTxn(dto.getTransaction());
         dto.getTransaction().setId(txnVoucher.getId());
+        dto.getTransaction().setCurrency(txnVoucher.getCurrency());
 
         //(2)
         transaction.preAuthorizationTxn(txnVoucher);
@@ -75,52 +95,11 @@ public class VoucherServiceImpl implements IVoucherService {
         //(4)
         transaction.verifyTxn(dto.getTransaction());
         //throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.VERIFYING_PARTICIPANTS);
-
-        String pickupCode = utilComponent.getPickupCodeByCellPhoneNumber(dto.getTransaction().getPayee().getMsisdn());
-
-        dto.getVoucher().setPickupCode(pickupCode);
-        dto.getVoucher().setTxnCreatedBy(txnVoucher);
-        dto.getVoucher().setAmountInitial(txnVoucher.getAmount());
-        dto.getVoucher().setAmountCurrent(txnVoucher.getAmount());
-
-        //(5)
-        transaction.confirmTxn(dto.getTransaction());
-        Voucher voucherResult = this.create(dto.getVoucher());
-
-        String template = Constants.TEMPLATE_NOTIFICATION_SMS;//Todo get template from DB
-        String sms = String.format(template, String.valueOf(txnVoucher.getAmount()), pickupCode);
-        if(voucherResult != null){
-            bankService.sendNotification(dto.getTransaction().getPayee().getMsisdn(),"",sms,Constants.BANK_NOTIFICATION_SMS);
-        }
-
-        return voucherResult;
-    }
-
-    @Override
-    public VoucherTransactionDTO verify(VoucherTransactionDTO dto) {
-        if (dto.getSessionKey() == null || dto.getSessionKey().equals("")) {
-            throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_OCB_SESSION_KEY);
-        }
-        UtilComponentImpl.setSessionKey(dto.getSessionKey());
-        dto.getTransaction().setUseCase(useCase.getById(Constants.VOUCHER_USE_CASE));
-        transaction.authorizationTxn(dto.getTransaction());
-        //(1)
-        Transaction txnVoucher = transaction.initTxn(dto.getTransaction());
-
-        //(2)
-        transaction.preAuthorizationTxn(txnVoucher);
-
-        //(3)
-        //transaction.authorizationTxn(txnVoucher);
-        /*authorize txn => verify access, privileges, limits of payer and payee txn*/
-
-        //(4)
-        dto.setTransaction(transaction.verifyTxn(txnVoucher));
         return dto;
     }
 
     @Override
-    public Voucher confirm(VoucherTransactionDTO dto) {
+    public VoucherTransactionDTO bankConfirmPayment(VoucherTransactionDTO dto) {
         if(dto.getTransaction() == null || dto.getTransaction().getId() == null){
             throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_TXN_ON_REQUEST);
         }
@@ -130,24 +109,29 @@ public class VoucherServiceImpl implements IVoucherService {
             throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_TXN_DOES_NOT_EXIST);
         }
 
+        if (txnVoucher != null && txnVoucher.getTxnStatus().getId() != null && txnVoucher.getTxnStatus().getId() >= Constants.CONFIRM_TXN_STATUS) {
+            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.ALREADY_PROCESSED_TXN);
+        }
+        //(5)
+        transaction.confirmTxn(txnVoucher);
+        String pickupCode = utilComponent.getPickupCodeByCellPhoneNumber(dto.getTransaction().getPayee().getMsisdn());
+
+        dto.getVoucher().setPickupCode(pickupCode);
         dto.getVoucher().setTxnCreatedBy(txnVoucher);
         dto.getVoucher().setAmountInitial(txnVoucher.getAmount());
         dto.getVoucher().setAmountCurrent(txnVoucher.getAmount());
-
-        String pickupCode = utilComponent.getPickupCodeByCellPhoneNumber(dto.getTransaction().getPayee().getMsisdn());
-        dto.getVoucher().setPickupCode(pickupCode);
-        //(5)
-        transaction.confirmTxn(dto.getTransaction());
-
         Voucher voucherResult = this.create(dto.getVoucher());
 
-        String template = Constants.TEMPLATE_NOTIFICATION_SMS;//Todo get template from DB
-        String sms = String.format(template, String.valueOf(txnVoucher.getAmount()), pickupCode);
+        dto.setTransaction(txnVoucher);
+        dto.setVoucher(voucherResult);
+
         if(voucherResult != null){
+            String template = Constants.TEMPLATE_NOTIFICATION_SMS;//Todo get template from DB
+            String sms = String.format(template, String.valueOf(txnVoucher.getAmount()), pickupCode);
             bankService.sendNotification(dto.getTransaction().getPayee().getMsisdn(),"",sms,Constants.BANK_NOTIFICATION_SMS);
         }
 
-        return voucherResult;
+        return dto;
     }
 
     @Override
@@ -157,7 +141,7 @@ public class VoucherServiceImpl implements IVoucherService {
         if(cst == null){
             //execStatus.setErrorCode("57");
             throw new ModelNotFoundException("User with Cellphone - " +
-                    dto.getTransaction().getPayee().getMsisdn() + " - not found");
+                    dto.getTransaction().getPayer().getMsisdn() + " - not found");
         }
 
         Voucher voucher = repo.findByPickupCodeAndSecretCodeAndCustomer(dto.getVoucher().getPickupCode(),dto.getVoucher().getSecretCode(), cst);
