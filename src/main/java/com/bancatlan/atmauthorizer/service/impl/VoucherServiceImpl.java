@@ -197,7 +197,7 @@ public class VoucherServiceImpl implements IVoucherService {
 
     @Override
     public List<Voucher> getAllByOcbUser(String ocbUser) {
-        return repo.findAllByOcbUser(ocbUser);
+        return repo.findAllActiveByOcbUser(ocbUser);
     }
 
     @Override

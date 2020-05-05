@@ -3,6 +3,7 @@ package com.bancatlan.atmauthorizer.api;
 import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.dto.VoucherTransactionDTO;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
+import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
 import com.bancatlan.atmauthorizer.model.Voucher;
 import com.bancatlan.atmauthorizer.service.IVoucherService;
@@ -19,7 +20,7 @@ public class VoucherController {
 
     @Autowired
     IVoucherService service;
-
+    /*
     @GetMapping
     private ResponseEntity<List<Voucher>> getAll(){
         List<Voucher> list = service.getAll();
@@ -42,11 +43,19 @@ public class VoucherController {
             throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.VOUCHER_NOT_FOUND);
         }
         return new ResponseEntity<Voucher>(voucher, HttpStatus.OK);
-    }
+    }*/
 
     @PostMapping("/process")
     private ResponseEntity<VoucherTransactionDTO> processVoucher(@RequestBody VoucherTransactionDTO dto) {
         return new ResponseEntity<VoucherTransactionDTO>(service.bankPaymentProcess(dto), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/query")
+    private ResponseEntity<List<Voucher>> getVouchersByParameter(@RequestBody VoucherTransactionDTO dto) {
+        if(dto.getTransaction() == null || dto.getTransaction().getPayer() == null || dto.getTransaction().getPayer().getOcbUser() == null || dto.getTransaction().getPayer().getOcbUser().equals("")){
+            throw new ModelCustomErrorException("Some parameter required on request is missing",AuthorizerError.MALFORMED_URL);
+        }
+        return new ResponseEntity<List<Voucher>>(service.getAllByOcbUser(dto.getTransaction().getPayer().getOcbUser()), HttpStatus.CREATED);
     }
 
     @PostMapping("/withdraw")
