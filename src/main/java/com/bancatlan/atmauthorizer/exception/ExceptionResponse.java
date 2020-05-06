@@ -2,12 +2,12 @@ package com.bancatlan.atmauthorizer.exception;
 
 import java.time.LocalDateTime;
 
-public class ExceptionResponse {
+public class ExceptionResponse<T> {
 
     private LocalDateTime timestamp;
     private String message;
     private String details;
-    private AuthorizerError customError;
+    private T status;//In case custom error is a key and value
 
     public ExceptionResponse(LocalDateTime timestamp, String message, String details) {
         this.timestamp = timestamp;
@@ -15,11 +15,11 @@ public class ExceptionResponse {
         this.details = details;
     }
 
-    public ExceptionResponse(LocalDateTime timestamp, String message, String details, AuthorizerError customError) {
+    public ExceptionResponse(LocalDateTime timestamp, String message, String details, T status) {
         this.timestamp = timestamp;
         this.message = message;
         this.details = details;
-        this.customError = customError;
+        this.status = status;
     }
 
     public LocalDateTime getTimestamp() {
@@ -46,11 +46,11 @@ public class ExceptionResponse {
         this.details = details;
     }
 
-    public AuthorizerError getCustomError() {
-        return customError;
+    public T getStatus() {
+        return status;
     }
 
-    public void setCustomError(AuthorizerError customError) {
-        this.customError = customError;
+    public void setStatus(T status) {
+        this.status = status;
     }
 }

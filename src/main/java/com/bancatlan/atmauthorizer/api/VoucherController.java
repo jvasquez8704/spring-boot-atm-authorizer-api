@@ -1,18 +1,16 @@
 package com.bancatlan.atmauthorizer.api;
 
+import com.bancatlan.atmauthorizer.api.http.CustomStatus;
+import com.bancatlan.atmauthorizer.api.http.CustomResponse;
 import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.dto.VoucherTransactionDTO;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
-import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
-import com.bancatlan.atmauthorizer.model.Voucher;
 import com.bancatlan.atmauthorizer.service.IVoucherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/vouchers")
@@ -20,7 +18,32 @@ public class VoucherController {
 
     @Autowired
     IVoucherService service;
-    /*
+    CustomStatus successStatus = new CustomStatus(Constants.INT_BANK_SUCCESS_STATUS_CODE, Constants.BANK_SUCCESS_STATUS_TYPE, Constants.BANK_SUCCESS_STATUS_MESSAGE, Constants.BANK_STRING_ZERO);
+
+    @PostMapping("/process")
+    private ResponseEntity<CustomResponse> processVoucher(@RequestBody VoucherTransactionDTO dto) {
+        return new ResponseEntity<>(new CustomResponse(service.bankPaymentProcess(dto), successStatus), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/query")
+    private ResponseEntity<CustomResponse> getVouchersByParameter(@RequestBody VoucherTransactionDTO dto) {
+        if (dto.getTransaction() == null || dto.getTransaction().getPayer() == null || dto.getTransaction().getPayer().getUsername() == null || dto.getTransaction().getPayer().getUsername().equals("")) {
+            throw new ModelCustomErrorException("Some parameter required on request is missing", AuthorizerError.MALFORMED_URL);
+        }
+        return new ResponseEntity<>(new CustomResponse(service.getAllByOcbUser(dto.getTransaction().getPayer().getUsername()), successStatus), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/withdraw")
+    private ResponseEntity<CustomResponse> withdrawVoucher(@RequestBody VoucherTransactionDTO dto){
+        return new ResponseEntity<>(new CustomResponse(service.withdraw(dto), successStatus),HttpStatus.OK);
+    }
+
+    @PostMapping("/cancel")
+    private ResponseEntity<CustomResponse> updateVoucher(@RequestBody VoucherTransactionDTO dto){
+         return new ResponseEntity<CustomResponse>(new CustomResponse(service.cancelWithdraw(dto), successStatus),HttpStatus.OK);
+    }
+
+      /*
     @GetMapping
     private ResponseEntity<List<Voucher>> getAll(){
         List<Voucher> list = service.getAll();
@@ -44,28 +67,5 @@ public class VoucherController {
         }
         return new ResponseEntity<Voucher>(voucher, HttpStatus.OK);
     }*/
-
-    @PostMapping("/process")
-    private ResponseEntity<VoucherTransactionDTO> processVoucher(@RequestBody VoucherTransactionDTO dto) {
-        return new ResponseEntity<VoucherTransactionDTO>(service.bankPaymentProcess(dto), HttpStatus.CREATED);
-    }
-
-    @PostMapping("/query")
-    private ResponseEntity<List<Voucher>> getVouchersByParameter(@RequestBody VoucherTransactionDTO dto) {
-        if(dto.getTransaction() == null || dto.getTransaction().getPayer() == null || dto.getTransaction().getPayer().getOcbUser() == null || dto.getTransaction().getPayer().getOcbUser().equals("")){
-            throw new ModelCustomErrorException("Some parameter required on request is missing",AuthorizerError.MALFORMED_URL);
-        }
-        return new ResponseEntity<List<Voucher>>(service.getAllByOcbUser(dto.getTransaction().getPayer().getOcbUser()), HttpStatus.CREATED);
-    }
-
-    @PostMapping("/withdraw")
-    private ResponseEntity<Voucher> withdrawVoucher(@RequestBody VoucherTransactionDTO dto){
-        return new ResponseEntity<Voucher>(service.withdraw(dto),HttpStatus.OK);
-    }
-
-    @PostMapping("/cancel")
-    private ResponseEntity<Voucher> updateVoucher(@RequestBody VoucherTransactionDTO dto){
-         return new ResponseEntity<Voucher>(service.cancelWithdraw(dto),HttpStatus.OK);
-    }
 
 }

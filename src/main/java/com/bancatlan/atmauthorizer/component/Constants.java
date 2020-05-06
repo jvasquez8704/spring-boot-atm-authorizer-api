@@ -5,9 +5,19 @@ public class Constants {
     public static final String CUSTOM_MESSAGE_ERROR = "Custom handle error";
     public static final String MODEL_NOT_FOUND_MESSAGE_ERROR = "Model not found";
     public static final String PARAMETER_NOT_FOUND_MESSAGE_ERROR = "Parameter not found";
+    public static final String GENERIC_ERROR_STATUS_CODE = "9999";
+    public static final String GENERIC_EXCEPTION_TYPE = "GENERIC_EXCEPTION";
+    public static final String CUSTOM_EXCEPTION_TYPE = "CUSTOM_EXCEPTION_TYPE";
+    public static final String BANK_EXCEPTION_TYPE = "BANK_EXCEPTION_TYPE";
+    public static final String CUSTOM_BANK_EXCEPTION_TYPE = "CUSTOM_BANK_EXCEPTION_TYPE";
+    public static final String NOT_FOUND_EXCEPTION_TYPE = "NOT_FOUND_EXCEPTION_TYPE";
 
     /*BASA SERVICES CONSTANTS*/
-    public static final String BASA_SUCCESS_STATUS_CODE = "0000";
+    public static final String BANK_SUCCESS_STATUS_CODE = "0000";
+    public static final int INT_BANK_SUCCESS_STATUS_CODE = 0;
+    public static final String BANK_SUCCESS_STATUS_TYPE = "OK";
+    public static final String BANK_SUCCESS_STATUS_MESSAGE = "OK";
+    public static final String BANK_STRING_ZERO= "";
     public static final String HN_CURRENCY = "LPS";
     public static final String BANK_ACCOUNT_TYPE_1 = "1";
     public static final String BANK_ACCOUNT_TYPE_2 = "2";
