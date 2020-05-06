@@ -24,14 +24,8 @@ public class Transaction {
     @Column(name = "citizenIdentity", nullable = true, length = 50)
     private String citizenIdentity;
 
-    @Column(name = "ocbReference", nullable = true, length = 50)
-    private String ocbReference;
-
     @Column(name = "coreReference", nullable = true, length = 50)
     private String coreReference;
-
-    @Column(name = "baseServiceReference", nullable = true, length = 50)
-    private String baseServiceReference;
 
     @Column(name = "integrationBusReference", nullable = true, length = 50)
     private String integrationBusReference;
@@ -39,8 +33,11 @@ public class Transaction {
     @Column(name = "channelReference", nullable = true, length = 50)
     private String channelReference;
 
-    @Column(name = "applicationReference", nullable = true, length = 50)
-    private String applicationReference;
+    @Column(name = "channelId", nullable = true, length = 50)
+    private String channelId;
+
+    @Column(name = "applicationId", nullable = true, length = 50)
+    private String applicationId;
 
     @Column(name = "id_order", nullable = true, length = 30)
     private String id_order;
@@ -98,10 +95,12 @@ public class Transaction {
     @Column(name = "updateDate", nullable = true, length = 30)
     private LocalDateTime updateDate;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_customer_creation", nullable = true, foreignKey = @ForeignKey(name = "fk_txn_customer_c"))
     private Customer customerCreation;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_customer_update", nullable = true, foreignKey = @ForeignKey(name = "fk_txn_customer_u"))
     private Customer customerUpdate;
@@ -146,14 +145,6 @@ public class Transaction {
         this.citizenIdentity = citizenIdentity;
     }
 
-    public String getOcbReference() {
-        return ocbReference;
-    }
-
-    public void setOcbReference(String ocbReference) {
-        this.ocbReference = ocbReference;
-    }
-
     public String getCoreReference() {
         return coreReference;
     }
@@ -162,12 +153,12 @@ public class Transaction {
         this.coreReference = coreReference;
     }
 
-    public String getBaseServiceReference() {
-        return baseServiceReference;
+    public String getChannelId() {
+        return channelId;
     }
 
-    public void setBaseServiceReference(String baseServiceReference) {
-        this.baseServiceReference = baseServiceReference;
+    public void setChannelId(String channelId) {
+        this.channelId = channelId;
     }
 
     public String getIntegrationBusReference() {
@@ -274,12 +265,12 @@ public class Transaction {
         this.channel = channel;
     }
 
-    public String getApplicationReference() {
-        return applicationReference;
+    public String getApplicationId() {
+        return applicationId;
     }
-    
-    public void setApplicationReference(String applicationReference) {
-        this.applicationReference = applicationReference;
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
     }
 
     public LocalDateTime getExpirationDate() {

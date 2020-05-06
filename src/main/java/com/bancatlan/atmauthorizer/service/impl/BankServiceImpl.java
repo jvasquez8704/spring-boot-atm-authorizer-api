@@ -168,7 +168,7 @@ public class BankServiceImpl implements IBankService {
             smsData.setPeticionGeneral(peticion);
 
             DTEjecutarEnvioNotificacionResponse response = sms.siOSEjecutarEnvioNotificacion(smsData);
-            if (!response.getRespuesta().getEstado().getCodigo().equals(Constants.BASA_SUCCESS_STATUS_CODE)) {
+            if (!response.getRespuesta().getEstado().getCodigo().equals(Constants.BANK_SUCCESS_STATUS_CODE)) {
                 LOG.error(AuthorizerError.EXTERNAL_SMS_ERROR + " || "
                         + response.getRespuesta().getEstado().getCodigo() + "|"
                         + response.getRespuesta().getEstado().getDescripcion() + "|"
@@ -343,7 +343,7 @@ public class BankServiceImpl implements IBankService {
 
             DTConsultaSaldoV2Response poResponse = coreConsultaClient.siOSConsultaSaldoV2(poRequest);
 
-            if (poResponse != null && poResponse.getRespuesta().getEstado().getCodigo().equals(Constants.BASA_SUCCESS_STATUS_CODE)) {
+            if (poResponse != null && poResponse.getRespuesta().getEstado().getCodigo().equals(Constants.BANK_SUCCESS_STATUS_CODE)) {
                 List<DTCuentaItemV2> dtCuentas =
                         poResponse.getRespuesta().getProductoColeccionV2().getCuentaColeccionV2() != null ?
                                 poResponse.getRespuesta().getProductoColeccionV2().getCuentaColeccionV2().getCuentaItemV2() : new ArrayList<DTCuentaItemV2>();

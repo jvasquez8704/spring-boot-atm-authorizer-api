@@ -16,11 +16,11 @@ public class Customer {
     @Column(name = "email", nullable = true, length = 70)
     private String email;
 
-    @Column(name = "msisdn", nullable = true, length = 14)
+    @Column(name = "msisdn", nullable = true, length = 20)
     private String msisdn;
 
-    @Column(name = "ocbUser", nullable = true, length = 25)
-    private String ocbUser;
+    @Column(name = "username", nullable = true, length = 25)
+    private String username;
 
     @Column(name = "birthday", nullable = true, length = 30)
     private LocalDateTime birthday;
@@ -121,12 +121,12 @@ public class Customer {
         this.msisdn = msisdn;
     }
 
-    public String getOcbUser() {
-        return ocbUser;
+    public String getUsername() {
+        return username;
     }
 
-    public void setOcbUser(String ocbUser) {
-        this.ocbUser = ocbUser;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public LocalDateTime getBirthday() {

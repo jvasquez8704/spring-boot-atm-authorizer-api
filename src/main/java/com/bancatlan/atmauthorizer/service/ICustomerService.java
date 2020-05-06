@@ -5,7 +5,7 @@ import com.bancatlan.atmauthorizer.model.Customer;
 public interface ICustomerService extends ICRUD<Customer> {
     Customer getByMsisdn(String msisdn);
     Customer checkIfCustomerExist(String msisdn);
-    Customer getByOcbUser(String ocbUser);
+    Customer getByUsername(String username);
     Customer register(Customer customer);
     Boolean checkCustomerLimits(Customer customer);
     Boolean checkCustomerPrivileges(Customer customer);

@@ -167,13 +167,15 @@ public class TransactionServiceImpl implements ITransactionService {
     private Transaction processAuthenticationTxn(Transaction txn) {
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
-                Customer payer = customer.getByOcbUser(txn.getPayer().getOcbUser());
+                Customer payer = customer.getByUsername(txn.getPayer().getUsername());
                 if (payer == null) {
+                    txn.getPayer().setCountry(null);//hack
                     payer = customer.register(txn.getPayer());
                 }
 
                 Customer payee = customer.checkIfCustomerExist(txn.getPayee().getMsisdn());
                 if (payee == null) {
+                    txn.getPayee().setCountry(null);//hack
                     payee = customer.register(txn.getPayee());
                 }
 
@@ -183,15 +185,15 @@ public class TransactionServiceImpl implements ITransactionService {
                     throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_PAYER_PI);
                 }
                 //CHECK PAYER OCB_USER
-                if (txn.getPayer() == null || txn.getPayer().getOcbUser() == null || txn.getPayer().getOcbUser().equals("")) {
+                if (txn.getPayer() == null || txn.getPayer().getUsername() == null || txn.getPayer().getUsername().equals("")) {
                     LOG.error(AuthorizerError.MISSING_OCB_USER.toString() + txn);
                     throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_OCB_USER);
                 }
 
                 //GET BANK ACCOUNTS BY OCB_USER
-                Boolean isFoundPI = false;
+                boolean isFoundPI = false;
                 //Boolean isFoundPI = true;
-                List<PaymentInstrument> accountsUser = bankService.getBankAccountsByUserId(txn.getPayer().getOcbUser());
+                List<PaymentInstrument> accountsUser = bankService.getBankAccountsByUserId(txn.getPayer().getUsername());
                 if(!accountsUser.isEmpty()) {
                     for (PaymentInstrument pi : accountsUser) {
                         if (pi.getStrIdentifier().trim().equals(txn.getPayerPaymentInstrument().getStrIdentifier().trim())) {

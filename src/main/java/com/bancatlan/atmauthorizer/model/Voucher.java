@@ -1,5 +1,7 @@
 package com.bancatlan.atmauthorizer.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -22,9 +24,7 @@ public class Voucher {
     @Column(name = "secretCode", nullable = false, length = 8)
     private String secretCode;
 
-    @Column(name = "atmReference",  length = 40)
-    private String atmReference;
-
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_customer",  foreignKey = @ForeignKey(name = "fk_voucher_customer"))
     private Customer customer;
@@ -38,10 +38,15 @@ public class Voucher {
     @Column(name = "isDeleted")
     private Boolean isDeleted;
 
+    @Column(name = "isExpired")
+    private Boolean isExpired;
+
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "id_txn_paid_out_by",  foreignKey = @ForeignKey(name = "fk_txn_paid_out_by"))
     private Transaction txnPaidOutBy;
 
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "id_txn_created_by", nullable = false, foreignKey = @ForeignKey(name = "fk_txn_created_by"))
     private Transaction txnCreatedBy;
@@ -55,10 +60,12 @@ public class Voucher {
     @Column(name = "updateDate",  length = 30)
     private LocalDateTime updateDate;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_customer_creation",  foreignKey = @ForeignKey(name = "fk_voucher_customer_c"))
     private Customer customerCreation;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_customer_update",  foreignKey = @ForeignKey(name = "fk_voucher_customer_u"))
     private Customer customerUpdate;
@@ -101,14 +108,6 @@ public class Voucher {
 
     public void setSecretCode(String secretCode) {
         this.secretCode = secretCode;
-    }
-
-    public String getAtmReference() {
-        return atmReference;
-    }
-
-    public void setAtmReference(String atmReference) {
-        this.atmReference = atmReference;
     }
 
     public Customer getCustomer() {

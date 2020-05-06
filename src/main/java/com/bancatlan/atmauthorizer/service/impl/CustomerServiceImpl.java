@@ -33,8 +33,8 @@ public class CustomerServiceImpl implements ICustomerService {
     }
 
     @Override
-    public Customer getByOcbUser(String ocbUser) {
-        return repo.getByOcbUser(ocbUser);
+    public Customer getByUsername(String username) {
+        return repo.getByUsername(username);
     }
 
     @Override
