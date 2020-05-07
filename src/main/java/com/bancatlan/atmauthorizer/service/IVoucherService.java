@@ -7,7 +7,7 @@ import com.bancatlan.atmauthorizer.model.Voucher;
 import java.util.List;
 
 public interface IVoucherService extends ICRUD<Voucher> {
-    VoucherTransactionDTO bankPaymentProcess(VoucherTransactionDTO dto);
+    VoucherTransactionDTO voucherProcess(VoucherTransactionDTO dto);
     VoucherTransactionDTO bankVerifyPayment(VoucherTransactionDTO dto);
     VoucherTransactionDTO bankConfirmPayment(VoucherTransactionDTO dto);
     Voucher withdraw(VoucherTransactionDTO dto);

@@ -14,6 +14,7 @@ import com.bancatlan.atmauthorizer.repo.IVoucherRepo;
 import com.bancatlan.atmauthorizer.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,19 +51,25 @@ public class VoucherServiceImpl implements IVoucherService {
         return repo.save(voucher);
     }
 
-    //@Transactional
+    @Transactional
     @Override
-    public VoucherTransactionDTO bankPaymentProcess(VoucherTransactionDTO dto) {
+    public VoucherTransactionDTO voucherProcess(VoucherTransactionDTO dto) {
         if (dto.getAction() == null || dto.getAction().equals("")) {
             throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_BANK_PAYMENT_SERVICE_ACTION);
         }
-        switch (dto.getAction().toUpperCase()){
-            case "C":
+        switch (dto.getAction().toUpperCase()) {
+            case Constants.BANK_ACTION_VERIFY:
                 return this.bankVerifyPayment(dto);
-            case "P":
+            case Constants.BANK_ACTION_PAYMENT:
                 return this.bankConfirmPayment(dto);
+            case Constants.ITM_PROCESS_CODE_WITHDRAW:
+                dto.setVoucher(this.withdraw(dto));
+                return dto;
+            case Constants.ITM_PROCESS_CODE_REVERSE_WITHDRAW:
+                dto.setVoucher(this.cancelWithdraw(dto));
+                return dto;
             default:
-                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORTED_BANK_PAYMENT_SERVICE_ACTION);
+                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORTED_VOUCHER_PROCESS_CODE);
         }
     }
 
@@ -116,6 +123,10 @@ public class VoucherServiceImpl implements IVoucherService {
         dto.getVoucher().setTxnCreatedBy(txnVoucher);
         dto.getVoucher().setAmountInitial(txnVoucher.getAmount());
         dto.getVoucher().setAmountCurrent(txnVoucher.getAmount());
+        dto.getVoucher().setActive(true);
+        dto.getVoucher().setExpired(false);
+        dto.getVoucher().setCanceled(false);
+        dto.getVoucher().setDeleted(false);
         Voucher voucherResult = this.create(dto.getVoucher());
 
         dto.setTransaction(txnVoucher);

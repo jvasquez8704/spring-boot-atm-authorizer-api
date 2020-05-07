@@ -21,6 +21,10 @@ public class Constants {
     public static final String HN_CURRENCY = "LPS";
     public static final String BANK_ACCOUNT_TYPE_1 = "1";
     public static final String BANK_ACCOUNT_TYPE_2 = "2";
+    public static final String BANK_ACTION_VERIFY = "C";
+    public static final String BANK_ACTION_PAYMENT = "P";
+    public static final String ITM_PROCESS_CODE_WITHDRAW = "010000";
+    public static final String ITM_PROCESS_CODE_REVERSE_WITHDRAW = "040000";
 
     /*STATUS TXN CODES*/
     public static final long INITIAL_TXN_STATUS = 1;

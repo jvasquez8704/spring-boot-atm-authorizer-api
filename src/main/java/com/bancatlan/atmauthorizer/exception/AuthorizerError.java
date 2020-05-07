@@ -87,7 +87,7 @@ public enum AuthorizerError {
     CUSTOM_ERROR_ACCOUNTING_TRANSFER_ESB(76, "Custom error accounting transfer when esb got the service response"),
     NOT_FOUND_USE_CASE(76, "use case not found"),
     NOT_FOUND_BANK_PAYMENT_SERVICE_ACTION(77, "action not found"),
-    NOT_SUPPORTED_BANK_PAYMENT_SERVICE_ACTION(78, "action not supported"),
+    NOT_SUPPORTED_VOUCHER_PROCESS_CODE(78, "action or processing code not supported"),
     NOT_SUPPORTED_TXN_ID_BANK_PAYMENT_SERVICE_ACTION(79, "This action doest not support an txn id"),
     ALREADY_PROCESSED_TXN(80, "Transaction already processed"),
     NOT_FOUND_CURRENCY_IN_REQ(81, "Currency not found in request"),

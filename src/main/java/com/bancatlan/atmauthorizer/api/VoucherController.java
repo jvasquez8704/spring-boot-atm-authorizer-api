@@ -22,7 +22,7 @@ public class VoucherController {
 
     @PostMapping("/process")
     private ResponseEntity<CustomResponse> processVoucher(@RequestBody VoucherTransactionDTO dto) {
-        return new ResponseEntity<>(new CustomResponse(service.bankPaymentProcess(dto), successStatus), HttpStatus.CREATED);
+        return new ResponseEntity<>(new CustomResponse(service.voucherProcess(dto), successStatus), HttpStatus.CREATED);
     }
 
     @PostMapping("/query")
@@ -41,6 +41,11 @@ public class VoucherController {
     @PostMapping("/cancel")
     private ResponseEntity<CustomResponse> updateVoucher(@RequestBody VoucherTransactionDTO dto){
          return new ResponseEntity<CustomResponse>(new CustomResponse(service.cancelWithdraw(dto), successStatus),HttpStatus.OK);
+    }
+
+    @PostMapping("/atm-process")
+    private ResponseEntity<CustomResponse> atmProcessVoucher(@RequestBody VoucherTransactionDTO dto){
+        return new ResponseEntity<CustomResponse>(new CustomResponse(service.voucherProcess(dto), successStatus),HttpStatus.OK);
     }
 
       /*

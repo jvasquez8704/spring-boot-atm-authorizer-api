@@ -142,6 +142,14 @@ public class Voucher {
         isDeleted = deleted;
     }
 
+    public Boolean getExpired() {
+        return isExpired;
+    }
+
+    public void setExpired(Boolean expired) {
+        isExpired = expired;
+    }
+
     public Transaction getTxnPaidOutBy() {
         return txnPaidOutBy;
     }
