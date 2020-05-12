@@ -21,8 +21,11 @@ public class Transaction {
     @Column(name = "atmReference", nullable = true, length = 50)
     private String atmReference;
 
-    @Column(name = "citizenIdentity", nullable = true, length = 50)
-    private String citizenIdentity;
+    @Column(name = "strIdentifierPayer", nullable = true, length = 50)
+    private String strIdentifierPayer;
+
+    @Column(name = "strIdentifierPayee", nullable = true, length = 50)
+    private String strIdentifierPayee;
 
     @Column(name = "coreReference", nullable = true, length = 50)
     private String coreReference;
@@ -41,6 +44,12 @@ public class Transaction {
 
     @Column(name = "id_order", nullable = true, length = 30)
     private String id_order;
+
+    @Column(name = "strIdTerminal", nullable = true, length = 20)
+    private String strIdTerminal;
+
+    @Column(name = "strAuthorizationCode", nullable = true, length = 20)
+    private String strAuthorizationCode;
 
     /*Associations*/
     @ManyToOne
@@ -137,12 +146,20 @@ public class Transaction {
         this.atmReference = atmReference;
     }
 
-    public String getCitizenIdentity() {
-        return citizenIdentity;
+    public String getStrIdentifierPayer() {
+        return strIdentifierPayer;
     }
 
-    public void setCitizenIdentity(String citizenIdentity) {
-        this.citizenIdentity = citizenIdentity;
+    public void setStrIdentifierPayer(String strIdentifierPayer) {
+        this.strIdentifierPayer = strIdentifierPayer;
+    }
+
+    public String getStrIdentifierPayee() {
+        return strIdentifierPayee;
+    }
+
+    public void setStrIdentifierPayee(String strIdentifierPayee) {
+        this.strIdentifierPayee = strIdentifierPayee;
     }
 
     public String getCoreReference() {
@@ -151,14 +168,6 @@ public class Transaction {
 
     public void setCoreReference(String coreReference) {
         this.coreReference = coreReference;
-    }
-
-    public String getChannelId() {
-        return channelId;
-    }
-
-    public void setChannelId(String channelId) {
-        this.channelId = channelId;
     }
 
     public String getIntegrationBusReference() {
@@ -177,12 +186,44 @@ public class Transaction {
         this.channelReference = channelReference;
     }
 
+    public String getChannelId() {
+        return channelId;
+    }
+
+    public void setChannelId(String channelId) {
+        this.channelId = channelId;
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
+
     public String getId_order() {
         return id_order;
     }
 
     public void setId_order(String id_order) {
         this.id_order = id_order;
+    }
+
+    public String getStrIdTerminal() {
+        return strIdTerminal;
+    }
+
+    public void setStrIdTerminal(String strIdTerminal) {
+        this.strIdTerminal = strIdTerminal;
+    }
+
+    public String getStrAuthorizationCode() {
+        return strAuthorizationCode;
+    }
+
+    public void setStrAuthorizationCode(String strAuthorizationCode) {
+        this.strAuthorizationCode = strAuthorizationCode;
     }
 
     public UseCase getUseCase() {
@@ -263,14 +304,6 @@ public class Transaction {
 
     public void setChannel(Channel channel) {
         this.channel = channel;
-    }
-
-    public String getApplicationId() {
-        return applicationId;
-    }
-
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
     }
 
     public LocalDateTime getExpirationDate() {

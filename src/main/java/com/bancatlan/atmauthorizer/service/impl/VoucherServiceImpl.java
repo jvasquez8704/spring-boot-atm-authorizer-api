@@ -63,11 +63,9 @@ public class VoucherServiceImpl implements IVoucherService {
             case Constants.BANK_ACTION_PAYMENT:
                 return this.bankConfirmPayment(dto);
             case Constants.ITM_PROCESS_CODE_WITHDRAW:
-                dto.setVoucher(this.withdraw(dto));
-                return dto;
+                return this.processWithdraw(dto);
             case Constants.ITM_PROCESS_CODE_REVERSE_WITHDRAW:
-                dto.setVoucher(this.cancelWithdraw(dto));
-                return dto;
+                return this.processCancelWithdraw(dto);
             default:
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORTED_VOUCHER_PROCESS_CODE);
         }
@@ -238,5 +236,71 @@ public class VoucherServiceImpl implements IVoucherService {
             System.out.println(ex);
         }
         return retVal;
+    }
+
+    public VoucherTransactionDTO processWithdraw(VoucherTransactionDTO dto) {
+        //find customer
+        Customer cst = customer.getByMsisdn(dto.getTransaction().getPayer().getMsisdn());
+        if(cst == null){
+            //execStatus.setErrorCode("57");
+            throw new ModelNotFoundException("User with Cellphone - " +
+                    dto.getTransaction().getPayer().getMsisdn() + " - not found");
+        }
+
+        Voucher voucher = repo.findByPickupCodeAndSecretCodeAndCustomer(dto.getVoucher().getPickupCode(),dto.getVoucher().getSecretCode(), cst);
+        if(voucher == null || voucher.getAmountCurrent() == 0L || dto.getTransaction().getAmount() > voucher.getAmountCurrent()){//is missing if it's active
+            throw new ModelNotFoundException(" Voucher with pickupCode " +
+                    dto.getVoucher().getPickupCode() + " and secretCode " + dto.getVoucher().getSecretCode() + " - not found");
+        }
+        //Todo agregar validacion de limites privilegios ciclo de vida de txns
+        //confirm txn
+        Transaction txn = new Transaction();
+        txn.setCurrency(currency.getById(Constants.HN_CURRENCY_ID));
+        txn.setUseCase(useCase.getById(Constants.WITHDRAW_VOUCHER_USE_CASE));
+        txn.setAmount(dto.getTransaction().getAmount());
+        txn.setPayer(cst);
+        txn.setPayee(customer.getById(Constants.ATM_USER_ID));
+        txn.setAtmReference(dto.getTransaction().getAtmReference());
+        txn.setVoucher(voucher);//Todo Es mejor crear una tabla maestra
+        Transaction txnPaidBy = transaction.confirmTxn(txn);
+        Double currentAmount = voucher.getAmountCurrent() - txnPaidBy.getAmount();
+        dto.setTransaction(txnPaidBy);
+        //mark voucher
+        if (currentAmount == 0) {
+            voucher.setActive(false);
+        }
+        voucher.setAmountCurrent(currentAmount);
+        voucher.setTxnPaidOutBy(txnPaidBy);
+        voucher.setCustomerUpdate(cst);
+        dto.setVoucher(this.update(voucher));
+        return dto;
+    }
+
+    public VoucherTransactionDTO processCancelWithdraw(VoucherTransactionDTO dto) {
+        //find customer
+        Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference());
+        if(txn == null  || txn.getTxnStatus().getId().equals(Constants.CANCEL_CONFIRM_TXN_STATUS)){
+            //execStatus.setErrorCode("57");
+            throw new ModelNotFoundException("Txn and Voucher by this atm reference - " +
+                    dto.getTransaction().getAtmReference() + " - not found or already canceled");
+        }
+
+        Voucher voucher = this.getById(txn.getVoucher().getId());
+        if(voucher == null){//is missing if it's active
+            throw new ModelNotFoundException(" Voucher with txn " +
+                    txn.getId() + " - not found");
+        }
+        //Todo regresar el dinero de la cuenta de cajeros a la cuenta de ATM (o en el caso de Oscar P. regresar el dinero al usuario (pero en estado de congelado))
+        //cancel txn
+        Transaction txnPaidBy = transaction.cancelConfirmTxn(txn);
+        Double currentAmount = voucher.getAmountCurrent() + txnPaidBy.getAmount();
+
+        //mark voucher
+        voucher.setActive(true);
+        voucher.setAmountCurrent(currentAmount);
+        voucher.setCustomerUpdate(voucher.getCustomer());
+        dto.setTransaction(txnPaidBy);
+        dto.setVoucher(this.update(voucher));
+        return dto;
     }
 }
