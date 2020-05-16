@@ -334,11 +334,11 @@ public class TransactionServiceImpl implements ITransactionService {
                 //Update balance payee
                 Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
                 accountATMBASA.setBalance(newBalance);
-                LOG.info("CORE REFERENCE:", coreRef);
+                LOG.info("CORE REFERENCE: {}", coreRef);
                 //Update balance payer
-                Double nwBalance = payerPI.getBalance() - txn.getAmount();
+                /*Double nwBalance = payerPI.getBalance() - txn.getAmount();
                 payerPI.setBalance(nwBalance);
-                paymentInstrumentService.update(payerPI);
+                paymentInstrumentService.update(payerPI);*/
 
                 txn.setPayerPaymentInstrument(payerPI);
                 txn.setPayeePaymentInstrument(accountATMBASA);
