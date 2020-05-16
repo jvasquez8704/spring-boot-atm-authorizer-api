@@ -355,7 +355,7 @@ public class BankServiceImpl implements IBankService {
                     PaymentInstrument newBankAccount = new PaymentInstrument();
                     PaymentInstrumentType piType = new PaymentInstrumentType();
                     piType.setId(Constants.PI_TYPE_BANK_ACCOUNT_ID);
-                    if ((currentAccount.getTipo().equals(Constants.BANK_ACCOUNT_TYPE_1) || currentAccount.getTipo().equals(Constants.BANK_ACCOUNT_TYPE_2)) && currentAccount.getMoneda().equals(Constants.HN_CURRENCY)) {
+                    if ((currentAccount.getTipo().equals(Constants.BANK_ACCOUNT_TYPE_1) || currentAccount.getTipo().equals(Constants.BANK_ACCOUNT_TYPE_2)) && currentAccount.getMoneda().equals(Constants.BANK_HN_CURRENCY)) {
                         newBankAccount.setStrIdentifier(currentAccount.getNumeroCuenta());
                         newBankAccount.setAlias(currentAccount.getAlias());
                         Double balance = currentAccount.getSaldoColeccion().getDisponibleLps();

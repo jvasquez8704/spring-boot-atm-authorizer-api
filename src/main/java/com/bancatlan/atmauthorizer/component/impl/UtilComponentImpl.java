@@ -7,10 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.lang.ref.SoftReference;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Component
@@ -18,6 +21,7 @@ public class UtilComponentImpl implements IUtilComponent {
     Logger LOG = LoggerFactory.getLogger(UtilComponentImpl.class);
     public static String sessionKey;
     private Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+    private Map<String, Double> amountValues = new HashMap<>();
     @Override
     public String getPickupCodeByCellPhoneNumber(String cellPhoneNumber) {
         return this.encrypt(cellPhoneNumber);
@@ -36,13 +40,40 @@ public class UtilComponentImpl implements IUtilComponent {
     }
 
     @Override
+    public Boolean isANumber(String cellPhoneNumber) {
+        if (cellPhoneNumber == null) {
+            return false;
+        }
+
+        return pattern.matcher(cellPhoneNumber).matches();
+    }
+
+    @Override
     public Boolean isValidStringAmount(String amount) {
         if (amount == null) {
             return false;
         }
         try {
-            double d = Double.parseDouble(amount);
+           double d = Double.parseDouble(amount);
         } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public Boolean isValidAmountWithAtm(String amount) {
+        double doubleAmount;
+        if (amount == null) {
+            return false;
+        }
+        try {
+            doubleAmount = Double.parseDouble(amount);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+
+        if (!this.isValidAmountAccordingATMRules(doubleAmount)) {
             return false;
         }
         return true;
@@ -52,6 +83,18 @@ public class UtilComponentImpl implements IUtilComponent {
     public Double convertAmountWithDecimals(Double amount) {
         Integer conversionFactor = 100; //Todo preference from DB
         return amount/conversionFactor;
+    }
+
+    @Override
+    public Double getAmountFromKey(String key) {
+        amountValues.put("1",100.00);
+        amountValues.put("2",200.00);
+        amountValues.put("3",300.00);
+        amountValues.put("5",500.00);
+        amountValues.put("6",1000.00);
+        amountValues.put("7",2000.00);
+        amountValues.put("8",4000.00);
+        return amountValues.get(key);
     }
 
     /**
@@ -128,5 +171,12 @@ public class UtilComponentImpl implements IUtilComponent {
 
     public static void setSessionKey(String _sessionKey) {
         sessionKey = _sessionKey;
+    }
+
+    private boolean isValidAmountAccordingATMRules(Double amount) {
+        if (amount % 100 != 0 || amount > 4000) {
+            return false;
+        }
+        return true;
     }
 }

@@ -15,12 +15,15 @@ public class Constants {
 
     /*BASA SERVICES CONSTANTS*/
     public static final String BANK_SUCCESS_STATUS_CODE = "0000";
+    public static final String BANK_SUCCESS_TYPE = "S1";
+    public static final String ATM_ANOTHER_AMOUNT_KEY = "999";
     public static final String ATM_SUCCESS_STATUS_CODE = "00";
     public static final int INT_BANK_SUCCESS_STATUS_CODE = 0;
-    public static final String BANK_SUCCESS_STATUS_TYPE = "OK";
-    public static final String BANK_SUCCESS_STATUS_MESSAGE = "OK";
+    public static final String BANK_SUCCESS_STATUS_TYPE = "S1";
+    public static final String BANK_SUCCESS_STATUS_MESSAGE = "Satisfactorio";
     public static final String BANK_STRING_ZERO= "";
-    public static final String HN_CURRENCY = "LPS";
+    public static final String BANK_HN_CURRENCY = "LPS";
+    public static final String HN_CURRENCY = "HNL";
     public static final String BANK_ACCOUNT_TYPE_1 = "1";
     public static final String BANK_ACCOUNT_TYPE_2 = "2";
     public static final String BANK_ACTION_VERIFY = "C";

@@ -22,6 +22,9 @@ public class VoucherController {
 
     @PostMapping("/process")
     private ResponseEntity<CustomResponse> processVoucher(@RequestBody VoucherTransactionDTO dto) {
+        successStatus.setCode(Constants.BANK_SUCCESS_STATUS_CODE);
+        successStatus.setType(Constants.BANK_SUCCESS_TYPE);
+        successStatus.setMessage(Constants.BANK_SUCCESS_STATUS_MESSAGE);
         return new ResponseEntity<>(new CustomResponse(service.voucherProcess(dto), successStatus), HttpStatus.CREATED);
     }
 
