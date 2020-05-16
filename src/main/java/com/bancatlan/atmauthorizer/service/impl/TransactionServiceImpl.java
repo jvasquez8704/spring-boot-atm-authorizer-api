@@ -365,9 +365,9 @@ public class TransactionServiceImpl implements ITransactionService {
                 atmPI.setBalance(newBalance);
 
                 //Update balance payee
-                Double nwBalance = payerPI.getBalance() + txn.getAmount();
+                /*Double nwBalance = payerPI.getBalance() + txn.getAmount();
                 payerPI.setBalance(nwBalance);
-                paymentInstrumentService.update(payerPI);
+                paymentInstrumentService.update(payerPI);*/
                 break;
             default:
 
