@@ -3,7 +3,7 @@ package com.bancatlan.atmauthorizer.exception;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public enum AuthorizerError {
+public enum AuthorizerError implements IError {
     /**
     * ESB SUFFIX MINTS ENTERPRISE SERVICE BUS
      * SERVICE SUFFIX TO BANK SERVICES
@@ -106,7 +106,6 @@ public enum AuthorizerError {
     AuthorizerError(final Integer code, final String message){
         this.code = code;
         this.message = message;
-
     }
 
     /**

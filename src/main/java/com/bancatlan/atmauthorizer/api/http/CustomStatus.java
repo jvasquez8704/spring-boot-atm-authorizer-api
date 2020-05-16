@@ -1,23 +1,23 @@
 package com.bancatlan.atmauthorizer.api.http;
 
-public class CustomStatus {
-    private int code;
+public class CustomStatus<T> {
+    private T code;
     private String type;
     private String message;
     private String detail;
 
-    public CustomStatus(int code, String type, String message, String detail){
+    public CustomStatus(T code, String type, String message, String detail){
         this.code = code;
         this.type = type;
         this.message = message;
         this.detail = detail;
     }
 
-    public int getCode() {
+    public T getCode() {
         return code;
     }
 
-    public void setCode(int code) {
+    public void setCode(T code) {
         this.code = code;
     }
 

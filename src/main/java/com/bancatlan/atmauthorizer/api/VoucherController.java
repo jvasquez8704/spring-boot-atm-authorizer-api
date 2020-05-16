@@ -45,6 +45,7 @@ public class VoucherController {
 
     @PostMapping("/atm-process")
     private ResponseEntity<CustomResponse> atmProcessVoucher(@RequestBody VoucherTransactionDTO dto){
+        successStatus.setCode(Constants.ATM_SUCCESS_STATUS_CODE);
         return new ResponseEntity<CustomResponse>(new CustomResponse(service.voucherProcess(dto), successStatus),HttpStatus.OK);
     }
 

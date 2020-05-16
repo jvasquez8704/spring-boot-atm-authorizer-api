@@ -9,11 +9,13 @@ public class Constants {
     public static final String GENERIC_EXCEPTION_TYPE = "GENERIC_EXCEPTION";
     public static final String CUSTOM_EXCEPTION_TYPE = "CUSTOM_EXCEPTION_TYPE";
     public static final String BANK_EXCEPTION_TYPE = "BANK_EXCEPTION_TYPE";
+    public static final String ATM_EXCEPTION_TYPE = "ATM_CUSTOM_EXCEPTION_TYPE";
     public static final String CUSTOM_BANK_EXCEPTION_TYPE = "CUSTOM_BANK_EXCEPTION_TYPE";
     public static final String NOT_FOUND_EXCEPTION_TYPE = "NOT_FOUND_EXCEPTION_TYPE";
 
     /*BASA SERVICES CONSTANTS*/
     public static final String BANK_SUCCESS_STATUS_CODE = "0000";
+    public static final String ATM_SUCCESS_STATUS_CODE = "00";
     public static final int INT_BANK_SUCCESS_STATUS_CODE = 0;
     public static final String BANK_SUCCESS_STATUS_TYPE = "OK";
     public static final String BANK_SUCCESS_STATUS_MESSAGE = "OK";

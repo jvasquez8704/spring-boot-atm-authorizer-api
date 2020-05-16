@@ -8,12 +8,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ITransactionService extends ICRUD<Transaction> {
-    Transaction initTxn(Transaction txn);
-    Transaction preAuthorizationTxn(Transaction txn);
-    Transaction authorizationTxn(Transaction txn);
-    Transaction verifyTxn(Transaction txn);
-    Transaction confirmTxn(Transaction txn);
-    Transaction cancelConfirmTxn(Transaction txn);
+    Transaction init(Transaction txn);
+    Transaction authentication(Transaction txn);
+    Transaction authorization(Transaction txn);
+    Transaction verify(Transaction txn);
+    Transaction confirm(Transaction txn);
+    Transaction cancelConfirm(Transaction txn);
     Boolean verifyTxnParticipants(Transaction txn);
     Boolean verifyTxnLimits(Transaction txn);
     Transaction getTransactionByAtmReference(String atmReference);

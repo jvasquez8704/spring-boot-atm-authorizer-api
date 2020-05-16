@@ -1,26 +1,23 @@
 package com.bancatlan.atmauthorizer.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
 //@ResponseStatus(HttpStatus.NOT_FOUND)
 public class ModelNotFoundException extends RuntimeException {
-    AuthorizerError customError;
+    IError customError;
 
     public ModelNotFoundException(String message){
         super(message);
     }
 
-    public ModelNotFoundException(String message, AuthorizerError customError){
+    public ModelNotFoundException(String message, IError customError){
         super(message);
         this.customError = customError;
     }
 
-    public AuthorizerError getCustomError() {
+    public IError getCustomError() {
         return customError;
     }
 
-    public void setCustomError(AuthorizerError customError) {
+    public void setCustomError(IError customError) {
         this.customError = customError;
     }
 }

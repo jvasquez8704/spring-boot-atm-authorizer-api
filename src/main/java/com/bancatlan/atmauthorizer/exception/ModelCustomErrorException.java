@@ -5,21 +5,21 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 //@ResponseStatus(HttpStatus.METHOD_FAILURE)
 public class ModelCustomErrorException extends RuntimeException {
-    AuthorizerError customError;
+    IError customError;
 
     public ModelCustomErrorException(String message){
         super(message);
     }
-    public ModelCustomErrorException(String message, AuthorizerError customError){
+    public ModelCustomErrorException(String message, IError customError){
         super(message);
         this.customError = customError;
     }
 
-    public AuthorizerError getCustomError() {
+    public IError getCustomError() {
         return customError;
     }
 
-    public void setCustomError(AuthorizerError customError) {
+    public void setCustomError(IError customError) {
         this.customError = customError;
     }
 }

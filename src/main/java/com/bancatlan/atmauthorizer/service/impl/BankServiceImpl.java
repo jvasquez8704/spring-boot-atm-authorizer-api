@@ -133,8 +133,6 @@ public class BankServiceImpl implements IBankService {
             }
         });
         String urlS = absolutePathWSDLResources + notificationWSDLName;
-        //String urlS = "file:/Users/walletmachine/projects/bank-git-repository/atm-authorizer-mysql/src/main/resources/wsdl/SI_OS_EjecutarEnvioNotificacionService.wsdl";
-
         URL url;
         try {
             url = new URL(urlS);
@@ -202,7 +200,6 @@ public class BankServiceImpl implements IBankService {
             }
         });
         String urlS = absolutePathWSDLResources + transferWSDLName;
-        //String urlS = "file:/Users/walletmachine/projects/bank-git-repository/atm-authorizer-mysql/src/main/resources/wsdl/SI_OS_TransferenciaContableService.wsdl";
         String uniqueTransNum = "";
         URL url;
         try {
@@ -298,6 +295,13 @@ public class BankServiceImpl implements IBankService {
     }
 
     @Override
+    public String freezeFounds(String accountDebit, Double amount, String customComment) {
+        String comment = "Freeze {} Lps founds to account number {}, comment: " + customComment;
+        LOG.info(comment, amount, accountDebit);
+        return comment;
+    }
+
+    @Override
     public List<PaymentInstrument> getBankAccountsByUserId(String userId) {
         // verify if ocbUser exists inside authorizer system when it will be required
         List<PaymentInstrument> retVal = new ArrayList<>();
@@ -308,7 +312,6 @@ public class BankServiceImpl implements IBankService {
             }
         });
         String urlS = absolutePathWSDLResources + balanceWSDLName;
-        //String urlS = "file:/Users/walletmachine/projects/bank-git-repository/atm-authorizer-mysql/src/main/resources/wsdl/SI_OS_ConsultaSaldoV2Service.wsdl";
         String sessionKey = UtilComponentImpl.getSessionKey();
         URL url;
         try {

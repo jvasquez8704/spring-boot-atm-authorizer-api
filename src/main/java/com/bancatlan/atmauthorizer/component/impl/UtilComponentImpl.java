@@ -11,14 +11,47 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.regex.Pattern;
 
 @Component
 public class UtilComponentImpl implements IUtilComponent {
     Logger LOG = LoggerFactory.getLogger(UtilComponentImpl.class);
     public static String sessionKey;
+    private Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
     @Override
     public String getPickupCodeByCellPhoneNumber(String cellPhoneNumber) {
         return this.encrypt(cellPhoneNumber);
+    }
+
+    @Override
+    public Boolean isValidPhoneNumber(String cellPhoneNumber) {
+        if (cellPhoneNumber == null) {
+            return false;
+        }
+
+        if (cellPhoneNumber.length() != 8) {
+            return false;
+        }
+        return pattern.matcher(cellPhoneNumber).matches();
+    }
+
+    @Override
+    public Boolean isValidStringAmount(String amount) {
+        if (amount == null) {
+            return false;
+        }
+        try {
+            double d = Double.parseDouble(amount);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public Double convertAmountWithDecimals(Double amount) {
+        Integer conversionFactor = 100; //Todo preference from DB
+        return amount/conversionFactor;
     }
 
     /**

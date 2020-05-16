@@ -1,6 +1,8 @@
 package com.bancatlan.atmauthorizer.service.impl;
 
 import com.bancatlan.atmauthorizer.component.Constants;
+import com.bancatlan.atmauthorizer.component.IUtilComponent;
+import com.bancatlan.atmauthorizer.exception.AtmError;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
@@ -39,6 +41,9 @@ public class TransactionServiceImpl implements ITransactionService {
     @Autowired
     private  ICurrencyService currencyService;
 
+    @Autowired
+    private IUtilComponent utilComponent;
+
     @Override
     public Transaction create(Transaction txn) {
         txn.setCreationDate(LocalDateTime.now());
@@ -73,65 +78,60 @@ public class TransactionServiceImpl implements ITransactionService {
         }
         return retVal;
     }
-
+    /**
+     * start txn
+     * @param txn
+     * @return initialized txn
+     */
     @Override
-    public Transaction initTxn(Transaction txn) {
-        Transaction initTxn = new Transaction();
+    public Transaction init(Transaction txn) {
         if (txn.getUseCase() == null || txn.getUseCase().getId() == null) {
             throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_USE_CASE);
         }
-
-        if (txn.getCurrency() == null || txn.getCurrency().getCode() == null || txn.getCurrency().getCode().equals("")) {
-            throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_CURRENCY_IN_REQ);
-        }
-
-        Currency currency = currencyService.getCurrencyByCode(txn.getCurrency().getCode());
-        if(currency == null){
-            throw new ModelCustomErrorException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_CURRENCY);
-        }
-
-        initTxn.setTxnStatus(status.getById(Constants.INITIAL_TXN_STATUS));
-        initTxn.setAmount(txn.getAmount());
-        initTxn.setUseCase(txn.getUseCase());
-        initTxn.setCurrency(currency);
-        return this.create(initTxn);
+        return this.processInit(txn);
     }
-
+    /**
+     * access payer and payee
+     * */
     @Override
-    public Transaction preAuthorizationTxn(Transaction txn) {
-        this.processPreAuthorizationTxn(txn);
-        txn.setTxnStatus(status.getById(Constants.PRE_AUTHORIZED_TXN_STATUS));
-        return this.update(txn);
-    }
-
-    @Override
-    public Transaction authorizationTxn(Transaction txn) {
-        this.processAuthenticationTxn(txn);
+    public Transaction authentication(Transaction txn) {
+        this.processAuthentication(txn);
         txn.setTxnStatus(status.getById(Constants.AUTHENTICATED_TXN_STATUS));
         return this.update(txn);
     }
 
+    /**
+     * payer and payee privileges
+     */
     @Override
-    public Transaction verifyTxn(Transaction txn) {
-        if(!this.verifyTxnParticipants(txn) && !this.verifyTxnLimits(txn)){
-            throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.ERROR_ON_VERIFY);
-        }
+    public Transaction authorization(Transaction txn) {
+        this.processAuthorization(txn);
+        txn.setTxnStatus(status.getById(Constants.PRE_AUTHORIZED_TXN_STATUS));
+        return this.update(txn);
+    }
+
+    /**
+     * txn status, limits, fees
+     */
+    @Override
+    public Transaction verify(Transaction txn) {
+        this.processVerification(txn);
         txn.setTxnStatus(status.getById(Constants.AUTHORIZED_TXN_STATUS));
         return this.update(txn);
     }
 
     @Override
-    public Transaction confirmTxn(Transaction txn) {
-        Transaction txnRet = this.processConfirmTxn(txn);
+    public Transaction confirm(Transaction txn) {
+        Transaction txnRet = this.processConfirm(txn);
         txnRet.setTxnStatus(status.getById(Constants.CONFIRM_TXN_STATUS));
         return this.update(txnRet);
     }
 
     @Override
-    public Transaction cancelConfirmTxn(Transaction txn) {
+    public Transaction cancelConfirm(Transaction txn) {
+        Transaction retTxn = this.processCancelConfirm(txn);
         txn.setTxnStatus(status.getById(Constants.CANCEL_CONFIRM_TXN_STATUS));
-        txn.setUpdateDate(LocalDateTime.now());
-        return repo.save(txn);
+        return this.update(retTxn);
     }
 
     @Override
@@ -164,7 +164,38 @@ public class TransactionServiceImpl implements ITransactionService {
         return txnList;
     }
 
-    private Transaction processAuthenticationTxn(Transaction txn) {
+    private Transaction processInit(Transaction txn){
+        Transaction initTxn = new Transaction();
+        switch (txn.getUseCase().getId().intValue()){
+            case Constants.INT_VOUCHER_USE_CASE:
+                initTxn.setAmount(txn.getAmount());
+                break;
+            case Constants.INT_WITHDRAW_VOUCHER_USE_CASE:
+                //validate amount
+                if (txn.getAmount() == null) {
+                    LOG.error("Amount in request is not a properly value to be processed", txn);
+                    throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_13);
+                }
+                initTxn.setAmount(txn.getAmount());
+                break;
+            default:
+        }
+        //set currency
+        if (txn.getCurrency() == null || txn.getCurrency().getCode() == null || txn.getCurrency().getCode().equals("")) {
+            throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_CURRENCY_IN_REQ);
+        }
+        Currency currency = currencyService.getCurrencyByCode(txn.getCurrency().getCode());
+        if(currency == null){
+            throw new ModelCustomErrorException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_CURRENCY);
+        }
+        initTxn.setCurrency(currency);
+        initTxn.setTxnStatus(status.getById(Constants.INITIAL_TXN_STATUS));
+        initTxn.setUseCase(txn.getUseCase());
+        return this.create(initTxn);
+    }
+
+    private Transaction processAuthentication(Transaction txn) {
+        //Todo if it's necessary check user with esb service provided
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
                 Customer payer = customer.getByUsername(txn.getPayer().getUsername());
@@ -218,19 +249,25 @@ public class TransactionServiceImpl implements ITransactionService {
                 txn.setPayerPaymentInstrument(payerPi);
                 break;
             case Constants.INT_WITHDRAW_VOUCHER_USE_CASE:
-                Customer clientAtmPayer = customer.checkIfCustomerExist(txn.getPayer().getMsisdn());
-                if (clientAtmPayer == null) {
-                    throw new ModelCustomErrorException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR,
-                            AuthorizerError.NOT_FOUND_PAYEE_ATM);
+                //find customer
+                if (txn.getPayer() == null || txn.getPayer().getMsisdn() == null || txn.getPayer().getMsisdn().equals("") ||
+                        !utilComponent.isValidPhoneNumber(txn.getPayer().getMsisdn())) {
+                    LOG.error("NumberPhone does not come properly in request", txn);
+                    throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_14);
+                }
+
+                Customer cst = customer.getByMsisdn(txn.getPayer().getMsisdn());
+                if (cst == null) {
+                    LOG.error("Customer with numberPhone specified in request not fount ", txn);
+                    throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_25);
                 }
 
                 Customer userATM = customer.getById(Constants.ATM_USER_ID);
-                if (userATM == null || userATM.getName().trim().equals(Constants.ATM_USER_STR)) {
-                    throw new ModelCustomErrorException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR,
-                            AuthorizerError.NOT_FOUND_PAYEE_ATM);
+                if (userATM == null || !userATM.getName().trim().equals(Constants.ATM_USER_STR)) {
+                    throw new ModelCustomErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_03);
                 }
 
-                txn.setPayer(clientAtmPayer);
+                txn.setPayer(cst);
                 txn.setPayee(userATM);
                 break;
             default:
@@ -239,7 +276,7 @@ public class TransactionServiceImpl implements ITransactionService {
         return this.update(txn);
     }
 
-    private Transaction processPreAuthorizationTxn(Transaction txn){
+    private Transaction processAuthorization(Transaction txn){
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
                 //Todo verifyBasaUser
@@ -254,20 +291,82 @@ public class TransactionServiceImpl implements ITransactionService {
         return txn;
     }
 
-    private Transaction processConfirmTxn(Transaction txn) {
-        switch (txn.getUseCase().getId().intValue()) {
+    private Transaction processVerification(Transaction txn){
+        switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
-                PaymentInstrument accountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
-                //Account Payer, Account Payee, Amount
-                String coreRef = bankService.transferMoney(txn.getPayerPaymentInstrument().getStrIdentifier(),accountATMBASA.getStrIdentifier(),txn.getAmount(), "");
-                txn.setCoreReference(coreRef);
-                //Update balance payer
-                Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
-                accountATMBASA.setBalance(newBalance);
-                paymentInstrumentService.update(accountATMBASA);
+                if(!this.verifyTxnParticipants(txn) && !this.verifyTxnLimits(txn)){
+                    throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.ERROR_ON_VERIFY);
+                }
                 break;
             case Constants.INT_WITHDRAW_VOUCHER_USE_CASE:
+                //Not do nothing for now
+                break;
+            default:
 
+        }
+        return txn;
+    }
+
+    private Transaction processConfirm(Transaction txn) {
+        switch (txn.getUseCase().getId().intValue()) {
+            case Constants.INT_VOUCHER_USE_CASE:
+                //Freeze founds for ocb user
+                PaymentInstrument cstBank = paymentInstrumentService.getById(txn.getPayer().getId());
+                LOG.info(" {} account number of customer {}",cstBank, txn.getPayer().getId());
+                //Account Payer, Amount, comment
+                String Ref = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(),txn.getAmount(), " txn ref: " + txn.getId());
+                //txn.setCoreReference(coreRef);
+                //Update balance payer
+                //Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
+                //accountATMBASA.setBalance(newBalance);
+                //paymentInstrumentService.update(accountATMBASA);
+                break;
+            case Constants.INT_WITHDRAW_VOUCHER_USE_CASE:
+                Transaction creatorTxn = txn.getVoucher().getTxnCreatedBy();
+                PaymentInstrument payerPI = creatorTxn.getPayerPaymentInstrument();
+                PaymentInstrument accountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
+
+
+                //Account Payer, Account Payee, Amount
+                String coreRef = bankService.transferMoney(payerPI.getStrIdentifier(),accountATMBASA.getStrIdentifier(),txn.getAmount(), " txn ref: " + txn.getId());
+                txn.setCoreReference(coreRef);
+                //Update balance payee
+                Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
+                accountATMBASA.setBalance(newBalance);
+
+                //Update balance payer
+                Double nwBalance = payerPI.getBalance() - txn.getAmount();
+                payerPI.setBalance(nwBalance);
+                paymentInstrumentService.update(payerPI);
+
+                txn.setPayerPaymentInstrument(payerPI);
+                txn.setPayeePaymentInstrument(accountATMBASA);
+                break;
+            default:
+
+        }
+        return txn;
+    }
+
+    private Transaction processCancelConfirm(Transaction txn) {
+        switch (txn.getUseCase().getId().intValue()) {
+            case Constants.INT_VOUCHER_USE_CASE:
+                //Not do nothing
+                break;
+            case Constants.INT_WITHDRAW_VOUCHER_USE_CASE:
+                PaymentInstrument payerPI = txn.getPayerPaymentInstrument();
+                PaymentInstrument atmPI = txn.getPayeePaymentInstrument();
+                //Account Payer, Account Payee, Amount
+                String coreRef = bankService.transferMoney(atmPI.getStrIdentifier(),payerPI.getStrIdentifier(),txn.getAmount(), " txn ref: " + txn.getId());
+                txn.setCoreReference(coreRef);
+                //Update balance payer
+                Double newBalance = atmPI.getBalance() - txn.getAmount();
+                atmPI.setBalance(newBalance);
+
+                //Update balance payee
+                Double nwBalance = payerPI.getBalance() + txn.getAmount();
+                payerPI.setBalance(nwBalance);
+                paymentInstrumentService.update(payerPI);
                 break;
             default:
 

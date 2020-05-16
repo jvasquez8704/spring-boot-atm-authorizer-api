@@ -4,6 +4,7 @@ import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.component.IUtilComponent;
 import com.bancatlan.atmauthorizer.component.impl.UtilComponentImpl;
 import com.bancatlan.atmauthorizer.dto.VoucherTransactionDTO;
+import com.bancatlan.atmauthorizer.exception.AtmError;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
@@ -12,6 +13,8 @@ import com.bancatlan.atmauthorizer.model.Transaction;
 import com.bancatlan.atmauthorizer.model.Voucher;
 import com.bancatlan.atmauthorizer.repo.IVoucherRepo;
 import com.bancatlan.atmauthorizer.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,7 @@ import java.util.Optional;
 
 @Service
 public class VoucherServiceImpl implements IVoucherService {
+    Logger LOG = LoggerFactory.getLogger(VoucherServiceImpl.class);
     @Autowired
     IVoucherRepo repo;
 
@@ -67,7 +71,7 @@ public class VoucherServiceImpl implements IVoucherService {
             case Constants.ITM_PROCESS_CODE_REVERSE_WITHDRAW:
                 return this.processCancelWithdraw(dto);
             default:
-                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORTED_VOUCHER_PROCESS_CODE);
+                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AtmError.ERROR_12);
         }
     }
 
@@ -82,19 +86,18 @@ public class VoucherServiceImpl implements IVoucherService {
         }
         UtilComponentImpl.setSessionKey(dto.getSessionKey());
         //(1)
-        Transaction txnVoucher = transaction.initTxn(dto.getTransaction());
+        Transaction txnVoucher = transaction.init(dto.getTransaction());
         dto.getTransaction().setId(txnVoucher.getId());
         dto.getTransaction().setCurrency(txnVoucher.getCurrency());
 
         //(2)
-        transaction.preAuthorizationTxn(txnVoucher);
+        transaction.authentication(dto.getTransaction());
 
         //(3)
-        transaction.authorizationTxn(dto.getTransaction());
-        /*authorize txn => verify access, privileges, limits of payer and payee txn*/
+        transaction.authorization(txnVoucher);
 
         //(4)
-        transaction.verifyTxn(dto.getTransaction());
+        transaction.verify(dto.getTransaction());
         //throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.VERIFYING_PARTICIPANTS);
         return dto;
     }
@@ -114,7 +117,7 @@ public class VoucherServiceImpl implements IVoucherService {
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.ALREADY_PROCESSED_TXN);
         }
         //(5)
-        transaction.confirmTxn(txnVoucher);
+        transaction.confirm(txnVoucher);
         String pickupCode = utilComponent.getPickupCodeByCellPhoneNumber(dto.getTransaction().getPayee().getMsisdn());
 
         dto.getVoucher().setPickupCode(pickupCode);
@@ -149,7 +152,7 @@ public class VoucherServiceImpl implements IVoucherService {
                     dto.getTransaction().getPayer().getMsisdn() + " - not found");
         }
 
-        Voucher voucher = repo.findByPickupCodeAndSecretCodeAndCustomer(dto.getVoucher().getPickupCode(),dto.getVoucher().getSecretCode(), cst);
+        Voucher voucher = this.findVoucherToWithdraw(dto.getVoucher().getPickupCode(),dto.getVoucher().getSecretCode(), cst);
         if(voucher == null || voucher.getAmountCurrent() == 0L || dto.getTransaction().getAmount() > voucher.getAmountCurrent()){//is missing if it's active
             throw new ModelNotFoundException(" Voucher with pickupCode " +
                     dto.getVoucher().getPickupCode() + " and secretCode " + dto.getVoucher().getSecretCode() + " - not found");
@@ -164,7 +167,7 @@ public class VoucherServiceImpl implements IVoucherService {
         txn.setPayee(customer.getById(Constants.ATM_USER_ID));
         txn.setAtmReference(dto.getTransaction().getAtmReference());
         txn.setVoucher(voucher);//Todo Es mejor crear una tabla maestra
-        Transaction txnPaidBy = transaction.confirmTxn(txn);
+        Transaction txnPaidBy = transaction.confirm(txn);
         Double currentAmount = voucher.getAmountCurrent() - txnPaidBy.getAmount();
 
         //mark voucher
@@ -175,6 +178,16 @@ public class VoucherServiceImpl implements IVoucherService {
         voucher.setTxnPaidOutBy(txnPaidBy);
         voucher.setCustomerUpdate(cst);
         return this.update(voucher);
+    }
+
+    @Override
+    public Voucher findVoucherToWithdraw(String pickupCode, String secretCode, Customer customer) {
+        return repo.findByPickupCodeAndSecretCodeAndCustomerAndIsActive(pickupCode,secretCode, customer, true);
+    }
+
+    @Override
+    public Voucher findVoucherToReverse(String pickupCode, String secretCode, Customer customer) {
+        return repo.findByPickupCodeAndSecretCodeAndCustomerAndIsActive(pickupCode,secretCode, customer, false);
     }
 
     @Override
@@ -194,7 +207,7 @@ public class VoucherServiceImpl implements IVoucherService {
         }
         //Todo regresar el dinero de la cuenta de cajeros a la cuenta de ATM (o en el caso de Oscar P. regresar el dinero al usuario (pero en estado de congelado))
         //cancel txn
-        Transaction txnPaidBy = transaction.cancelConfirmTxn(txn);
+        Transaction txnPaidBy = transaction.cancelConfirm(txn);
         Double currentAmount = voucher.getAmountCurrent() + txnPaidBy.getAmount();
 
         //mark voucher
@@ -239,30 +252,43 @@ public class VoucherServiceImpl implements IVoucherService {
     }
 
     public VoucherTransactionDTO processWithdraw(VoucherTransactionDTO dto) {
-        //find customer
-        Customer cst = customer.getByMsisdn(dto.getTransaction().getPayer().getMsisdn());
-        if(cst == null){
-            //execStatus.setErrorCode("57");
-            throw new ModelNotFoundException("User with Cellphone - " +
-                    dto.getTransaction().getPayer().getMsisdn() + " - not found");
+        //Atm reference
+        if (dto.getTransaction() == null || dto.getTransaction().getAtmReference() == null || dto.getTransaction().getAtmReference().equals("")) {
+            LOG.error("AtmReference in request is not defined", dto);
+            throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76);
+        }
+        //(1)
+        Transaction txn = transaction.init(dto.getTransaction());
+
+        //(2)
+        dto.getTransaction().setId(txn.getId());
+        dto.getTransaction().setCurrency(txn.getCurrency());
+        transaction.authentication(dto.getTransaction());
+
+        //validate both PIN
+        if (dto.getVoucher() == null || dto.getVoucher().getSecretCode() == null || dto.getVoucher().getPickupCode() == null ||
+                dto.getVoucher().getSecretCode().equals("") || dto.getVoucher().getSecretCode().length() != 4 || dto.getVoucher().getPickupCode().equals("") ||
+                dto.getVoucher().getPickupCode().length() != 5) {
+            LOG.error("Codes in request are not properly values to be processed", dto);
+            throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_81);
         }
 
-        Voucher voucher = repo.findByPickupCodeAndSecretCodeAndCustomer(dto.getVoucher().getPickupCode(),dto.getVoucher().getSecretCode(), cst);
-        if(voucher == null || voucher.getAmountCurrent() == 0L || dto.getTransaction().getAmount() > voucher.getAmountCurrent()){//is missing if it's active
-            throw new ModelNotFoundException(" Voucher with pickupCode " +
-                    dto.getVoucher().getPickupCode() + " and secretCode " + dto.getVoucher().getSecretCode() + " - not found");
+        Voucher voucher = this.findVoucherToWithdraw(dto.getVoucher().getPickupCode(), dto.getVoucher().getSecretCode(), txn.getPayer());
+        if (!this.isValidVoucherToWithDraw(voucher, dto)) {
+            LOG.error("Voucher found is not valid", voucher);
+            LOG.error("Request => ", dto);
+            throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76);
         }
-        //Todo agregar validacion de limites privilegios ciclo de vida de txns
-        //confirm txn
-        Transaction txn = new Transaction();
-        txn.setCurrency(currency.getById(Constants.HN_CURRENCY_ID));
-        txn.setUseCase(useCase.getById(Constants.WITHDRAW_VOUCHER_USE_CASE));
-        txn.setAmount(dto.getTransaction().getAmount());
-        txn.setPayer(cst);
-        txn.setPayee(customer.getById(Constants.ATM_USER_ID));
+        //(3)
+        transaction.authorization(txn);
+
+        //(4)
+        transaction.verify(dto.getTransaction());
+
         txn.setAtmReference(dto.getTransaction().getAtmReference());
         txn.setVoucher(voucher);//Todo Es mejor crear una tabla maestra
-        Transaction txnPaidBy = transaction.confirmTxn(txn);
+        Transaction txnPaidBy = transaction.confirm(txn);
+
         Double currentAmount = voucher.getAmountCurrent() - txnPaidBy.getAmount();
         dto.setTransaction(txnPaidBy);
         //mark voucher
@@ -271,28 +297,33 @@ public class VoucherServiceImpl implements IVoucherService {
         }
         voucher.setAmountCurrent(currentAmount);
         voucher.setTxnPaidOutBy(txnPaidBy);
-        voucher.setCustomerUpdate(cst);
+        voucher.setCustomerUpdate(txn.getPayer());
         dto.setVoucher(this.update(voucher));
         return dto;
     }
 
     public VoucherTransactionDTO processCancelWithdraw(VoucherTransactionDTO dto) {
+        //Atm reference
+        if (dto.getTransaction() == null || dto.getTransaction().getAtmReference() == null || dto.getTransaction().getAtmReference().equals("")) {
+            LOG.error("processCancelWithdraw: AtmReference in request is not defined", dto);
+            throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76);
+        }
+
         //find customer
         Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference());
         if(txn == null  || txn.getTxnStatus().getId().equals(Constants.CANCEL_CONFIRM_TXN_STATUS)){
-            //execStatus.setErrorCode("57");
-            throw new ModelNotFoundException("Txn and Voucher by this atm reference - " +
-                    dto.getTransaction().getAtmReference() + " - not found or already canceled");
+            LOG.error("processCancelWithdraw: AtmReference was not found or already cancelled", txn);
+            throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_77);
         }
 
         Voucher voucher = this.getById(txn.getVoucher().getId());
-        if(voucher == null){//is missing if it's active
-            throw new ModelNotFoundException(" Voucher with txn " +
-                    txn.getId() + " - not found");
+        if (voucher == null || !this.isValidVoucherToReverse(voucher, dto)) {
+            LOG.error("Voucher found is not valid", voucher);
+            LOG.error("Request => ", dto);
+            throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_R1);
         }
-        //Todo regresar el dinero de la cuenta de cajeros a la cuenta de ATM (o en el caso de Oscar P. regresar el dinero al usuario (pero en estado de congelado))
         //cancel txn
-        Transaction txnPaidBy = transaction.cancelConfirmTxn(txn);
+        Transaction txnPaidBy = transaction.cancelConfirm(txn);
         Double currentAmount = voucher.getAmountCurrent() + txnPaidBy.getAmount();
 
         //mark voucher
@@ -302,5 +333,19 @@ public class VoucherServiceImpl implements IVoucherService {
         dto.setTransaction(txnPaidBy);
         dto.setVoucher(this.update(voucher));
         return dto;
+    }
+
+    private Boolean isValidVoucherToWithDraw(Voucher voucher, VoucherTransactionDTO dto) {
+        if (voucher == null || voucher.getAmountCurrent() == 0L || dto.getTransaction().getAmount() > voucher.getAmountCurrent() || !voucher.getActive()) {
+            return false;
+        }
+        return true;
+    }
+
+    private Boolean isValidVoucherToReverse(Voucher voucher, VoucherTransactionDTO dto) {
+        if (voucher == null || voucher.getAmountCurrent().equals(voucher.getAmountInitial()) || dto.getTransaction().getAmount() > voucher.getAmountInitial()) {
+            return false;
+        }
+        return true;
     }
 }
