@@ -200,6 +200,7 @@ public class BankServiceImpl implements IBankService {
             }
         });
         String urlS = absolutePathWSDLResources + transferWSDLName;
+        LOG.info("URL: {}",urlS);
         String uniqueTransNum = "";
         URL url;
         try {

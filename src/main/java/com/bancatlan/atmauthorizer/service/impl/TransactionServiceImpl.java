@@ -124,6 +124,7 @@ public class TransactionServiceImpl implements ITransactionService {
     public Transaction confirm(Transaction txn) {
         Transaction txnRet = this.processConfirm(txn);
         txnRet.setTxnStatus(status.getById(Constants.CONFIRM_TXN_STATUS));
+        LOG.info("GET TXN IN CONFIRM {}",txn);
         return this.update(txnRet);
     }
 
@@ -333,7 +334,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 //Update balance payee
                 Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
                 accountATMBASA.setBalance(newBalance);
-
+                LOG.info("CORE REFERENCE:", coreRef);
                 //Update balance payer
                 Double nwBalance = payerPI.getBalance() - txn.getAmount();
                 payerPI.setBalance(nwBalance);
