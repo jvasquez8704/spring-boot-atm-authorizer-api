@@ -353,9 +353,10 @@ public class VoucherServiceImpl implements IVoucherService {
             throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_OCB_SESSION_KEY);
         }
 
-        if (dto.getTransaction() != null && dto.getTransaction().getId() != null) {
+
+       /* if (dto.getTransaction() != null && dto.getTransaction().getId() != null) {
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORTED_TXN_ID_BANK_PAYMENT_SERVICE_ACTION);
-        }
+        }*/
 
         if (dto.getTransaction().getPayee() == null && dto.getTransaction().getPayee().getMsisdn() == null && dto.getTransaction().getPayee().getMsisdn().equals("")) {
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_TARGET_TELEPHONE_FIELD);
