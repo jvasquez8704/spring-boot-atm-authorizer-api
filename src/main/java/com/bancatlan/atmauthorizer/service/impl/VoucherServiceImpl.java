@@ -77,7 +77,10 @@ public class VoucherServiceImpl implements IVoucherService {
 
     @Override
     public VoucherTransactionDTO bankVerifyPayment(VoucherTransactionDTO dto) {
-        LOG.info("Request from OCB", dto);
+        LOG.info("Request from OCB {}", dto);
+        LOG.info("Request from TXN {}", dto.getTransaction());
+        LOG.info("Request from TXN ID {}", dto.getTransaction().getId());
+
         dto = this.validateAndFitOcbRequest(dto);
         UtilComponentImpl.setSessionKey(dto.getSessionKey());
         //(1)
