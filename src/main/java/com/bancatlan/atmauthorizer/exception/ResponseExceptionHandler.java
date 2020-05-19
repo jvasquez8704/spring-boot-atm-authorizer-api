@@ -20,24 +20,28 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public final ResponseEntity<ExceptionResponse> handleAllExceptions(Exception ex, WebRequest request){
         ExceptionResponse er = new ExceptionResponse(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
-        return new ResponseEntity<ExceptionResponse>(er, HttpStatus.INTERNAL_SERVER_ERROR);
+        //return new ResponseEntity<ExceptionResponse>(er, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<ExceptionResponse>(er, HttpStatus.OK);
     }
 
     @ExceptionHandler(ModelCustomErrorException.class)
     public final ResponseEntity<ExceptionResponse> handleModelException(ModelCustomErrorException ex, WebRequest request){
         ExceptionResponse er = new ExceptionResponse(LocalDateTime.now(), ex.getMessage(), request.getDescription(false), ex.getCustomError());
-        return new ResponseEntity<ExceptionResponse>(er, HttpStatus.PRECONDITION_REQUIRED);
+        //return new ResponseEntity<ExceptionResponse>(er, HttpStatus.PRECONDITION_REQUIRED);
+        return new ResponseEntity<ExceptionResponse>(er, HttpStatus.OK);
     }
 
     @ExceptionHandler(ModelNotFoundException.class)
     public final ResponseEntity<ExceptionResponse> handleNotFoundException(ModelNotFoundException ex, WebRequest request){
         ExceptionResponse er = new ExceptionResponse(LocalDateTime.now(), ex.getMessage(), request.getDescription(false), ex.getCustomError());
-        return new ResponseEntity<ExceptionResponse>(er, HttpStatus.NOT_FOUND);
+        //return new ResponseEntity<ExceptionResponse>(er, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<ExceptionResponse>(er, HttpStatus.OK);
     }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         ExceptionResponse er = new ExceptionResponse(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
-        return new ResponseEntity<Object>(er, HttpStatus.BAD_REQUEST);
+        //return new ResponseEntity<Object>(er, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<Object>(er, HttpStatus.OK);
     }
 }
