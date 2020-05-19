@@ -77,9 +77,10 @@ public class VoucherServiceImpl implements IVoucherService {
 
     @Override
     public VoucherTransactionDTO bankVerifyPayment(VoucherTransactionDTO dto) {
-        LOG.info("Request from OCB {}", dto);
-        LOG.info("Request from TXN {}", dto.getTransaction());
-        LOG.info("Request from TXN ID {}", dto.getTransaction().getId());
+        LOG.info("Request from DTO {}", dto.toString());
+        LOG.info("Request from DTO>TXN {}", dto.getTransaction().toString());
+        LOG.info("Request from DTO>VOUCHER {}",dto.getVoucher().toString());
+        LOG.info("Request from TXN>ID {}", dto.getTransaction().getId());
 
         dto = this.validateAndFitOcbRequest(dto);
         UtilComponentImpl.setSessionKey(dto.getSessionKey());
@@ -350,39 +351,47 @@ public class VoucherServiceImpl implements IVoucherService {
     private VoucherTransactionDTO validateAndFitOcbRequest(VoucherTransactionDTO dto) {
         /*OCB Validations*/
         if (dto.getSessionKey() == null || dto.getSessionKey().equals("")) {
+            LOG.error("Custom Exception {}", AuthorizerError.MISSING_OCB_SESSION_KEY.toString());
             throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_OCB_SESSION_KEY);
         }
 
-
-       /* if (dto.getTransaction() != null && dto.getTransaction().getId() != null) {
+        if (dto.getTransaction() != null && dto.getTransaction().getId() != null) {
+            LOG.error("Custom Exception {}", AuthorizerError.NOT_SUPPORTED_TXN_ID_BANK_PAYMENT_SERVICE_ACTION.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORTED_TXN_ID_BANK_PAYMENT_SERVICE_ACTION);
-        }*/
+        }
 
         if (dto.getTransaction().getPayee() == null && dto.getTransaction().getPayee().getMsisdn() == null && dto.getTransaction().getPayee().getMsisdn().equals("")) {
+            LOG.error("Custom Exception {}", AuthorizerError.MISSING_TARGET_TELEPHONE_FIELD.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_TARGET_TELEPHONE_FIELD);
         }
 
         if (dto.getValidatePayeeMsisdn() == null && dto.getValidatePayeeMsisdn().equals("")) {
+            LOG.error("Custom Exception {}", AuthorizerError.MISSING_CONFIRM_TARGET_TELEPHONE_FIELD.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_CONFIRM_TARGET_TELEPHONE_FIELD);
         }
 
         if (!utilComponent.isValidPhoneNumber(dto.getTransaction().getPayee().getMsisdn())) {
+            LOG.error("Custom Exception {}", AuthorizerError.BAD_FORMAT_TARGET_TELEPHONE.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.BAD_FORMAT_TARGET_TELEPHONE);
         }
 
         if (!dto.getValidatePayeeMsisdn().equals(dto.getTransaction().getPayee().getMsisdn())) {
+            LOG.error("Custom Exception {}", AuthorizerError.NOT_MATCH_CONFIRM_TARGET_TELEPHONE.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_MATCH_CONFIRM_TARGET_TELEPHONE);
         }
 
         if (dto.getAmountKey() == null && dto.getAmountKey().equals("")) {
+            LOG.error("Custom Exception {}", AuthorizerError.MISSING_AMOUNT_TO_TRANSFER_FIELD.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_AMOUNT_TO_TRANSFER_FIELD);
         }
 
         if (dto.getAmountKey().equals(Constants.ATM_ANOTHER_AMOUNT_KEY)) {
             if (dto.getAmount() == null && dto.getAmount().equals("")) {
+                LOG.error("Custom Exception {}", AuthorizerError.MISSING_WRITTEN_AMOUNT.toString());
                 throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_WRITTEN_AMOUNT);
             }
             if (!utilComponent.isValidAmountWithAtm(dto.getAmount())) {
+                LOG.error("Custom Exception {}", AuthorizerError.NOT_MATCH_AMOUNT_WITH_ATM.toString());
                 throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_MATCH_AMOUNT_WITH_ATM);
             }
             dto.getTransaction().setAmount(Double.parseDouble(dto.getAmount()));
@@ -391,15 +400,18 @@ public class VoucherServiceImpl implements IVoucherService {
         }
 
         if (dto.getVoucher() == null || dto.getVoucher().getSecretCode() == null || dto.getVoucher().getSecretCode().equals("")) {
+            LOG.error("Custom Exception {}", AuthorizerError.MISSING_SECRET_CODE_FIELD.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_SECRET_CODE_FIELD);
         }
 
         if (!utilComponent.isANumber(dto.getVoucher().getSecretCode()) || dto.getVoucher().getSecretCode().length() != 4) {
+            LOG.error("Custom Exception {}", AuthorizerError.BAD_FORMAT_SECRET_CODE.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.BAD_FORMAT_SECRET_CODE);
         }
 
         /*OCB Adjustments*/
         if (dto.getTransaction().getCurrency() != null && dto.getTransaction().getCurrency().getCode() != null && dto.getTransaction().getCurrency().getCode().equals(Constants.BANK_HN_CURRENCY)) {
+            LOG.info("Adjusting Curency from OCB Req. LPS to HNL #{}",dto.getTransaction().getCurrency().getCode());
             dto.getTransaction().getCurrency().setCode(Constants.HN_CURRENCY);
         }
         return dto;
