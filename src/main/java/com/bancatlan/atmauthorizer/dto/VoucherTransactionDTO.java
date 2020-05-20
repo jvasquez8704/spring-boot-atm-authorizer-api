@@ -4,7 +4,9 @@ import com.bancatlan.atmauthorizer.model.Identification;
 import com.bancatlan.atmauthorizer.model.Identity;
 import com.bancatlan.atmauthorizer.model.Transaction;
 import com.bancatlan.atmauthorizer.model.Voucher;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.time.LocalDateTime;
 
 public class VoucherTransactionDTO {
@@ -142,5 +144,18 @@ public class VoucherTransactionDTO {
 
     public void setPayeeIdentity(Identity payeeIdentity) {
         this.payeeIdentity = payeeIdentity;
+    }
+
+    @Override
+    public String toString() {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonString = "";
+        try {
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+            jsonString = mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return jsonString;
     }
 }

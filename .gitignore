@@ -4,7 +4,7 @@ target/
 !**/src/main/**
 !**/src/test/**
 *.properties
-
+logs/
 ### STS ###
 .apt_generated
 .classpath

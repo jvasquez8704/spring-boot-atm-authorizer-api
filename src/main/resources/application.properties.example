@@ -10,6 +10,7 @@ spring.datasource.password=Pass!234
 spring.jpa.open-in-view=true
 
 spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
+spring.jackson.serialization.indent_output=true
 
 #PO Parameters
 bank.service.po.username=APPOCH19
