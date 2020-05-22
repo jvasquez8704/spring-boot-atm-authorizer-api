@@ -195,19 +195,39 @@ public class TransactionServiceImpl implements ITransactionService {
         return this.create(initTxn);
     }
 
+    /**
+     * 1.check if participants in txn exist in db
+     * 2.check if identification and identity exist for each one
+     * 3 check PI for each one then (update PI adding User to PI)
+     * 4. add user creator system admin user
+     * @param txn
+     * @return
+     */
     private Transaction processAuthentication(Transaction txn) {
-        //Todo if it's necessary check user with esb service provided
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
+                //CHECK PAYER USER AND PAYEE NO CLIENT
+                if (txn.getPayer() == null || txn.getPayer().getUsername() == null || txn.getPayer().getUsername().equals("")) {
+                    LOG.error(AuthorizerError.MISSING_OCB_USER.toString());
+                    throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_OCB_USER);
+                }
+
+                if (txn.getPayee() == null || txn.getPayee().getMsisdn() == null || txn.getPayer().getMsisdn().equals("")) {
+                    LOG.error(AuthorizerError.MISSING_PAYER_PI.toString());
+                    throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_PAYER_PI);
+                }
+                //business rules, if users not exits, create them as pre-registered customers
                 Customer payer = customer.getByUsername(txn.getPayer().getUsername());
                 if (payer == null) {
                     txn.getPayer().setCountry(null);//hack
+                    //Set creator user
                     payer = customer.register(txn.getPayer());
                 }
 
                 Customer payee = customer.checkIfCustomerExist(txn.getPayee().getMsisdn());
                 if (payee == null) {
                     txn.getPayee().setCountry(null);//hack
+                    //Set creator user
                     payee = customer.register(txn.getPayee());
                 }
 
@@ -216,16 +236,11 @@ public class TransactionServiceImpl implements ITransactionService {
                     LOG.error(AuthorizerError.MISSING_PAYER_PI.toString() + txn);
                     throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_PAYER_PI);
                 }
-                //CHECK PAYER OCB_USER
-                if (txn.getPayer() == null || txn.getPayer().getUsername() == null || txn.getPayer().getUsername().equals("")) {
-                    LOG.error(AuthorizerError.MISSING_OCB_USER.toString() + txn);
-                    throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_OCB_USER);
-                }
 
                 //GET BANK ACCOUNTS BY OCB_USER
                 boolean isFoundPI = false;
                 //Boolean isFoundPI = true;
-                List<PaymentInstrument> accountsUser = bankService.getBankAccountsByUserId(txn.getPayer().getUsername());
+                /*List<PaymentInstrument> accountsUser = bankService.getBankAccountsByUserId(txn.getPayer().getUsername());
                 if(!accountsUser.isEmpty()) {
                     for (PaymentInstrument pi : accountsUser) {
                         if (pi.getStrIdentifier().trim().equals(txn.getPayerPaymentInstrument().getStrIdentifier().trim())) {
@@ -237,11 +252,12 @@ public class TransactionServiceImpl implements ITransactionService {
                 if(!isFoundPI){
                     LOG.error(AuthorizerError.MISSING_ACCOUNT_FROM_BANK.toString() + txn.toString());
                     throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_ACCOUNT_FROM_BANK);
-                }
+                }*/
 
                 PaymentInstrument payerPi = paymentInstrumentService.getPaymentInstrumentByStrIdentifier(txn.getPayerPaymentInstrument().getStrIdentifier());
                 //PaymentInstrument payerPi = paymentInstrumentService.getPaymentInstrumentByCustomerAndStrIdentifier(payer, txn.getPayerPaymentInstrument().getStrIdentifier());
                 if (payerPi == null) {
+                    txn.getPayerPaymentInstrument().setCustomer(payer);
                     payerPi = paymentInstrumentService.create(txn.getPayerPaymentInstrument());
                 }
 
