@@ -58,6 +58,9 @@ public class VoucherServiceImpl implements IVoucherService {
     @Transactional
     @Override
     public VoucherTransactionDTO voucherProcess(VoucherTransactionDTO dto) {
+        LOG.info("Request from TXN>ID {}", dto.getTransaction().getId());
+        LOG.debug("Request from DTO {}", dto.toString());
+
         if (dto.getAction() == null || dto.getAction().equals("")) {
             throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_BANK_PAYMENT_SERVICE_ACTION);
         }
@@ -77,9 +80,6 @@ public class VoucherServiceImpl implements IVoucherService {
 
     @Override
     public VoucherTransactionDTO bankVerifyPayment(VoucherTransactionDTO dto) {
-        LOG.info("Request from TXN>ID {}", dto.getTransaction().getId());
-        LOG.debug("Request from DTO {}", dto.toString());
-
         dto = this.validateAndFitOcbRequest(dto);
         UtilComponentImpl.setSessionKey(dto.getSessionKey());
         //(1)
@@ -251,7 +251,7 @@ public class VoucherServiceImpl implements IVoucherService {
     public VoucherTransactionDTO processWithdraw(VoucherTransactionDTO dto) {
         //Atm reference
         if (dto.getTransaction() == null || dto.getTransaction().getAtmReference() == null || dto.getTransaction().getAtmReference().equals("")) {
-            LOG.error("AtmReference in request is not defined", dto);
+            LOG.error("AtmReference in request is not defined {}", dto.toString());
             throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76);
         }
         //(1)
@@ -266,14 +266,13 @@ public class VoucherServiceImpl implements IVoucherService {
         if (dto.getVoucher() == null || dto.getVoucher().getSecretCode() == null || dto.getVoucher().getPickupCode() == null ||
                 dto.getVoucher().getSecretCode().equals("") || dto.getVoucher().getSecretCode().length() != 4 || dto.getVoucher().getPickupCode().equals("") ||
                 dto.getVoucher().getPickupCode().length() != 5) {
-            LOG.error("Codes in request are not properly values to be processed", dto);
+            LOG.error("Codes in request are not properly values to be processed {}", dto.toString());
             throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_81);
         }
 
         Voucher voucher = this.findVoucherToWithdraw(dto.getVoucher().getPickupCode(), dto.getVoucher().getSecretCode(), txn.getPayer());
         if (!this.isValidVoucherToWithDraw(voucher, dto)) {
-            LOG.error("Voucher found is not valid", voucher);
-            LOG.error("Request => ", dto);
+            LOG.error("Voucher found is not valid {} ", dto);
             throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76);
         }
         //(3)
@@ -302,21 +301,20 @@ public class VoucherServiceImpl implements IVoucherService {
     public VoucherTransactionDTO processCancelWithdraw(VoucherTransactionDTO dto) {
         //Atm reference
         if (dto.getTransaction() == null || dto.getTransaction().getAtmReference() == null || dto.getTransaction().getAtmReference().equals("")) {
-            LOG.error("processCancelWithdraw: AtmReference in request is not defined", dto);
+            LOG.error("processCancelWithdraw: AtmReference in request is not defined {}", dto.toString());
             throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76);
         }
 
         //find customer
         Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference());
         if(txn == null  || txn.getTxnStatus().getId().equals(Constants.CANCEL_CONFIRM_TXN_STATUS)){
-            LOG.error("processCancelWithdraw: AtmReference was not found or already cancelled", txn);
+            LOG.error("processCancelWithdraw: AtmReference was not found or already cancelled {}", dto.toString());
             throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_77);
         }
 
         Voucher voucher = this.getById(txn.getVoucher().getId());
         if (voucher == null || !this.isValidVoucherToReverse(voucher, dto)) {
-            LOG.error("Voucher found is not valid", voucher);
-            LOG.error("Request => ", dto);
+            LOG.error("Voucher found is not valid {}", dto);
             throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_R1);
         }
         //cancel txn
