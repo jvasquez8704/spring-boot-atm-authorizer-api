@@ -95,6 +95,10 @@ public class VoucherServiceImpl implements IVoucherService {
 
         //(4)
         transaction.verify(dto.getTransaction());
+        //Now PO does not have to map these fields
+        dto.getTransaction().setAmount(null);//remove that after change in PO
+        dto.getTransaction().getPayee().setMsisdn(null);//remove that after change in PO
+        dto.getVoucher().setSecretCode(null);//remove that after change in PO
         return dto;
     }
 

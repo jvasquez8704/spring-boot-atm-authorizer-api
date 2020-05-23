@@ -38,7 +38,7 @@ public enum AuthorizerError implements IError {
     NOT_MATCH_CONFIRM_TARGET_TELEPHONE(27,"El campo CONFIRMAR TELEFONO DESTINO no es igual al campo TELEFONO DESTINO"),
     BAD_FORMAT_TARGET_TELEPHONE(28,"El campo TELEFONO DESTINO no tiene un formato de teléfono válido"),
     MISSING_WRITTEN_AMOUNT(29,"El campo DIGITAR CANTIDAD A TRANSFERIR es obligatorio"),
-    NOT_MATCH_AMOUNT_WITH_ATM(30,"La cantidad no es valida para retirar en el ATM"),
+    NOT_MATCH_AMOUNT_WITH_ATM(30,"La cantidad a transferir debe ser múltiplo 100 y no exceder el máximo de retiro."),
     USER_NOT_EXIST(31,"The user does not exist"),
     MISSING_SECRET_CODE_FIELD(32,"El campo CLAVE DE SEGURIDAD es obligatorio"),
     BAD_FORMAT_SECRET_CODE(33,"El campo CLAVE DE RETIRO debe ser un número de 4 digitos"),
