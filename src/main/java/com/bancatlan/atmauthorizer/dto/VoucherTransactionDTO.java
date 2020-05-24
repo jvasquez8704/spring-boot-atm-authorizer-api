@@ -1,5 +1,6 @@
 package com.bancatlan.atmauthorizer.dto;
 
+import com.bancatlan.atmauthorizer.api.http.AtmBody;
 import com.bancatlan.atmauthorizer.model.Identification;
 import com.bancatlan.atmauthorizer.model.Identity;
 import com.bancatlan.atmauthorizer.model.Transaction;
@@ -25,6 +26,7 @@ public class VoucherTransactionDTO {
     private Identification payeeIdentification;
     private Identity payerIdentity;
     private Identity payeeIdentity;
+    private AtmBody atmBody;
 
     public Voucher getVoucher() {
         return voucher;
@@ -144,6 +146,14 @@ public class VoucherTransactionDTO {
 
     public void setPayeeIdentity(Identity payeeIdentity) {
         this.payeeIdentity = payeeIdentity;
+    }
+
+    public AtmBody getAtmBody() {
+        return atmBody;
+    }
+
+    public void setAtmBody(AtmBody atmBody) {
+        this.atmBody = atmBody;
     }
 
     @Override
