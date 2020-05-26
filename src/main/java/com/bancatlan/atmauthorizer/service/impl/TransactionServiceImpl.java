@@ -177,7 +177,12 @@ public class TransactionServiceImpl implements ITransactionService {
                     LOG.error("Amount in request is not a properly value to be processed", txn);
                     throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_13);
                 }
-                initTxn.setAmount(txn.getAmount());
+                Double amountFromAtm = utilComponent.convertAmountWithDecimals(txn.getAmount());
+                if (!utilComponent.isValidAmountWithAtm(amountFromAtm.toString())) {
+                    LOG.error("Custom Exception {}", AtmError.ERROR_13.toString());
+                    throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AtmError.ERROR_13);
+                }
+                initTxn.setAmount(amountFromAtm);
                 break;
             default:
         }
@@ -316,7 +321,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 }
                 break;
             case Constants.INT_WITHDRAW_VOUCHER_USE_CASE:
-                //Not do nothing for now
+                txn.setStrAuthorizationCode(utilComponent.createAuthorizationCode(Constants.LENGTH_AUTH_CODE));
                 break;
             default:
 

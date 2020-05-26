@@ -132,7 +132,7 @@ public class VoucherServiceImpl implements IVoucherService {
 
         if(voucherResult != null){
             String template = Constants.TEMPLATE_NOTIFICATION_SMS;//Todo get template from DB
-            String sms = String.format(template, String.valueOf(txnVoucher.getAmount()), pickupCode);
+            String sms = String.format(template, String.format("%.2f", txnVoucher.getAmount()), pickupCode);
             bankService.sendNotification(dto.getTransaction().getPayee().getMsisdn(),"",sms,Constants.BANK_NOTIFICATION_SMS);
         }
 
@@ -260,6 +260,7 @@ public class VoucherServiceImpl implements IVoucherService {
         //(2)
         dto.getTransaction().setId(txn.getId());
         dto.getTransaction().setCurrency(txn.getCurrency());
+        dto.getTransaction().setAmount(txn.getAmount());
         transaction.authentication(dto.getTransaction());
 
         //validate both PIN
@@ -331,14 +332,14 @@ public class VoucherServiceImpl implements IVoucherService {
     }
 
     private Boolean isValidVoucherToWithDraw(Voucher voucher, VoucherTransactionDTO dto) {
-        if (voucher == null || voucher.getAmountCurrent() == 0L || dto.getTransaction().getAmount() > voucher.getAmountCurrent() || !voucher.getActive()) {
+        if (voucher == null || voucher.getAmountCurrent() == 0L || utilComponent.convertAmountWithDecimals(dto.getTransaction().getAmount()) > voucher.getAmountCurrent() || !voucher.getActive()) {
             return false;
         }
         return true;
     }
 
     private Boolean isValidVoucherToReverse(Voucher voucher, VoucherTransactionDTO dto) {
-        if (voucher == null || voucher.getAmountCurrent().equals(voucher.getAmountInitial()) || dto.getTransaction().getAmount() > voucher.getAmountInitial()) {
+        if (voucher == null || voucher.getAmountCurrent().equals(voucher.getAmountInitial()) || utilComponent.convertAmountWithDecimals(dto.getTransaction().getAmount()) > voucher.getAmountInitial()) {
             return false;
         }
         return true;
@@ -392,6 +393,11 @@ public class VoucherServiceImpl implements IVoucherService {
             }
             dto.getTransaction().setAmount(Double.parseDouble(dto.getAmount()));
         } else {
+            Double amountFromMapKeys = utilComponent.getAmountFromKey(dto.getAmountKey());
+            if (amountFromMapKeys == null) {
+                LOG.error("Custom Exception {}", AuthorizerError.AMOUNT_KEY_DOES_NOT_EXIST.toString());
+                throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.AMOUNT_KEY_DOES_NOT_EXIST);
+            }
             dto.getTransaction().setAmount(utilComponent.getAmountFromKey(dto.getAmountKey()));
         }
 

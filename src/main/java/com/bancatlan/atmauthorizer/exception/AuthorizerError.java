@@ -53,7 +53,7 @@ public enum AuthorizerError implements IError {
     CRM_EXCEPTION(42,"Exception when executing the CRM service: BusquedaCliente"),
     TELEPHONE_EXCEPTION(43,"It was not possible to find phone number, review user settings"),
     SP05_AUTH_INIT_ERROR(44,"Error when executing the Init on OCB-SP05"),
-    SP05_AUTH_MFA_ERROR(45,"Error when executing the Init on OCB-SP05"),
+    AMOUNT_KEY_DOES_NOT_EXIST(45,"Error getting amount key, this key does not exist"),
     MALFORMED_URL_GETTING_ACCOUNT_INFORMATION_ESB(46,"URL Malformed when trying to get account info at esb"),
     UNEXPECTED_ERROR_GETTING_ACCOUNT_INFORMATION_ESB(47,"Unexpected error when trying to get account info at esb"),
     VOUCHER_NOT_FOUND(48,"Error when find voucher, it seems voucher does not exist"),

@@ -9,4 +9,5 @@ public interface IUtilComponent {
     Boolean isValidAmountWithAtm(String amount);
     Double convertAmountWithDecimals(Double amount);
     Double getAmountFromKey(String key);
+    String createAuthorizationCode(int length);
 }

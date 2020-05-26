@@ -51,6 +51,9 @@ public class Constants {
 
     /*DEFAULT LIMIT CONFIGURED*/
     public static final long DEFAULT_LIMIT =  1;
+    public static final int LENGTH_AUTH_CODE = 8;
+    public static int SIZE_PICKUP_CODE = 4;
+    public static int PIVOT_PICKUP_CODE_RANGE = 5;
 
     /*DEFAULT LIMIT CONFIGURED*/
     public static final String DAILY_RANGE = "DAILY_RANGE";
@@ -74,7 +77,8 @@ public class Constants {
     /*NOTIFICATION TYPES*/
     public static final String BANK_NOTIFICATION_SMS =  "SMS";
     public static final String BANK_NOTIFICATION_EMAIL =  "EMAIL";
-    public static String TEMPLATE_NOTIFICATION_SMS =  "Envio de dinero Atlantida Retiro sin tarjeta. Monto: L. %s Codigo de retiro %s";
+    //public static String TEMPLATE_NOTIFICATION_SMS =  "Envio de dinero Atlantida Retiro sin tarjeta. Monto: L. %s Codigo de retiro %s";
+    public static String TEMPLATE_NOTIFICATION_SMS =  "Retiro de dinero sin tarjeta Atlantida. Monto: L. %s Codigo de retiro %s";
 
 
 }

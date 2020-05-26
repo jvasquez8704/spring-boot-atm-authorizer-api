@@ -1,5 +1,6 @@
 package com.bancatlan.atmauthorizer.component.impl;
 
+import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.component.IUtilComponent;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
@@ -14,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 @Component
@@ -24,7 +26,7 @@ public class UtilComponentImpl implements IUtilComponent {
     private Map<String, Double> amountValues = new HashMap<>();
     @Override
     public String getPickupCodeByCellPhoneNumber(String cellPhoneNumber) {
-        return this.encrypt(cellPhoneNumber);
+        return this.getRandomNumber(Constants.PIVOT_PICKUP_CODE_RANGE) + this.encrypt(cellPhoneNumber);
     }
 
     @Override
@@ -97,6 +99,29 @@ public class UtilComponentImpl implements IUtilComponent {
         return amountValues.get(key);
     }
 
+    @Override
+    public String createAuthorizationCode(int length) {
+        // chose a Character random from this String
+        String AlphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        // create StringBuffer size of AlphaNumericString
+        StringBuilder sb = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+
+            // generate a random number between
+            // 0 to AlphaNumericString variable length
+            int index
+                    = (int) (AlphaNumericString.length()
+                    * Math.random());
+
+            // add Character one by one in end of sb
+            sb.append(AlphaNumericString
+                    .charAt(index));
+        }
+        return sb.toString();
+    }
+
     /**
      *It generates a code for verification in a measure time configured
      * @param value it should be cellphone number, email or user
@@ -108,7 +133,7 @@ public class UtilComponentImpl implements IUtilComponent {
 
         String addedValue = value + LocalDateTime.now().getDayOfMonth() + LocalDateTime.now().getMinute();
 
-        val = encryptString(addedValue);
+        val = encryptString(addedValue, Constants.SIZE_PICKUP_CODE);
 
         return val;
     }
@@ -135,7 +160,7 @@ public class UtilComponentImpl implements IUtilComponent {
                 minute = 60;
             }
             val = addedValue + (minute - x);
-            if (code.equals(encryptString(val))) {
+            if (code.equals(encryptString(val, Constants.SIZE_PICKUP_CODE))) {
                 return true;
             }
         }
@@ -146,10 +171,11 @@ public class UtilComponentImpl implements IUtilComponent {
     /**
      * It makes a encrypt value using a sign method as MD5 or SHA1
      * @param value value to encrypt
+     * @param size value to encrypt
      * @return valor encrypted value
      * @throws ModelCustomErrorException exception
      */
-    private String encryptString(final String value) throws ModelCustomErrorException {
+    private String encryptString(final String value, int size) throws ModelCustomErrorException {
         String encrypted = "";
         MessageDigest md;
         try {
@@ -157,12 +183,18 @@ public class UtilComponentImpl implements IUtilComponent {
             md.update(value.getBytes(), 0, value.length());
             encrypted = "" + new BigInteger(1, md.digest()).toString();
             md.reset();
-            encrypted = encrypted.substring(0, 5);
+            encrypted = encrypted.substring(0, size);
         } catch (NoSuchAlgorithmException ex) {
             LOG.error(AuthorizerError.ENCRYPT_ERROR.toString(), ex);
             throw new ModelCustomErrorException(ex.getMessage(), AuthorizerError.ENCRYPT_ERROR);
         }
         return encrypted;
+    }
+
+    private String getRandomNumber(int range) {
+        Random random = new Random();
+        Integer randomInteger = random.nextInt(range);
+        return randomInteger.toString();
     }
 
     public static String getSessionKey() {
