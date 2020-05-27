@@ -102,7 +102,8 @@ public class UtilComponentImpl implements IUtilComponent {
     @Override
     public String createAuthorizationCode(int length) {
         // chose a Character random from this String
-        String AlphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        //String AlphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        String AlphaNumericString = "0123456789";
 
         // create StringBuffer size of AlphaNumericString
         StringBuilder sb = new StringBuilder(length);
