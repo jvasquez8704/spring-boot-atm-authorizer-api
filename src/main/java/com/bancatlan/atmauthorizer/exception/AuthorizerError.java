@@ -20,7 +20,7 @@ public enum AuthorizerError implements IError {
     ADMIN_CREATE_USER_ERROR(9,"Error when creating the user"),
     ADMIN_CREATE_SOFT_TOKEN_ERROR(10,"Error when creating the soft token"),
     ADMIN_ACTIVATE_SOFT_TOKEN_ERROR(11,"Error when activating soft token"),
-    ADMIN_ACTIVATE_COMPLETE_SOFT_TOKEN_ERROR(12,"Error when completing the soft token activation"),
+    NOT_SUPPORT_USE_CASE(12,"Use case not support"),
     DUPLICATE_USER_ERROR(13,"More than one user found with the same id, cannot continue"),
     MISSING_AMOUNT_TO_TRANSFER_FIELD(14,"El campo CANTIDAD A TRANSFERIR es obligatorio"),
     EXTERNAL_USER_DATA_ERROR(15,"Error when recovering the user data"),

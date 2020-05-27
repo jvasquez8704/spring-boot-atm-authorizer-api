@@ -185,13 +185,17 @@ public class TransactionServiceImpl implements ITransactionService {
                 initTxn.setAmount(amountFromAtm);
                 break;
             default:
+                LOG.error("Custom Exception {}", AuthorizerError.NOT_SUPPORT_USE_CASE.toString());
+                throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORT_USE_CASE);
         }
         //set currency
         if (txn.getCurrency() == null || txn.getCurrency().getCode() == null || txn.getCurrency().getCode().equals("")) {
+            LOG.error("Custom Exception {}", AuthorizerError.NOT_FOUND_CURRENCY_IN_REQ);
             throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_CURRENCY_IN_REQ);
         }
         Currency currency = currencyService.getCurrencyByCode(txn.getCurrency().getCode());
-        if(currency == null){
+        if (currency == null) {
+            LOG.error("Custom Exception {}", AuthorizerError.NOT_FOUND_CURRENCY);
             throw new ModelCustomErrorException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_CURRENCY);
         }
         initTxn.setCurrency(currency);
