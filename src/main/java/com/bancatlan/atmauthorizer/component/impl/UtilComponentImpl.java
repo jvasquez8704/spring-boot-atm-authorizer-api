@@ -83,7 +83,7 @@ public class UtilComponentImpl implements IUtilComponent {
 
     @Override
     public Double convertAmountWithDecimals(Double amount) {
-        Integer conversionFactor = 100; //Todo preference from DB
+        Integer conversionFactor = 1; //Todo preference from DB
         return amount/conversionFactor;
     }
 
