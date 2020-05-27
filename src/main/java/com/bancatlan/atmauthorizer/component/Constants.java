@@ -51,7 +51,7 @@ public class Constants {
 
     /*DEFAULT LIMIT CONFIGURED*/
     public static final long DEFAULT_LIMIT =  1;
-    public static final int LENGTH_AUTH_CODE = 8;
+    public static final int LENGTH_AUTH_CODE = 6;
     public static int SIZE_PICKUP_CODE = 4;
     public static int PIVOT_PICKUP_CODE_RANGE = 5;
 
