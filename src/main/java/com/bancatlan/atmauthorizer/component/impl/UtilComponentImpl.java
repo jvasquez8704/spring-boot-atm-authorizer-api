@@ -1,5 +1,6 @@
 package com.bancatlan.atmauthorizer.component.impl;
 
+import com.bancatlan.atmauthorizer.api.http.AtmBody;
 import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.component.IUtilComponent;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
@@ -22,6 +23,7 @@ import java.util.regex.Pattern;
 public class UtilComponentImpl implements IUtilComponent {
     Logger LOG = LoggerFactory.getLogger(UtilComponentImpl.class);
     public static String sessionKey;
+    public static AtmBody atmBody;
     private Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
     private Map<String, Double> amountValues = new HashMap<>();
     @Override
@@ -204,6 +206,14 @@ public class UtilComponentImpl implements IUtilComponent {
 
     public static void setSessionKey(String _sessionKey) {
         sessionKey = _sessionKey;
+    }
+
+    public static AtmBody getAtmBody() {
+        return atmBody;
+    }
+
+    public static void setAtmBody(AtmBody atmBody) {
+        UtilComponentImpl.atmBody = atmBody;
     }
 
     private boolean isValidAmountAccordingATMRules(Double amount) {

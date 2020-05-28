@@ -16,6 +16,7 @@ public interface ITransactionService extends ICRUD<Transaction> {
     Transaction cancelConfirm(Transaction txn);
     Boolean verifyTxnParticipants(Transaction txn);
     Boolean verifyTxnLimits(Transaction txn);
-    Transaction getTransactionByAtmReference(String atmReference);
+    List<Transaction> getTransactionByAtmReference(String atmReference);
+    Transaction getTransactionByAtmReference(String atmReference, Long txnStatus);
     List<Transaction> getTransactionsByCustomerAndRangeTime(Customer customer, UseCase useCase, LocalDateTime startDateTime, LocalDateTime endDateTime, Boolean isDebit);
 }

@@ -2,10 +2,7 @@ package com.bancatlan.atmauthorizer.service.impl;
 
 import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.component.IUtilComponent;
-import com.bancatlan.atmauthorizer.exception.AtmError;
-import com.bancatlan.atmauthorizer.exception.AuthorizerError;
-import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
-import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
+import com.bancatlan.atmauthorizer.exception.*;
 import com.bancatlan.atmauthorizer.model.*;
 import com.bancatlan.atmauthorizer.repo.ITransactionRepo;
 import com.bancatlan.atmauthorizer.service.*;
@@ -148,8 +145,13 @@ public class TransactionServiceImpl implements ITransactionService {
     }
 
     @Override
-    public Transaction getTransactionByAtmReference(String atmReference) {
+    public List<Transaction> getTransactionByAtmReference(String atmReference) {
         return repo.getTransactionByAtmReference(atmReference);
+    }
+
+    @Override
+    public Transaction getTransactionByAtmReference(String atmReference, Long txnStatus) {
+        return repo.getTransactionByAtmReferenceAndTxnStatus(atmReference, status.getById(txnStatus));
     }
 
     @Override
@@ -290,7 +292,7 @@ public class TransactionServiceImpl implements ITransactionService {
 
                 Customer userATM = customer.getById(Constants.ATM_USER_ID);
                 if (userATM == null || !userATM.getName().trim().equals(Constants.ATM_USER_STR)) {
-                    throw new ModelCustomErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_03);
+                    throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_03);
                 }
 
                 txn.setPayer(cst);
@@ -305,7 +307,7 @@ public class TransactionServiceImpl implements ITransactionService {
     private Transaction processAuthorization(Transaction txn){
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
-                //Todo verifyBasaUser
+                //Todo verifyBasaUser , here code things related with permissions, privileges, user roles etc...
                 //Todo account
                 break;
             case Constants.INT_WITHDRAW_VOUCHER_USE_CASE:

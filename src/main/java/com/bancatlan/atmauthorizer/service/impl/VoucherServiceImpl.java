@@ -4,10 +4,7 @@ import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.component.IUtilComponent;
 import com.bancatlan.atmauthorizer.component.impl.UtilComponentImpl;
 import com.bancatlan.atmauthorizer.dto.VoucherTransactionDTO;
-import com.bancatlan.atmauthorizer.exception.AtmError;
-import com.bancatlan.atmauthorizer.exception.AuthorizerError;
-import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
-import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
+import com.bancatlan.atmauthorizer.exception.*;
 import com.bancatlan.atmauthorizer.model.Customer;
 import com.bancatlan.atmauthorizer.model.Transaction;
 import com.bancatlan.atmauthorizer.model.Voucher;
@@ -58,23 +55,23 @@ public class VoucherServiceImpl implements IVoucherService {
     @Transactional
     @Override
     public VoucherTransactionDTO voucherProcess(VoucherTransactionDTO dto) {
-        LOG.info("Request from TXN>ID {}", dto.getTransaction().getId());
-        LOG.debug("Request from DTO {}", dto.toString());
-
+        LOG.debug("voucherProcess - Request {}", dto.toString());
         if (dto.getAction() == null || dto.getAction().equals("")) {
-            throw new ModelCustomErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_BANK_PAYMENT_SERVICE_ACTION);
+            LOG.error("No action found in Request {}", dto.getAction());
+            throw new ModelAtmErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_FOUND_BANK_PAYMENT_SERVICE_ACTION, dto);
         }
         switch (dto.getAction().toUpperCase()) {
             case Constants.BANK_ACTION_VERIFY:
                 return this.bankVerifyPayment(dto);
             case Constants.BANK_ACTION_PAYMENT:
                 return this.bankConfirmPayment(dto);
-            case Constants.ITM_PROCESS_CODE_WITHDRAW:
+            case Constants.ITM_MTI_WITHDRAW:
                 return this.processWithdraw(dto);
-            case Constants.ITM_PROCESS_CODE_REVERSE_WITHDRAW:
+            case Constants.ITM_MTI_REVERSE_WITHDRAW:
                 return this.processCancelWithdraw(dto);
             default:
-                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AtmError.ERROR_12);
+                LOG.error("Action not supported {}", dto.getAction());
+                throw new ModelAtmErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORTED_VOUCHER_ACTION, dto);
         }
     }
 
@@ -190,8 +187,8 @@ public class VoucherServiceImpl implements IVoucherService {
     @Override
     public Voucher cancelWithdraw(VoucherTransactionDTO dto) {
         //find customer
-        Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference());
-        if(txn == null  || txn.getTxnStatus().getId().equals(Constants.CANCEL_CONFIRM_TXN_STATUS)){
+        Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference(), Constants.CONFIRM_TXN_STATUS);
+        if (txn == null) {
             //execStatus.setErrorCode("57");
             throw new ModelNotFoundException("Txn and Voucher by this atm reference - " +
                     dto.getTransaction().getAtmReference() + " - not found or already canceled");
@@ -250,10 +247,7 @@ public class VoucherServiceImpl implements IVoucherService {
 
     public VoucherTransactionDTO processWithdraw(VoucherTransactionDTO dto) {
         //Atm reference
-        if (dto.getTransaction() == null || dto.getTransaction().getAtmReference() == null || dto.getTransaction().getAtmReference().equals("")) {
-            LOG.error("AtmReference in request is not defined {}", dto.toString());
-            throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76);
-        }
+        this.validateAtmRequest(dto);
         //(1)
         Transaction txn = transaction.init(dto.getTransaction());
 
@@ -268,13 +262,13 @@ public class VoucherServiceImpl implements IVoucherService {
                 dto.getVoucher().getSecretCode().equals("") || dto.getVoucher().getSecretCode().length() != 4 || dto.getVoucher().getPickupCode().equals("") ||
                 dto.getVoucher().getPickupCode().length() != 5) {
             LOG.error("Codes in request are not properly values to be processed {}", dto.toString());
-            throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_81);
+            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_81,dto);
         }
 
         Voucher voucher = this.findVoucherToWithdraw(dto.getVoucher().getPickupCode(), dto.getVoucher().getSecretCode(), txn.getPayer());
         if (!this.isValidVoucherToWithDraw(voucher, dto)) {
             LOG.error("Voucher found is not valid {} ", dto);
-            throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76);
+            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76, dto);
         }
         //(3)
         transaction.authorization(txn);
@@ -284,7 +278,7 @@ public class VoucherServiceImpl implements IVoucherService {
 
         txn.setAtmReference(dto.getTransaction().getAtmReference());
         txn.setVoucher(voucher);//Todo Es mejor crear una tabla maestra
-        Transaction txnPaidBy = transaction.confirm(txn);
+        Transaction txnPaidBy = transaction.confirm(txn); // TODO pending fit custom response in case atm call this service
 
         Double currentAmount = voucher.getAmountCurrent() - txnPaidBy.getAmount();
         dto.setTransaction(txnPaidBy);
@@ -296,27 +290,26 @@ public class VoucherServiceImpl implements IVoucherService {
         voucher.setTxnPaidOutBy(txnPaidBy);
         voucher.setCustomerUpdate(txn.getPayer());
         dto.setVoucher(this.update(voucher));
+
+        //TODO according Oscar's new architecture call a service to inform GUIP payer a success txn
         return dto;
     }
 
     public VoucherTransactionDTO processCancelWithdraw(VoucherTransactionDTO dto) {
         //Atm reference
-        if (dto.getTransaction() == null || dto.getTransaction().getAtmReference() == null || dto.getTransaction().getAtmReference().equals("")) {
-            LOG.error("processCancelWithdraw: AtmReference in request is not defined {}", dto.toString());
-            throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76);
-        }
+        this.validateAtmRequest(dto);
 
-        //find customer
-        Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference());
-        if(txn == null  || txn.getTxnStatus().getId().equals(Constants.CANCEL_CONFIRM_TXN_STATUS)){
-            LOG.error("processCancelWithdraw: AtmReference was not found or already cancelled {}", dto.toString());
-            throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_77);
+        //find confirmed txn
+        Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference(), Constants.CONFIRM_TXN_STATUS);
+        if (txn == null) {
+            LOG.error("processCancelWithdraw: atmReference was not found or it already cancelled {}", AtmError.ERROR_77);
+            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_77, dto);
         }
 
         Voucher voucher = this.getById(txn.getVoucher().getId());
         if (voucher == null || !this.isValidVoucherToReverse(voucher, dto)) {
-            LOG.error("Voucher found is not valid {}", dto);
-            throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_R1);
+            LOG.error("Voucher found is not valid {}", AtmError.ERROR_R1);
+            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_R1);
         }
         //cancel txn
         Transaction txnPaidBy = transaction.cancelConfirm(txn);
@@ -362,7 +355,7 @@ public class VoucherServiceImpl implements IVoucherService {
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_TARGET_TELEPHONE_FIELD);
         }
 
-        if (dto.getValidatePayeeMsisdn() == null && dto.getValidatePayeeMsisdn().equals("")) {
+        if (dto.getValidatePayeeMsisdn() == null || dto.getValidatePayeeMsisdn().equals("")) {
             LOG.error("Custom Exception {}", AuthorizerError.MISSING_CONFIRM_TARGET_TELEPHONE_FIELD.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_CONFIRM_TARGET_TELEPHONE_FIELD);
         }
@@ -377,13 +370,13 @@ public class VoucherServiceImpl implements IVoucherService {
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_MATCH_CONFIRM_TARGET_TELEPHONE);
         }
 
-        if (dto.getAmountKey() == null && dto.getAmountKey().equals("")) {
+        if (dto.getAmountKey() == null || dto.getAmountKey().equals("")) {
             LOG.error("Custom Exception {}", AuthorizerError.MISSING_AMOUNT_TO_TRANSFER_FIELD.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_AMOUNT_TO_TRANSFER_FIELD);
         }
 
         if (dto.getAmountKey().equals(Constants.ATM_ANOTHER_AMOUNT_KEY)) {
-            if (dto.getAmount() == null && dto.getAmount().equals("")) {
+            if (dto.getAmount() == null || dto.getAmount().equals("")) {
                 LOG.error("Custom Exception {}", AuthorizerError.MISSING_WRITTEN_AMOUNT.toString());
                 throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_WRITTEN_AMOUNT);
             }
@@ -417,6 +410,65 @@ public class VoucherServiceImpl implements IVoucherService {
             dto.getTransaction().getCurrency().setCode(Constants.HN_CURRENCY);
         }
         return dto;
+    }
+
+    private void validateAtmRequest(VoucherTransactionDTO dto) {
+        if (dto.getTransaction() == null || dto.getTransaction().getAtmReference() == null || dto.getTransaction().getAtmReference().equals("")) {
+            LOG.error("AtmReference in request is not defined {}", AtmError.ERROR_76);
+            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76, dto);
+        }
+
+        if (dto.getAction().equals(Constants.ITM_MTI_WITHDRAW)) {
+            Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference(), Constants.CONFIRM_TXN_STATUS);
+            if (txn != null) {
+                LOG.error("txn already exist with atmReference in request {}", AtmError.ERROR_94);
+                throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_94, dto);
+            }
+        }
+
+        //Init validations
+        if (dto.getTransaction().getUseCase() == null || dto.getTransaction().getUseCase().getId() == null) {
+            LOG.error("Use case null {}", AtmError.ERROR_12);
+            throw new ModelAtmErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AtmError.ERROR_12, dto);
+        }
+
+        if (!dto.getTransaction().getUseCase().getId().equals(Constants.WITHDRAW_VOUCHER_USE_CASE)) {
+            LOG.error("Use case is wrong {}", AtmError.ERROR_12);
+            throw new ModelAtmErrorException(Constants.PARAMETER_NOT_FOUND_MESSAGE_ERROR, AtmError.ERROR_12, dto);
+        }
+
+        if (dto.getTransaction().getAmount() == null) {
+            LOG.error("Amount in request is null {}", AtmError.ERROR_13);
+            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_13, dto);
+        }
+
+        Double amountFromAtm = utilComponent.convertAmountWithDecimals(dto.getTransaction().getAmount());
+        if (!utilComponent.isValidAmountWithAtm(amountFromAtm.toString())) {
+            LOG.error("Custom Exception {}", AtmError.ERROR_13.toString());
+            throw new ModelAtmErrorException(Constants.CUSTOM_MESSAGE_ERROR, AtmError.ERROR_13, dto);
+        }
+
+        //Authentication validations
+        if (dto.getTransaction().getPayer() == null || dto.getTransaction().getPayer().getMsisdn() == null || dto.getTransaction().getPayer().getMsisdn().equals("") ||
+                !utilComponent.isValidPhoneNumber(dto.getTransaction().getPayer().getMsisdn())) {
+            LOG.error("NumberPhone does not come properly in request {}", AtmError.ERROR_14);
+            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_14, dto);
+        }
+
+        Customer cst = customer.getByMsisdn(dto.getTransaction().getPayer().getMsisdn());
+        if (cst == null) {
+            LOG.error("Customer with numberPhone specified in request not fount {}", AtmError.ERROR_25);
+            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_25, dto);
+        }
+
+        Customer userATM = customer.getById(Constants.ATM_USER_ID);
+        if (userATM == null || !userATM.getName().trim().equals(Constants.ATM_USER_STR)) {
+            LOG.error("ATM user not fount {}", AtmError.ERROR_03);
+            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_03, dto);
+        }
+        //Authorization validations
+        //verify validations
+        //confirm validations
     }
 
     private void securityValidation(VoucherTransactionDTO dto){
