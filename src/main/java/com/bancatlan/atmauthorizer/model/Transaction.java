@@ -42,8 +42,8 @@ public class Transaction {
     @Column(name = "applicationId", nullable = true, length = 50)
     private String applicationId;
 
-    @Column(name = "id_order", nullable = true, length = 30)
-    private String id_order;
+    @Column(name = "orderId", nullable = true, length = 30)
+    private String orderId;
 
     @Column(name = "strIdTerminal", nullable = true, length = 20)
     private String strIdTerminal;
@@ -202,12 +202,12 @@ public class Transaction {
         this.applicationId = applicationId;
     }
 
-    public String getId_order() {
-        return id_order;
+    public String getOrderId() {
+        return orderId;
     }
 
-    public void setId_order(String id_order) {
-        this.id_order = id_order;
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
     }
 
     public String getStrIdTerminal() {

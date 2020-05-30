@@ -249,6 +249,7 @@ public class VoucherServiceImpl implements IVoucherService {
         //Atm reference
         this.validateAtmRequest(dto);
         //(1)
+        dto.getTransaction().setOrderId(dto.getAtmBody().getF11());
         Transaction txn = transaction.init(dto.getTransaction());
 
         //(2)
