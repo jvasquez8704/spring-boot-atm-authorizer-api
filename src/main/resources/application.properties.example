@@ -11,10 +11,21 @@ spring.jpa.open-in-view=true
 
 spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
 spring.jackson.serialization.indent_output=true
+#spring.mvc.static-path-pattern=/resources/**
+#logging.level.root=INFO
+#logging.level.com.bancatlan.atmauthorizer.component=TRACE
 
 #PO Parameters
 bank.service.po.username=APPOCH19
 bank.service.po.password=hm@x.G0{
+
+#PO DEV credentials
+bank.service.po.qa.username=APPOCH19
+bank.service.po.qa.password=hm@x.G0{
+
+#PO DEV credentials
+bank.service.po.dev.username=opagoaga
+bank.service.po.dev.password=inicio01
 
 #ConsultaSaldoV2
 bank.service.account.list.transaction.id=100128
@@ -43,10 +54,22 @@ bank.service.transfer.field.type=TIPO_TRANSACCION
 bank.service.transfer.source=INTERNET
 bank.service.transfer.line=1
 
+#CongelamientoCuentas
+bank.service.freeze.transaction.id=100347
+bank.service.freeze.application.id=001
+bank.service.freeze.institution.id=001
+bank.service.freeze.canal.id=101
+bank.service.freeze.sucursal.id=101
+bank.service.freeze.days=3
+
 #Files
 spring.resources.static-locations=file:/Users/walletmachine/projects/bank-git-repository/atm-authorizer-mysql/src/main/resources/wsdl/
 bus-integration.wsdl.balance-name=SI_OS_ConsultaSaldoV2Service.wsdl
 bus-integration.wsdl.transfer-name=SI_OS_TransferenciaContableService.wsdl
 bus-integration.wsdl.notification-name=SI_OS_EjecutarEnvioNotificacionService.wsdl
+bus-integration.wsdl.freeze-name=SI_OS_CongelamientoCuentas.wsdl
+bus-integration.wsdl.freeze-endpoint=http://sappocoredev.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_CongelamientoCuentas&interfaceNamespace=http://hn.infatlan/ACD169/out/CongelamientoCuentas
+
+
 
 

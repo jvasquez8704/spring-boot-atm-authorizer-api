@@ -7,20 +7,29 @@ import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.model.PaymentInstrument;
 import com.bancatlan.atmauthorizer.model.PaymentInstrumentType;
 import com.bancatlan.atmauthorizer.service.IBankService;
+import infatlan.hn.acd169.out.congelamientocuentas.*;
 import infatlan.hn.entrust.core.external.message.*;
 import och.infatlan.hn.ws.acd088.out.transferenciacontable.*;
+import och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion;
+import och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem;
 import och.infatlan.hn.ws.acd088.out.transferenciacontable.DTEstado;
 import och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion;
 import och.infatlan.hn.ws.acd101.out.consultasaldov2.*;
+import och.infatlan.hn.ws.acd101.out.consultasaldov2.DTParametroAdicionalColeccion;
+import och.infatlan.hn.ws.acd101.out.consultasaldov2.DTParametroAdicionalItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import javax.xml.ws.BindingProvider;
 import java.math.BigInteger;
 import java.net.Authenticator;
 import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +43,12 @@ public class BankServiceImpl implements IBankService {
 
     @Value("${bank.service.po.password}")
     String busIntegrationPassword;
+
+    @Value("${bank.service.po.dev.username}")
+    String busIntegrationDevUsername;
+
+    @Value("${bank.service.po.dev.password}")
+    String busIntegrationDevPassword;
 
     /*Balance*/
     @Value("${bank.service.account.list.transaction.id}")
@@ -101,6 +116,30 @@ public class BankServiceImpl implements IBankService {
     @Value("${bank.service.transfer.line}")
     String transferLine;
 
+    /**
+     * Notification
+     * */
+    @Value("${bank.service.freeze.transaction.id}")
+    String freezeTransactionId;
+
+    @Value("${bank.service.freeze.application.id}")
+    String freezeApplicationId;
+
+    @Value("${bank.service.freeze.institution.id}")
+    String freezeInstitutionId;
+
+    @Value("${bank.service.notification.canal.id}")
+    String freezeChannelId;
+
+    @Value("${bank.service.freeze.sucursal.id}")
+    String freezeSucursalId;
+
+    @Value("${bank.service.freeze.days}")
+    String freezeDays;
+
+    /**
+     * references Files and Endpoints WSDL's
+     */
     @Value("${spring.resources.static-locations}")
     String absolutePathWSDLResources;
 
@@ -112,6 +151,12 @@ public class BankServiceImpl implements IBankService {
 
     @Value("${bus-integration.wsdl.notification-name}")
     String notificationWSDLName;
+
+    @Value("${bus-integration.wsdl.freeze-name}")
+    String freezeWSDLName;
+
+    @Value("${bus-integration.wsdl.freeze-endpoint}")
+    String freezeSOAPEndpoint;
 
     @Override
     public Boolean verifyAccountByOcbUser(String ocbUser, String strAccount) {
@@ -247,15 +292,15 @@ public class BankServiceImpl implements IBankService {
             transferenciaContableItem.setFuente(transferSource);
             transferenciaContableItem.setSucursalCredito(BigInteger.valueOf(101));
             transferenciaContableItem.setSucursalDebito(BigInteger.ZERO);
-            transferenciaContableItem.setNumeroTransaccionUnico(Long.valueOf(0));
-            transferenciaContableItem.setNumeroReferencia(Long.valueOf(0));
+            transferenciaContableItem.setNumeroTransaccionUnico(Long.valueOf(0)); //Todo preguntar a Oscar
+            transferenciaContableItem.setNumeroReferencia(Long.valueOf(0));//Todo preguntar a Oscar
 
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion campoCollection = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion();
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem campoItem = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem();
             campoItem.setLinea(new BigInteger(transferLine));
             campoItem.setTipoCampo(transferFieldType);
 
-            campoItem.setValor("174");//HERE
+            campoItem.setValor("174");//Todo preguntar a Oscar
             campoCollection.getCampoItem().add(campoItem);
 
             transferenciaContableItem.setCampoColeccion(campoCollection);
@@ -296,10 +341,135 @@ public class BankServiceImpl implements IBankService {
     }
 
     @Override
-    public String freezeFounds(String accountDebit, Double amount, String customComment) {
-        String comment = "Freeze {} Lps founds to account number {}, comment: " + customComment;
-        LOG.info(comment, amount, accountDebit);
-        return comment;
+    public String freezeFounds(String accountDebit, Double amount, String customComment, String action, String ref, String userName) {
+        LOG.info("FreezeFounds function: comment {}, amount {}, accountDebit {}, action {}", customComment, amount, accountDebit, action);
+        String urlS = absolutePathWSDLResources + freezeWSDLName;
+        String coreReference = "";
+        LOG.info("URL: {}", urlS);
+        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime expirationDate = currentDate.plusDays(new Long(freezeDays));
+        String bankFormatCurrentDate = currentDate.format(DateTimeFormatter.BASIC_ISO_DATE);
+        String bankFormatExpirationDate = expirationDate.format(DateTimeFormatter.BASIC_ISO_DATE);
+        Authenticator.setDefault(new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(busIntegrationDevUsername,
+                        busIntegrationDevPassword.toCharArray());
+            }
+        });
+
+        URL url;
+        try {
+            url = new URL(urlS);
+            SIOSCongelamientoCuentasService port = new SIOSCongelamientoCuentasService(url);
+            SIOSCongelamientoCuentas siosCongelamientoCuentas = port.getHTTPPort();
+
+            BindingProvider provider = (BindingProvider) siosCongelamientoCuentas;
+            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, freezeSOAPEndpoint);
+
+            DTPeticion dtPeticion = new DTPeticion();
+            dtPeticion.setTransaccionId(freezeTransactionId);
+            dtPeticion.setAplicacionId(freezeApplicationId);
+            dtPeticion.setPaisId(Constants.HN_COUNTRY2CODE);
+            dtPeticion.setInstitucionId(freezeInstitutionId);
+            dtPeticion.setRegionId(Constants.STR_QUESTION_MARK);
+            dtPeticion.setCanalId(freezeChannelId);
+            dtPeticion.setVersion(Constants.STR_QUESTION_MARK);
+            dtPeticion.setLlaveSesion(Constants.STR_QUESTION_MARK);
+            dtPeticion.setUsuarioId(userName);
+            dtPeticion.setToken(Constants.STR_QUESTION_MARK);
+            dtPeticion.setDispositivoId(Constants.STR_QUESTION_MARK);
+            //dtPeticion.setClienteCoreId("111378");
+            dtPeticion.setIdentificacion(Constants.STR_QUESTION_MARK);
+
+            infatlan.hn.acd169.out.congelamientocuentas.DTIdentificadorColeccion dtIdentificadorColeccion = new infatlan.hn.acd169.out.congelamientocuentas.DTIdentificadorColeccion();
+            dtIdentificadorColeccion.setWas(Constants.STR_QUESTION_MARK);
+            dtIdentificadorColeccion.setPi(Constants.STR_QUESTION_MARK);
+            dtIdentificadorColeccion.setOmniCanal(Constants.STR_QUESTION_MARK);
+            dtIdentificadorColeccion.setRecibo(Constants.STR_QUESTION_MARK);
+            dtIdentificadorColeccion.setNumeroTransaccion(Constants.STR_QUESTION_MARK);
+
+            infatlan.hn.acd169.out.congelamientocuentas.DTParametroAdicionalColeccion dtParametroAdicionalColeccion = new infatlan.hn.acd169.out.congelamientocuentas.DTParametroAdicionalColeccion();
+            infatlan.hn.acd169.out.congelamientocuentas.DTParametroAdicionalItem dtParametroAdicionalItem = new infatlan.hn.acd169.out.congelamientocuentas.DTParametroAdicionalItem();
+
+            dtParametroAdicionalItem.setLinea(new BigInteger(Constants.STR_VALUE_1));
+            dtParametroAdicionalItem.setTipoRegistro(Constants.STR_QUESTION_MARK);
+            dtParametroAdicionalItem.setValor(Constants.STR_QUESTION_MARK);
+
+            dtParametroAdicionalColeccion.getParametroAdicionalItem().add(dtParametroAdicionalItem);
+
+            DTPeticionCongelamientoColeccion dtPeticionCongelamientoColeccion = new DTPeticionCongelamientoColeccion();
+
+            DTPeticionCongelamientoItem dtPeticionCongelamientoItem = new DTPeticionCongelamientoItem();
+
+            dtPeticionCongelamientoItem.setLinea(new BigInteger(Constants.STR_VALUE_1));
+            dtPeticionCongelamientoItem.setAccion(action);
+            dtPeticionCongelamientoItem.setValidar(Constants.BANK_STR_MARK_TRUE);
+            dtPeticionCongelamientoItem.setTipoDebito("");
+            dtPeticionCongelamientoItem.setCuentaDebito(accountDebit);
+            dtPeticionCongelamientoItem.setMonedaDebito(Constants.BANK_HN_CURRENCY);
+            //dtPeticionCongelamientoItem.setTitularDebito("");
+            //dtPeticionCongelamientoItem.setDebitoDescripcion("");
+            //dtPeticionCongelamientoItem.setMovimientoDebito("");
+            //dtPeticionCongelamientoItem.setMovimientoDebito("");
+            dtPeticionCongelamientoItem.setSucursalDebito(new BigInteger(freezeSucursalId));
+            //dtPeticionCongelamientoItem.setTipoCredito("");
+            //dtPeticionCongelamientoItem.setComentario("");
+            //dtPeticionCongelamientoItem.setMontoOriginal("150");
+            dtPeticionCongelamientoItem.setMontoOriginal(amount.toString());
+            //dtPeticionCongelamientoItem.setMontoDebito("");
+            //dtPeticionCongelamientoItem.setOrigenDivisa("");
+            //dtPeticionCongelamientoItem.setFuente("");
+            //dtPeticionCongelamientoItem.setNumeroTransaccionUnico("");
+            dtPeticionCongelamientoItem.setNumeroReferencia(ref);
+            dtPeticionCongelamientoItem.setDiasCongelamiento(new BigInteger(freezeDays));
+            //dtPeticionCongelamientoItem.setUsuarioOperador("");
+            //dtPeticionCongelamientoItem.setUsuarioAutorizador("");
+            //dtPeticionCongelamientoItem.setFechaProceso("20200528");
+            dtPeticionCongelamientoItem.setFechaProceso(bankFormatCurrentDate);
+            dtPeticionCongelamientoItem.setFechaVencimiento(bankFormatExpirationDate);
+            //dtPeticionCongelamientoItem.setRespuesta("");
+
+
+            dtPeticionCongelamientoColeccion.getPagoServicioItem().add(dtPeticionCongelamientoItem);
+
+
+            dtPeticion.setIdentificadorColeccion(dtIdentificadorColeccion);
+            dtPeticion.setParametroAdicionalColeccion(dtParametroAdicionalColeccion);
+            dtPeticion.setPeticionCongelamientoColeccion(dtPeticionCongelamientoColeccion);
+            DTRespuesta dtRespuesta = siosCongelamientoCuentas.siOSCongelamientoCuentas(dtPeticion);
+
+            if (dtRespuesta != null && dtRespuesta.getRespuesta() != null && dtRespuesta.getRespuesta().getEstado() != null && dtRespuesta.getRespuesta().getEstado().getCodigo() != null && dtRespuesta.getRespuesta().getEstado().getCodigo().equals(Constants.BANK_SUCCESS_STATUS_CODE)) {
+                DTPeticionCongelamientoColeccionResponse dtPeticionCongelamientoItemResponse = dtRespuesta.getRespuesta().getPeticionCongelamientoColeccion();
+                if (dtPeticionCongelamientoItemResponse.getPeticionCongelamientoItemResponse() != null &&
+                        !dtPeticionCongelamientoItemResponse.getPeticionCongelamientoItemResponse().isEmpty()) {
+                    for (DTPeticionCongelamientoItemResponse item :
+                            dtPeticionCongelamientoItemResponse.getPeticionCongelamientoItemResponse()) {
+                        if (item.getEstado() != null && item.getEstado().getCodigo() != null) {
+                            LOG.info("Freeze Bank Service got success: Status => code {}, description {}, Type {}", item.getEstado().getCodigo(), item.getEstado().getDescripcion(), item.getEstado().getTipo());
+                            DTPeticionCongelamientoItem dtPeticionCongelamientoItemRes = item.getPagoServicioItem();
+                            if (item.getPagoServicioItem() != null && item.getPagoServicioItem().getNumeroTransaccionUnico() != null) {
+                                coreReference = item.getPagoServicioItem().getNumeroTransaccionUnico();
+                            }
+                        } else {
+                            LOG.error("Error in Freeze Bank Service: Status => code {}, description {}, Type {}, Technical detail {}", item.getEstado().getCodigo(), item.getEstado().getDescripcion(), item.getEstado().getTipo(), item.getEstado().getDetalleTecnico());
+                            throw new ModelCustomErrorException(item.getEstado().getDetalleTecnico(), AuthorizerError.CUSTOM_ERROR_SERVICE_BANK_FREEZE);
+                        }
+                    }
+                } else {
+                    LOG.error("Error in Freeze Bank Service: Response {}, customError {}", dtRespuesta, AuthorizerError.CUSTOM_ERROR_SERVICE_BANK_FREEZE);
+                    throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.CUSTOM_ERROR_SERVICE_BANK_FREEZE);
+                }
+            } else {
+                LOG.error("Error in Freeze Bank Service: Response {}, customError {}", dtRespuesta, AuthorizerError.CUSTOM_ERROR_SERVICE_BANK_FREEZE);
+                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.CUSTOM_ERROR_SERVICE_BANK_FREEZE);
+            }
+
+        } catch (Exception ex) {
+            LOG.error(AuthorizerError.ERROR_SERVICE_BANK_FREEZE.toString(), ex);
+            throw new ModelCustomErrorException(
+                    ex.getMessage(), AuthorizerError.ERROR_SERVICE_BANK_FREEZE);
+        }
+        return coreReference;
     }
 
     @Override

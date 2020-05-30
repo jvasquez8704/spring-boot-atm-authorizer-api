@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="SI_OS_CongelamientoCuentas" targetNamespace="http://hn.infatlan/ACD169/out/CongelamientoCuentas" xmlns:p1="http://hn.infatlan/ACD169/out/CongelamientoCuentas" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:documentation/>
+  <wsp:UsingPolicy wsdl:required="true"/>
+  <wsp:Policy wsu:Id="OP_SI_OS_CongelamientoCuentas"/>
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://hn.infatlan/ACD169/out/CongelamientoCuentas" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://hn.infatlan/ACD169/out/CongelamientoCuentas">
+      <xsd:element name="MT_CongelamientoCuentasResponse" type="DT_Respuesta"/>
+      <xsd:element name="MT_CongelamientoCuentas" type="DT_Peticion"/>
+      <xsd:complexType name="DT_PeticionCongelamientoItemResponse">
+        <xsd:annotation>
+          <xsd:appinfo source="http://sap.com/xi/VersionID">cac9c7caa06811eaaeb50000001c292f</xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="estado" type="DT_estado" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">be477f3fa06a11eacfe200059a3c7a00</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="pagoServicioItem" type="DT_PeticionCongelamientoItem" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">dcfbb4a6695011e5ce6168f728919865</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="CampoColeccion" type="DT_campoColeccion" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0a33ac32a06f11eaa6c600059a3c7a00</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="DT_estado">
+        <xsd:annotation>
+          <xsd:appinfo source="http://sap.com/xi/VersionID">3f57d8e4a05111eab1630000001c292e</xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="codigo" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="descripcion" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="detalleTecnico" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="tipo" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="fecha" type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="DT_PeticionCongelamientoItem">
+        <xsd:annotation>
+          <xsd:appinfo source="http://sap.com/xi/VersionID">025a2ea1a08d11eaad580000001c292f</xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="linea" type="xsd:integer">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa128cf696f11e5bbf700059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="accion" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa128d0696f11e5930800059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="validar" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa128d1696f11e5b3f100059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="tipoDebito" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa128d5696f11e582d000059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="cuentaDebito" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa128d6696f11e5929d00059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="monedaDebito" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa128d7696f11e5baf300059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="titularDebito" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa128d8696f11e5ae2700059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="debitoDescripcion" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa128d9696f11e58dec00059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="movimientoDebito" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa128d2696f11e5cec200059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="sucursalDebito" type="xsd:integer">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa2ad1c696f11e59d4900059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="tipoCredito" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa128da696f11e5b64e00059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="comentario" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa2ad16696f11e58f7d00059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="montoOriginal" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa2ad17696f11e5926a00059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="montoDebito" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa2ad18696f11e5841400059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="origenDivisa" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa128d3696f11e5c7d000059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="fuente" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa2ad1a696f11e5c07e00059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="numeroTransaccionUnico" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa2ad1d696f11e5a51200059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="numeroReferencia" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa2ad1e696f11e5b24e00059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="diasCongelamiento" type="xsd:integer">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa128db696f11e5aa6b00059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="usuarioOperador" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa128dc696f11e59e0600059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="usuarioAutorizador" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa2ad14696f11e5957200059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="fechaProceso" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa2ad1f696f11e5cfd700059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="fechaVencimiento" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">eee875c8a08b11ea8be100059a3c7a00</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="respuesta" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">eee875c9a08b11ea93cc00059a3c7a00</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="ParametroAdicionalColeccion" type="DT_parametroAdicionalColeccion" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">0fa2ad21696f11e5a46600059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="DT_Response">
+        <xsd:annotation>
+          <xsd:appinfo source="http://sap.com/xi/VersionID">4c7bad0fa08a11eaa49d0000001c292f</xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="estado" type="DT_estado" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">4ba6b189a06711eaaecd00059a3c7a00</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="peticionCongelamientoColeccion" type="DT_PeticionCongelamientoColeccionResponse" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">4ba6b18aa06711eaaeb100059a3c7a00</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="DT_PeticionCongelamientoColeccion">
+        <xsd:annotation>
+          <xsd:appinfo source="http://sap.com/xi/VersionID">ad07a642a06411eaa3170000001c292f</xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="pagoServicioItem" type="DT_PeticionCongelamientoItem" minOccurs="0" maxOccurs="unbounded">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">dcfbb4a6695011e5ce6168f728919865</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="DT_identificadorColeccion">
+        <xsd:annotation>
+          <xsd:appinfo source="http://sap.com/xi/VersionID">5dfcdc41a04111ea819b0000001c292e</xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="was" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="pi" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="omniCanal" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="recibo" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="numeroTransaccion" type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="DT_Respuesta">
+        <xsd:annotation>
+          <xsd:appinfo source="http://sap.com/xi/VersionID">8e5f5ec2a08811ea89da0000001c292f</xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="Respuesta" type="DT_Response" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">8e4af667a08811ea80ea00059a3c7a00</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="DT_parametroAdicionalItem">
+        <xsd:annotation>
+          <xsd:appinfo source="http://sap.com/xi/VersionID">5e2a24baa04111eab2230000001c292e</xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="linea" type="xsd:integer">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">f45a30492a7f11e5ca2e00059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="tipoRegistro" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">f45a304a2a7f11e5c8f600059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="valor" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">f45a304b2a7f11e5b24800059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="DT_Peticion">
+        <xsd:annotation>
+          <xsd:appinfo source="http://sap.com/xi/VersionID">06ada6a5a06511eac75c0000001c292f</xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="transaccionId" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">57da099f420a11e58c3900059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="aplicacionId" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">57da09a0420a11e5ac2100059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="paisId" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">57da50ce420a11e5938700059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="institucionId" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">57da50cf420a11e5a20300059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="regionId" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">57da50d0420a11e5cd6900059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="canalId" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">57da50d1420a11e5c3ce00059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="version" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">57da50d2420a11e5aa3500059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="llaveSesion" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">57da50d3420a11e5c26d00059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="usuarioId" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">57da60aa420a11e58c5e00059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="token" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">57da60ab420a11e5bfa600059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="dispositivoId" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">d2539015a06311eaaf9c00059a3c7a00</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="clienteCoreId" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">41a5c365a06311eac68d00059a3c7a00</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="identificacion" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">41a5c366a06311eac78300059a3c7a00</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="identificadorColeccion" type="DT_identificadorColeccion" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">57da60ac420a11e5940000059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="parametroAdicionalColeccion" type="DT_parametroAdicionalColeccion" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">57da60ad420a11e596f600059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="PeticionCongelamientoColeccion" type="DT_PeticionCongelamientoColeccion">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">cec6ed7ea06411ea99a500059a3c7a00</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="DT_PeticionCongelamientoColeccionResponse">
+        <xsd:annotation>
+          <xsd:appinfo source="http://sap.com/xi/VersionID">f8a95770a08911eacb330000001c292f</xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="PeticionCongelamientoItemResponse" type="DT_PeticionCongelamientoItemResponse" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="DT_campoColeccion">
+        <xsd:annotation>
+          <xsd:appinfo source="http://sap.com/xi/VersionID">25f76dcea04311ea93190000001c292e</xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="campoItem" type="DT_campoItem" minOccurs="0" maxOccurs="unbounded">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">913b46bf420511e597e700059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="DT_campoItem">
+        <xsd:annotation>
+          <xsd:appinfo source="http://sap.com/xi/VersionID">260f5054a04311eac90d0000001c292e</xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="linea" type="xsd:integer">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">f45a30492a7f11e5ca2e00059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="tipoCampo" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">f45a304a2a7f11e5c8f600059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="valor" type="xsd:string" minOccurs="0">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">f45a304b2a7f11e5b24800059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="DT_parametroAdicionalColeccion">
+        <xsd:annotation>
+          <xsd:appinfo source="http://sap.com/xi/VersionID">5e14fee5a04111eabb170000001c292e</xsd:appinfo>
+        </xsd:annotation>
+        <xsd:sequence>
+          <xsd:element name="parametroAdicionalItem" type="DT_parametroAdicionalItem" minOccurs="0" maxOccurs="unbounded">
+            <xsd:annotation>
+              <xsd:appinfo source="http://sap.com/xi/TextID">becb51dc420011e596c400059a3c7800</xsd:appinfo>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:complexType>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="MT_CongelamientoCuentas">
+    <wsdl:documentation/>
+    <wsdl:part name="MT_CongelamientoCuentas" element="p1:MT_CongelamientoCuentas"/>
+  </wsdl:message>
+  <wsdl:message name="MT_CongelamientoCuentasResponse">
+    <wsdl:documentation/>
+    <wsdl:part name="MT_CongelamientoCuentasResponse" element="p1:MT_CongelamientoCuentasResponse"/>
+  </wsdl:message>
+  <wsdl:portType name="SI_OS_CongelamientoCuentas">
+    <wsdl:documentation/>
+    <wsdl:operation name="SI_OS_CongelamientoCuentas">
+      <wsdl:documentation/>
+      <wsp:Policy>
+        <wsp:PolicyReference URI="#OP_SI_OS_CongelamientoCuentas"/>
+      </wsp:Policy>
+      <wsdl:input message="p1:MT_CongelamientoCuentas"/>
+      <wsdl:output message="p1:MT_CongelamientoCuentasResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="SI_OS_CongelamientoCuentasBinding" type="p1:SI_OS_CongelamientoCuentas">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"/>
+    <wsdl:operation name="SI_OS_CongelamientoCuentas">
+      <soap:operation soapAction="http://sap.com/xi/WebService/soap1.1" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"/>
+      <wsdl:input>
+        <soap:body use="literal" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="SI_OS_CongelamientoCuentasService">
+    <wsdl:port name="HTTP_Port" binding="p1:SI_OS_CongelamientoCuentasBinding">
+      <soap:address location="http://sappocoredev.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&amp;senderService=BS_VBA_DEV_443_HN75ODH&amp;receiverParty=&amp;receiverService=&amp;interface=SI_OS_CongelamientoCuentas&amp;interfaceNamespace=http%3A%2F%2Fhn.infatlan%2FACD169%2Fout%2FCongelamientoCuentas" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"/>
+    </wsdl:port>
+    <wsdl:port name="HTTPS_Port" binding="p1:SI_OS_CongelamientoCuentasBinding">
+      <soap:address location="https://sappocoredev.adbancat.hn:50001/XISOAPAdapter/MessageServlet?senderParty=&amp;senderService=BS_VBA_DEV_443_HN75ODH&amp;receiverParty=&amp;receiverService=&amp;interface=SI_OS_CongelamientoCuentas&amp;interfaceNamespace=http%3A%2F%2Fhn.infatlan%2FACD169%2Fout%2FCongelamientoCuentas" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

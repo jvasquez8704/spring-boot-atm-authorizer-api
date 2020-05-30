@@ -92,6 +92,8 @@ public enum AuthorizerError implements IError {
     ALREADY_PROCESSED_TXN(80, "Transaction already processed"),
     NOT_FOUND_CURRENCY_IN_REQ(81, "Currency not found in request"),
     NOT_FOUND_CURRENCY(82, "Currency not found"),
+    ERROR_SERVICE_BANK_FREEZE(83,"Error invoking SIOSCongelamientoCuentas service"),
+    CUSTOM_ERROR_SERVICE_BANK_FREEZE(84,"Custom error in response SIOSCongelamientoCuentas service"),
     ;
 
 

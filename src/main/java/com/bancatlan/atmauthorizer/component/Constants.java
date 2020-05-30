@@ -21,12 +21,17 @@ public class Constants {
     public static final int INT_BANK_SUCCESS_STATUS_CODE = 0;
     public static final String BANK_SUCCESS_STATUS_TYPE = "S1";
     public static final String BANK_SUCCESS_STATUS_MESSAGE = "Satisfactorio";
+    public static final String STR_QUESTION_MARK = "?";
+    public static final String BANK_STR_MARK_TRUE = "S";
     public static final String BANK_STRING_ZERO= "";
     public static final String BANK_HN_CURRENCY = "LPS";
     public static final String HN_CURRENCY = "HNL";
+    public static final String STR_VALUE_1 = "1";
     public static final String BANK_ACCOUNT_TYPE_1 = "1";
     public static final String BANK_ACCOUNT_TYPE_2 = "2";
     public static final String BANK_ACTION_VERIFY = "C";
+    public static final String BANK_ACTION_FREEZE = "C";
+    public static final String BANK_ACTION_DEFROST = "D";
     public static final String BANK_ACTION_PAYMENT = "P";
     public static final String ITM_MTI_WITHDRAW = "0200";
     public static final String ITM_MTI_REVERSE_WITHDRAW = "0400";
@@ -48,6 +53,9 @@ public class Constants {
     /*CURRENCY CODES*/
     public static final long HN_CURRENCY_ID =  1;
     public static final long US_CURRENCY_ID =  2;
+
+    /*COUNTRY CODES*/
+    public static final String HN_COUNTRY2CODE =  "HN";
 
     /*DEFAULT LIMIT CONFIGURED*/
     public static final long DEFAULT_LIMIT =  1;

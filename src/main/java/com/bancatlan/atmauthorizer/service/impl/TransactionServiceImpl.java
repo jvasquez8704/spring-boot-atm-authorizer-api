@@ -342,7 +342,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 PaymentInstrument cstBank = paymentInstrumentService.getById(txn.getPayer().getId());
                 LOG.info(" {} account number of customer {}",cstBank, txn.getPayer().getId());
                 //Account Payer, Amount, comment
-                String Ref = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(),txn.getAmount(), " txn ref: " + txn.getId());
+                String Ref = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), "VOUCHER_BASA " + txn.getId(), Constants.BANK_ACTION_FREEZE, txn.getId().toString(), txn.getPayer().getUsername());
                 //txn.setCoreReference(coreRef);
                 //Update balance payer
                 //Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
