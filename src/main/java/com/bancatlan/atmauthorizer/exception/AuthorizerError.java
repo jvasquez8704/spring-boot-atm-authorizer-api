@@ -94,6 +94,7 @@ public enum AuthorizerError implements IError {
     NOT_FOUND_CURRENCY(82, "Currency not found"),
     ERROR_SERVICE_BANK_FREEZE(83,"Error invoking SIOSCongelamientoCuentas service"),
     CUSTOM_ERROR_SERVICE_BANK_FREEZE(84,"Custom error in response SIOSCongelamientoCuentas service"),
+    NOT_SUPPORT_CURRENCY_DIFFERENT_HN(85, "Seleccione una cuenta en LPS."),
     ;
 
 

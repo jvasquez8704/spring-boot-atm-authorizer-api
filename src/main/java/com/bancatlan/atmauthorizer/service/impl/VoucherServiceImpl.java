@@ -405,6 +405,11 @@ public class VoucherServiceImpl implements IVoucherService {
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.BAD_FORMAT_SECRET_CODE);
         }
 
+        if (dto.getTransaction().getCurrency() == null || dto.getTransaction().getCurrency().getCode() == null || !(dto.getTransaction().getCurrency().getCode().equals(Constants.BANK_HN_CURRENCY) || dto.getTransaction().getCurrency().getCode().equals(Constants.HN_CURRENCY))) {
+            LOG.error("Custom Exception {}", AuthorizerError.NOT_SUPPORT_CURRENCY_DIFFERENT_HN);
+            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORT_CURRENCY_DIFFERENT_HN);
+        }
+
         /*OCB Adjustments*/
         if (dto.getTransaction().getCurrency() != null && dto.getTransaction().getCurrency().getCode() != null && dto.getTransaction().getCurrency().getCode().equals(Constants.BANK_HN_CURRENCY)) {
             LOG.info("Adjusting Curency from OCB Req. LPS to HNL #{}",dto.getTransaction().getCurrency().getCode());
