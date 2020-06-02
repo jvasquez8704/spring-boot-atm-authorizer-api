@@ -13,6 +13,12 @@ public class PaymentInstrument {
     @Column(name = "strIdentifier", nullable = true, length = 25)
     private String strIdentifier;
 
+    @Column(name = "strCustomBalance", nullable = true, length = 15)
+    private String strCustomBalance;
+
+    @Column(name = "strCustomStatus", nullable = true, length = 10)
+    private String strCustomStatus;
+
     @Column(name = "alias", nullable = true, length = 25)
     private String alias;
 
@@ -73,6 +79,22 @@ public class PaymentInstrument {
 
     public void setStrIdentifier(String strIdentifier) {
         this.strIdentifier = strIdentifier;
+    }
+
+    public String getStrCustomBalance() {
+        return strCustomBalance;
+    }
+
+    public void setStrCustomBalance(String strCustomBalance) {
+        this.strCustomBalance = strCustomBalance;
+    }
+
+    public String getStrCustomStatus() {
+        return strCustomStatus;
+    }
+
+    public void setStrCustomStatus(String strCustomStatus) {
+        this.strCustomStatus = strCustomStatus;
     }
 
     public String getAlias() {
