@@ -25,6 +25,7 @@ public class Constants {
     public static final String BANK_STR_MARK_TRUE = "S";
     public static final String BANK_STRING_ZERO= "";
     public static final String BANK_HN_CURRENCY = "LPS";
+    public static final String BANK_CURRENCY_STATUS_ACTIVE = "A";
     public static final String HN_CURRENCY = "HNL";
     public static final String STR_VALUE_1 = "1";
     public static final String BANK_ACCOUNT_TYPE_1 = "1";

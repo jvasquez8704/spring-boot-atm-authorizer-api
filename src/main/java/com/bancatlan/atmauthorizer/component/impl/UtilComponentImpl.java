@@ -5,6 +5,7 @@ import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.component.IUtilComponent;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
+import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -41,6 +42,19 @@ public class UtilComponentImpl implements IUtilComponent {
             return false;
         }
         return pattern.matcher(cellPhoneNumber).matches();
+    }
+
+    @Override
+    public Boolean isValidAvailableBalance(String availableBalance, Double txnAmount) {
+        if (pattern.matcher(availableBalance).matches()) {
+            Double _availableBalance = Double.parseDouble(availableBalance);
+            if (_availableBalance >= txnAmount) {
+                return true;
+            }
+        } else {
+            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PARSING_ERROR_VALIDATING_INSUFFICIENT_FUNDS);
+        }
+        return false;
     }
 
     @Override

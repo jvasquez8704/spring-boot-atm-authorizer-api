@@ -375,7 +375,8 @@ public class VoucherServiceImpl implements IVoucherService {
             LOG.error("Custom Exception {}", AuthorizerError.MISSING_AMOUNT_TO_TRANSFER_FIELD.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_AMOUNT_TO_TRANSFER_FIELD);
         }
-
+        /**
+         *General validation for amount */
         if (dto.getAmountKey().equals(Constants.ATM_ANOTHER_AMOUNT_KEY)) {
             if (dto.getAmount() == null || dto.getAmount().equals("")) {
                 LOG.error("Custom Exception {}", AuthorizerError.MISSING_WRITTEN_AMOUNT.toString());
@@ -394,20 +395,38 @@ public class VoucherServiceImpl implements IVoucherService {
             }
             dto.getTransaction().setAmount(utilComponent.getAmountFromKey(dto.getAmountKey()));
         }
-
+        /**
+         * validation mandatory field for secret code */
         if (dto.getVoucher() == null || dto.getVoucher().getSecretCode() == null || dto.getVoucher().getSecretCode().equals("")) {
             LOG.error("Custom Exception {}", AuthorizerError.MISSING_SECRET_CODE_FIELD.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_SECRET_CODE_FIELD);
         }
-
+        /**
+         * General validation for secret code */
         if (!utilComponent.isANumber(dto.getVoucher().getSecretCode()) || dto.getVoucher().getSecretCode().length() != 4) {
             LOG.error("Custom Exception {}", AuthorizerError.BAD_FORMAT_SECRET_CODE.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.BAD_FORMAT_SECRET_CODE);
         }
 
+        /**
+         * Validation for status account */
+        if (dto.getTransaction().getPayerPaymentInstrument() == null || dto.getTransaction().getPayerPaymentInstrument().getStrCustomStatus() == null || !dto.getTransaction().getPayerPaymentInstrument().getStrCustomStatus().equals(Constants.BANK_CURRENCY_STATUS_ACTIVE)) {
+            LOG.error("Custom Exception {}", AuthorizerError.CUSTOM_ERROR_NOT_VALID_ACCOUNT_STATUS);
+            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.CUSTOM_ERROR_NOT_VALID_ACCOUNT_STATUS);
+        }
+
+        /**
+         * Validation for currency type account */
         if (dto.getTransaction().getCurrency() == null || dto.getTransaction().getCurrency().getCode() == null || !(dto.getTransaction().getCurrency().getCode().equals(Constants.BANK_HN_CURRENCY) || dto.getTransaction().getCurrency().getCode().equals(Constants.HN_CURRENCY))) {
             LOG.error("Custom Exception {}", AuthorizerError.NOT_SUPPORT_CURRENCY_DIFFERENT_HN);
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORT_CURRENCY_DIFFERENT_HN);
+        }
+
+        /**
+         * Validation for insufficient funds */
+        if (dto.getTransaction().getPayerPaymentInstrument().getStrCustomBalance() == null || !utilComponent.isValidAvailableBalance(dto.getTransaction().getPayerPaymentInstrument().getStrCustomBalance(), dto.getTransaction().getAmount())) {
+            LOG.error("Custom Exception {}", AuthorizerError.CUSTOM_ERROR_INSUFFICIENT_FUNDS);
+            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.CUSTOM_ERROR_INSUFFICIENT_FUNDS);
         }
 
         /*OCB Adjustments*/
