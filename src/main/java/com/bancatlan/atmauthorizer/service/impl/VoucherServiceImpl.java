@@ -69,6 +69,9 @@ public class VoucherServiceImpl implements IVoucherService {
                 return this.processWithdraw(dto);
             case Constants.ITM_MTI_REVERSE_WITHDRAW:
                 return this.processCancelWithdraw(dto);
+            case Constants.BANK_ACTION_GUIP:
+                VoucherTransactionDTO firstCall = this.bankVerifyPayment(dto);
+                return this.bankConfirmPayment(firstCall);
             default:
                 LOG.error("Action not supported {}", dto.getAction());
                 throw new ModelAtmErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORTED_VOUCHER_ACTION, dto);
