@@ -58,6 +58,18 @@ public class UtilComponentImpl implements IUtilComponent {
     }
 
     @Override
+    public Boolean isValidCommunicationCompany(String telephone) {
+        if (telephone == null || telephone.equals("")) {
+            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PARSING_ERROR_VALIDATING_COMMUNICATION_COMPANY);
+        }
+        String firstNumber = telephone.substring(0, 1);
+        if (firstNumber.equals("3") || firstNumber.equals("8") || firstNumber.equals("9")) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public Boolean isANumber(String cellPhoneNumber) {
         if (cellPhoneNumber == null) {
             return false;

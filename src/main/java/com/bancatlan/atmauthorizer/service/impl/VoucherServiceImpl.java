@@ -363,10 +363,18 @@ public class VoucherServiceImpl implements IVoucherService {
             LOG.error("Custom Exception {}", AuthorizerError.MISSING_CONFIRM_TARGET_TELEPHONE_FIELD.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_CONFIRM_TARGET_TELEPHONE_FIELD);
         }
-
+        /**
+         * Validating format telephone of beneficiary/payee */
         if (!utilComponent.isValidPhoneNumber(dto.getTransaction().getPayee().getMsisdn())) {
-            LOG.error("Custom Exception {}", AuthorizerError.BAD_FORMAT_TARGET_TELEPHONE.toString());
+            LOG.error("Custom Exception {}", AuthorizerError.BAD_FORMAT_TARGET_TELEPHONE);
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.BAD_FORMAT_TARGET_TELEPHONE);
+        }
+
+        /**
+         * Validating telephone company of beneficiary/payee */
+        if (!utilComponent.isValidCommunicationCompany(dto.getTransaction().getPayee().getMsisdn())) {
+            LOG.error("Custom Exception {}", AuthorizerError.CUSTOM_ERROR_NOT_SUPPORTED_COMMUNICATION_COMPANY);
+            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.CUSTOM_ERROR_NOT_SUPPORTED_COMMUNICATION_COMPANY);
         }
 
         if (!dto.getValidatePayeeMsisdn().equals(dto.getTransaction().getPayee().getMsisdn())) {
