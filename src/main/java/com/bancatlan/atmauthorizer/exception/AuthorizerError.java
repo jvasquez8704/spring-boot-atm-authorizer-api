@@ -43,7 +43,7 @@ public enum AuthorizerError implements IError {
     MISSING_SECRET_CODE_FIELD(32,"El campo CLAVE DE SEGURIDAD es obligatorio"),
     BAD_FORMAT_SECRET_CODE(33,"El campo CLAVE DE RETIRO debe ser un número de 4 digitos"),
     REQUEST_UNLOCK_USER_ERROR(34,"The unlock user code cannot be null or empty"),
-    CUSTOM_ERROR_NOT_SUPPORTED_COMMUNICATION_COMPANY(35,"No es posible enviar el mensaje de confirmación a su compañia telefónica"),
+    CUSTOM_ERROR_NOT_SUPPORTED_COMMUNICATION_COMPANY(35,"No es posible enviar el mensaje de confirmación a números fijos"),
     OCB_LOGOUT_ERROR(36,"Error when executing the logout of OCB"),
     REQUEST_OCB_VERIFY_NULL(37,"The ocb verifier request cannot be null"),
     REQUEST_PASSWORD_NULL(38,"The user password cannot be empty or null"),
