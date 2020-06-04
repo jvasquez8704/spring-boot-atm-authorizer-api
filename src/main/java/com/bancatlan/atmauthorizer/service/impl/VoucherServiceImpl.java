@@ -354,15 +354,13 @@ public class VoucherServiceImpl implements IVoucherService {
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORTED_TXN_ID_BANK_PAYMENT_SERVICE_ACTION);
         }
 
+        /**
+         * Validating telephone field */
         if (dto.getTransaction().getPayee() == null && dto.getTransaction().getPayee().getMsisdn() == null && dto.getTransaction().getPayee().getMsisdn().equals("")) {
-            LOG.error("Custom Exception {}", AuthorizerError.MISSING_TARGET_TELEPHONE_FIELD.toString());
+            LOG.error("Custom Exception {}", AuthorizerError.MISSING_TARGET_TELEPHONE_FIELD);
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_TARGET_TELEPHONE_FIELD);
         }
 
-        if (dto.getValidatePayeeMsisdn() == null || dto.getValidatePayeeMsisdn().equals("")) {
-            LOG.error("Custom Exception {}", AuthorizerError.MISSING_CONFIRM_TARGET_TELEPHONE_FIELD.toString());
-            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_CONFIRM_TARGET_TELEPHONE_FIELD);
-        }
         /**
          * Validating format telephone of beneficiary/payee */
         if (!utilComponent.isValidPhoneNumber(dto.getTransaction().getPayee().getMsisdn())) {
@@ -377,6 +375,13 @@ public class VoucherServiceImpl implements IVoucherService {
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.CUSTOM_ERROR_NOT_SUPPORTED_COMMUNICATION_COMPANY);
         }
 
+        if (dto.getValidatePayeeMsisdn() == null || dto.getValidatePayeeMsisdn().equals("")) {
+            LOG.error("Custom Exception {}", AuthorizerError.MISSING_CONFIRM_TARGET_TELEPHONE_FIELD.toString());
+            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_CONFIRM_TARGET_TELEPHONE_FIELD);
+        }
+
+        /**
+         * Confirmation of telephone fields */
         if (!dto.getValidatePayeeMsisdn().equals(dto.getTransaction().getPayee().getMsisdn())) {
             LOG.error("Custom Exception {}", AuthorizerError.NOT_MATCH_CONFIRM_TARGET_TELEPHONE.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_MATCH_CONFIRM_TARGET_TELEPHONE);
@@ -386,6 +391,7 @@ public class VoucherServiceImpl implements IVoucherService {
             LOG.error("Custom Exception {}", AuthorizerError.MISSING_AMOUNT_TO_TRANSFER_FIELD.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_AMOUNT_TO_TRANSFER_FIELD);
         }
+
         /**
          *General validation for amount */
         if (dto.getAmountKey().equals(Constants.ATM_ANOTHER_AMOUNT_KEY)) {
@@ -406,12 +412,14 @@ public class VoucherServiceImpl implements IVoucherService {
             }
             dto.getTransaction().setAmount(utilComponent.getAmountFromKey(dto.getAmountKey()));
         }
+
         /**
          * validation mandatory field for secret code */
         if (dto.getVoucher() == null || dto.getVoucher().getSecretCode() == null || dto.getVoucher().getSecretCode().equals("")) {
             LOG.error("Custom Exception {}", AuthorizerError.MISSING_SECRET_CODE_FIELD.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_SECRET_CODE_FIELD);
         }
+
         /**
          * General validation for secret code */
         if (!utilComponent.isANumber(dto.getVoucher().getSecretCode()) || dto.getVoucher().getSecretCode().length() != 4) {
