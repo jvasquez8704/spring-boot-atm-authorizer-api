@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- LOG levels TRACE, DEBUG, INFO, WARN, ERROR -->
-    <property name="LOGS" value="./logs" />
+    <!-- LOG levels TRACE, DEBUG, INFO, WARN, ERROR
+    <property name="LOGS" value="./logs" />-->
+    <property name="LOGS" value="${LOG_PATH}logs" />
 
     <appender name="Console"
               class="ch.qos.logback.core.ConsoleAppender">

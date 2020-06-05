@@ -14,6 +14,7 @@ spring.jackson.serialization.indent_output=true
 #spring.mvc.static-path-pattern=/resources/**
 #logging.level.root=INFO
 #logging.level.com.bancatlan.atmauthorizer.component=TRACE
+logging.path=/Users/walletmachine/projects/
 
 #PO Parameters
 bank.service.po.username=APPOCH19
