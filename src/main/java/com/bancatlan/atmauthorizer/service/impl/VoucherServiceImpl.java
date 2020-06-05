@@ -356,7 +356,7 @@ public class VoucherServiceImpl implements IVoucherService {
 
         /**
          * Validating telephone field */
-        if (dto.getTransaction().getPayee() == null && dto.getTransaction().getPayee().getMsisdn() == null && dto.getTransaction().getPayee().getMsisdn().equals("")) {
+        if (dto.getTransaction().getPayee() == null || dto.getTransaction().getPayee().getMsisdn() == null || dto.getTransaction().getPayee().getMsisdn().equals("")) {
             LOG.error("Custom Exception {}", AuthorizerError.MISSING_TARGET_TELEPHONE_FIELD);
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_TARGET_TELEPHONE_FIELD);
         }
