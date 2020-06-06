@@ -231,15 +231,31 @@ public class TransactionServiceImpl implements ITransactionService {
                 Customer payer = customer.getByUsername(txn.getPayer().getUsername());
                 if (payer == null) {
                     txn.getPayer().setCountry(null);//hack
-                    //Set creator user
-                    payer = customer.register(txn.getPayer());
+                    //check if this client exist as payee
+                    payer = customer.checkIfCustomerExist(txn.getPayer().getMsisdn());
+                    if (payer == null) {
+                        //Set creator user
+                        payer = customer.register(txn.getPayer());
+                    } else {
+                        //update just username
+                        payer.setUsername(txn.getPayer().getUsername());
+                        payer = customer.update(payer);
+                    }
                 }
 
                 Customer payee = customer.checkIfCustomerExist(txn.getPayee().getMsisdn());
                 if (payee == null) {
                     txn.getPayee().setCountry(null);//hack
-                    //Set creator user
-                    payee = customer.register(txn.getPayee());
+                    //check if this client exist as payee => check if username is different of null
+                    payee = customer.getByUsername(txn.getPayee().getUsername());
+                    if (payee == null) {
+                        //Set creator user
+                        payee = customer.register(txn.getPayee());
+                    } else {
+                        //update just username
+                        payee.setUsername(txn.getPayee().getMsisdn());
+                        payee = customer.update(payee);
+                    }
                 }
 
                 //CHECK PAYER PI
@@ -355,7 +371,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 PaymentInstrument accountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
 
 
-                //Account Payer, Account Payee, Amount
+                //Account Payer, Account Payee, Amount = cta contable qa => 750099900684 RT-USECASE-CTA_ORIGEN-MSISDN
                 String coreRef = bankService.transferMoney(payerPI.getStrIdentifier(),accountATMBASA.getStrIdentifier(),txn.getAmount(), " txn ref: " + txn.getId());
                 txn.setCoreReference(coreRef);
                 //Update balance payee
