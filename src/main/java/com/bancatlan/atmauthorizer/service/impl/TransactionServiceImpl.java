@@ -358,8 +358,9 @@ public class TransactionServiceImpl implements ITransactionService {
                 PaymentInstrument cstBank = paymentInstrumentService.getById(txn.getPayer().getId());
                 LOG.info(" {} account number of customer {}",cstBank, txn.getPayer().getId());
                 //Account Payer, Amount, comment
-                String Ref = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), "VOUCHER_BASA " + txn.getId(), Constants.BANK_ACTION_FREEZE, txn.getId().toString(), txn.getPayer().getUsername());
-                //txn.setCoreReference(coreRef);
+                String _customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + txn.getPayerPaymentInstrument().getStrIdentifier() + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
+                String _coreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_FREEZE, txn.getPayer().getUsername(), _customComment);
+                txn.setCoreReference(_coreRef);
                 //Update balance payer
                 //Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
                 //accountATMBASA.setBalance(newBalance);
@@ -369,10 +370,12 @@ public class TransactionServiceImpl implements ITransactionService {
                 Transaction creatorTxn = txn.getVoucher().getTxnCreatedBy();
                 PaymentInstrument payerPI = creatorTxn.getPayerPaymentInstrument();
                 PaymentInstrument accountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
+                Customer payee = creatorTxn.getPayee();
 
-
-                //Account Payer, Account Payee, Amount = cta contable qa => 750099900684 RT-USECASE-CTA_ORIGEN-MSISDN
-                String coreRef = bankService.transferMoney(payerPI.getStrIdentifier(),accountATMBASA.getStrIdentifier(),txn.getAmount(), " txn ref: " + txn.getId());
+                //Account Payer, Account Payee, Amount = cta contable qa => 750099900684 RT-USECASE-CTA_ORIGEN-MSISDN_DESTINO
+                //this is a bank transfer with a implicit defrost
+                String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
+                String coreRef = bankService.transferMoney(payerPI.getStrIdentifier(), accountATMBASA.getStrIdentifier(), txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment);
                 txn.setCoreReference(coreRef);
                 //Update balance payee
                 Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
@@ -401,8 +404,8 @@ public class TransactionServiceImpl implements ITransactionService {
                 PaymentInstrument payerPI = txn.getPayerPaymentInstrument();
                 PaymentInstrument atmPI = txn.getPayeePaymentInstrument();
                 //Account Payer, Account Payee, Amount
-                String coreRef = bankService.transferMoney(atmPI.getStrIdentifier(),payerPI.getStrIdentifier(),txn.getAmount(), " txn ref: " + txn.getId());
-                txn.setCoreReference(coreRef);
+                //String coreRef = bankService.transferMoney(atmPI.getStrIdentifier(),payerPI.getStrIdentifier(),txn.getAmount(), " txn ref: " + txn.getId());
+                //txn.setCoreReference(coreRef);
                 //Update balance payer
                 Double newBalance = atmPI.getBalance() - txn.getAmount();
                 atmPI.setBalance(newBalance);

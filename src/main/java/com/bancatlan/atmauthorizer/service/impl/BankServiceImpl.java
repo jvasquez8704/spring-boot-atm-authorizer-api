@@ -234,7 +234,7 @@ public class BankServiceImpl implements IBankService {
     }
 
     @Override
-    public String transferMoney(String accountDebit, String accountCredit, Double amount, String customComment) {
+    public String transferMoney(String accountDebit, String accountCredit, Double amount, Long ref, String action, String customComment) {
         LOG.info("transferMoney: ");
         LOG.info("accountDebit: " + accountDebit + " accountCredit: " + accountCredit + " amount: " + amount + " comment: " + customComment);
         //String toAccNum, String fromAccNum, double payerNetAmount, Long transactionId, Integer useCaseId, String customDesc, Long customerId
@@ -245,7 +245,7 @@ public class BankServiceImpl implements IBankService {
             }
         });
         String urlS = absolutePathWSDLResources + transferWSDLName;
-        LOG.info("URL: {}",urlS);
+        LOG.info("URL: {}", urlS);
         String uniqueTransNum = "";
         URL url;
         try {
@@ -277,8 +277,9 @@ public class BankServiceImpl implements IBankService {
             transferenciaContableItem.setCuentaDebito(accountDebit);
             transferenciaContableItem.setMonedaDebito(transferDebitCurrency);
 
-            //transferenciaContableItem.setDebitoDescripcion("Transferencia Atlántida Money");
-            transferenciaContableItem.setDebitoDescripcion(Constants.MSG_ATM_TO_BANK_ACCOUNT);
+
+            transferenciaContableItem.setDebitoDescripcion(customComment);
+            transferenciaContableItem.setComentario(customComment + "TRANSFER_TESTQA");
             transferenciaContableItem.setMovimientoDebito(transferDebitMovement);
 
             transferenciaContableItem.setCuentaCredito(accountCredit);
@@ -292,8 +293,11 @@ public class BankServiceImpl implements IBankService {
             transferenciaContableItem.setFuente(transferSource);
             transferenciaContableItem.setSucursalCredito(BigInteger.valueOf(101));
             transferenciaContableItem.setSucursalDebito(BigInteger.ZERO);
-            transferenciaContableItem.setNumeroTransaccionUnico(Long.valueOf(0)); //Todo preguntar a Oscar
-            transferenciaContableItem.setNumeroReferencia(Long.valueOf(0));//Todo preguntar a Oscar
+            transferenciaContableItem.setNumeroTransaccionUnico(Long.valueOf(0));
+            transferenciaContableItem.setNumeroReferencia(ref);
+            if (action != null && !action.equals("")) {
+                //transferenciaContableItem.setRespuesta(action);//TODO GENERA ERROR AL MANDAR DESCONGELAMIENTO
+            }
 
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion campoCollection = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion();
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem campoItem = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem();
@@ -341,7 +345,7 @@ public class BankServiceImpl implements IBankService {
     }
 
     @Override
-    public String freezeFounds(String accountDebit, Double amount, String customComment, String action, String ref, String userName) {
+    public String freezeFounds(String accountDebit, Double amount, Long ref, String action, String userName, String customComment) {
         LOG.info("FreezeFounds function: comment {}, amount {}, accountDebit {}, action {}", customComment, amount, accountDebit, action);
         String urlS = absolutePathWSDLResources + freezeWSDLName;
         String coreReference = "";
@@ -408,7 +412,8 @@ public class BankServiceImpl implements IBankService {
             dtPeticionCongelamientoItem.setCuentaDebito(accountDebit);
             dtPeticionCongelamientoItem.setMonedaDebito(Constants.BANK_HN_CURRENCY);
             //dtPeticionCongelamientoItem.setTitularDebito("");
-            //dtPeticionCongelamientoItem.setDebitoDescripcion("");
+            dtPeticionCongelamientoItem.setDebitoDescripcion(customComment);
+            dtPeticionCongelamientoItem.setComentario(customComment + "FREEZE_TESTQA");
             //dtPeticionCongelamientoItem.setMovimientoDebito("");
             //dtPeticionCongelamientoItem.setMovimientoDebito("");
             dtPeticionCongelamientoItem.setSucursalDebito(new BigInteger(freezeSucursalId));
@@ -420,7 +425,7 @@ public class BankServiceImpl implements IBankService {
             //dtPeticionCongelamientoItem.setOrigenDivisa("");
             //dtPeticionCongelamientoItem.setFuente("");
             //dtPeticionCongelamientoItem.setNumeroTransaccionUnico("");
-            dtPeticionCongelamientoItem.setNumeroReferencia(ref);
+            dtPeticionCongelamientoItem.setNumeroReferencia(ref.toString());
             dtPeticionCongelamientoItem.setDiasCongelamiento(new BigInteger(freezeDays));
             //dtPeticionCongelamientoItem.setUsuarioOperador("");
             //dtPeticionCongelamientoItem.setUsuarioAutorizador("");
