@@ -296,7 +296,7 @@ public class BankServiceImpl implements IBankService {
             transferenciaContableItem.setNumeroTransaccionUnico(Long.valueOf(0));
             transferenciaContableItem.setNumeroReferencia(ref);
             if (action != null && !action.equals("")) {
-                //transferenciaContableItem.setRespuesta(action);//TODO GENERA ERROR AL MANDAR DESCONGELAMIENTO
+                transferenciaContableItem.setRespuesta(action);
             }
 
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion campoCollection = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion();
