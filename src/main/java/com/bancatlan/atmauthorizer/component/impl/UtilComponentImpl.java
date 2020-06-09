@@ -243,7 +243,7 @@ public class UtilComponentImpl implements IUtilComponent {
     }
 
     private boolean isValidAmountAccordingATMRules(Double amount) {
-        if (amount % 100 != 0 || amount > 4000) {
+        if (amount % 100 != 0 || amount > 5000) {
             return false;
         }
         return true;
