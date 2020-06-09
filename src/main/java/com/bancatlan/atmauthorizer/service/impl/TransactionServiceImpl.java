@@ -219,48 +219,64 @@ public class TransactionServiceImpl implements ITransactionService {
             case Constants.INT_VOUCHER_USE_CASE:
                 //CHECK PAYER USER AND PAYEE NO CLIENT
                 if (txn.getPayer() == null || txn.getPayer().getUsername() == null || txn.getPayer().getUsername().equals("")) {
-                    LOG.error(AuthorizerError.MISSING_OCB_USER.toString());
+                    LOG.error("processAuthentication: {}", AuthorizerError.MISSING_OCB_USER);
                     throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_OCB_USER);
                 }
 
-                if (txn.getPayee() == null || txn.getPayee().getMsisdn() == null || txn.getPayer().getMsisdn().equals("")) {
-                    LOG.error(AuthorizerError.MISSING_PAYER_PI.toString());
+                if (txn.getPayee() == null || txn.getPayee().getMsisdn() == null || txn.getPayee().getMsisdn().equals("")) {
+                    LOG.error("processAuthentication: {}", AuthorizerError.MISSING_PAYER_PI);
                     throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_PAYER_PI);
                 }
-                //business rules, if users not exits, create them as pre-registered customers
+                /**
+                 * business rules, if participants not exits, create them as a pre-registered customer
+                 * 1. If found payer by Username => GO
+                 * 2. check if request comes the payer telephone, validate if customer exist
+                 */
                 Customer payer = customer.getByUsername(txn.getPayer().getUsername());
                 if (payer == null) {
                     txn.getPayer().setCountry(null);//hack
-                    //check if this client exist as payee
-                    payer = customer.checkIfCustomerExist(txn.getPayer().getMsisdn());
-                    if (payer == null) {
-                        //Set creator user
-                        payer = customer.register(txn.getPayer());
+                    //check if request comes the payer telephone, validate if customer exist
+                    if (txn.getPayer().getMsisdn() != null && !txn.getPayer().getMsisdn().equals("")) {
+                        payer = customer.checkIfCustomerExist(txn.getPayer().getMsisdn());
+                        if (payer == null) {
+                            //Set creator user
+                            payer = customer.register(txn.getPayer());
+                        } else {
+                            //If customer found by telephone update just username
+                            payer.setUsername(txn.getPayer().getUsername());
+                            payer = customer.update(payer);
+                        }
                     } else {
-                        //update just username
-                        payer.setUsername(txn.getPayer().getUsername());
-                        payer = customer.update(payer);
+                        payer = customer.register(txn.getPayer());
                     }
                 }
 
+                /**
+                 * 1. If found customer by Username => GO
+                 * 2. check if request comes the payer telephone, validate if customer exist
+                 */
                 Customer payee = customer.checkIfCustomerExist(txn.getPayee().getMsisdn());
                 if (payee == null) {
                     txn.getPayee().setCountry(null);//hack
                     //check if this client exist as payee => check if username is different of null
-                    payee = customer.getByUsername(txn.getPayee().getUsername());
-                    if (payee == null) {
-                        //Set creator user
+                    if (txn.getPayee().getUsername() == null || txn.getPayee().getUsername().equals("")) {
                         payee = customer.register(txn.getPayee());
-                    } else {
-                        //update just username
-                        payee.setUsername(txn.getPayee().getMsisdn());
-                        payee = customer.update(payee);
+                    } else {//this almost never happens
+                        payee = customer.getByUsername(txn.getPayee().getUsername());
+                        if (payee == null) {
+                            //Set creator user
+                            payee = customer.register(txn.getPayee());
+                        } else {
+                            //update just username
+                            payee.setUsername(txn.getPayee().getMsisdn());
+                            payee = customer.update(payee);
+                        }
                     }
                 }
 
                 //CHECK PAYER PI
                 if (txn.getPayerPaymentInstrument() == null || txn.getPayerPaymentInstrument().getStrIdentifier() == null || txn.getPayerPaymentInstrument().getStrIdentifier().equals("")) {
-                    LOG.error(AuthorizerError.MISSING_PAYER_PI.toString() + txn);
+                    LOG.error("processAuthentication: {}", AuthorizerError.MISSING_PAYER_PI);
                     throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_PAYER_PI);
                 }
 
@@ -296,18 +312,19 @@ public class TransactionServiceImpl implements ITransactionService {
                 //find customer
                 if (txn.getPayer() == null || txn.getPayer().getMsisdn() == null || txn.getPayer().getMsisdn().equals("") ||
                         !utilComponent.isValidPhoneNumber(txn.getPayer().getMsisdn())) {
-                    LOG.error("NumberPhone does not come properly in request", txn);
+                    LOG.error("processAuthentication: NumberPhone does not come properly in request, error: {}", AtmError.ERROR_14);
                     throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_14);
                 }
 
                 Customer cst = customer.getByMsisdn(txn.getPayer().getMsisdn());
                 if (cst == null) {
-                    LOG.error("Customer with numberPhone specified in request not fount ", txn);
+                    LOG.error("processAuthentication: Customer with numberPhone specified in request not fount, error: {}", AtmError.ERROR_25);
                     throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_25);
                 }
 
                 Customer userATM = customer.getById(Constants.ATM_USER_ID);
                 if (userATM == null || !userATM.getName().trim().equals(Constants.ATM_USER_STR)) {
+                    LOG.error("processAuthentication: ATM User not configured {}", AtmError.ERROR_03);
                     throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_03);
                 }
 
