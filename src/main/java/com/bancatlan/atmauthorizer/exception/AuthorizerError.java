@@ -38,7 +38,7 @@ public enum AuthorizerError implements IError {
     NOT_MATCH_CONFIRM_TARGET_TELEPHONE(27,"Campos de teléfono no coinciden."),
     BAD_FORMAT_TARGET_TELEPHONE(28,"Favor validar los campos de número de teléfono. Debe cumplir con valores númericos y tamaño de 8 dígitos."),
     MISSING_WRITTEN_AMOUNT(29,"Ingrese el monto."),
-    NOT_MATCH_AMOUNT_WITH_ATM(30,"Los montos deben ser múltiplos de LPS. 100, máximo LPS. 5,000."),
+    NOT_MATCH_AMOUNT_WITH_ATM(30,"Los montos deben ser múltiplos de LPS. 100, máximo LPS.5,000."),
     USER_NOT_EXIST(31,"The user does not exist"),
     MISSING_SECRET_CODE_FIELD(32,"Ingrese clave de seguridad."),
     BAD_FORMAT_SECRET_CODE(33,"El campo clave de retiro debe ser un número de 4 dígitos."),
