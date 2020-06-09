@@ -274,6 +274,14 @@ public class VoucherServiceImpl implements IVoucherService {
             LOG.error("Voucher found is not valid {} ", dto);
             throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76, dto);
         }
+
+        /**
+         * Amount validation all or nothing
+         */
+        if (!voucher.getAmountInitial().equals(dto.getTransaction().getAmount())) {
+            LOG.error("Amount in voucher found {} did not march, err: {} ", voucher.getId(), AtmError.ERROR_13);
+            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_13, dto);
+        }
         //(3)
         transaction.authorization(txn);
 
