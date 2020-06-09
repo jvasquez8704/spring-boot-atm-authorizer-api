@@ -274,7 +274,6 @@ public class VoucherServiceImpl implements IVoucherService {
             LOG.error("Voucher found is not valid {} ", dto);
             throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76, dto);
         }
-
         /**
          * Amount validation all or nothing
          */
