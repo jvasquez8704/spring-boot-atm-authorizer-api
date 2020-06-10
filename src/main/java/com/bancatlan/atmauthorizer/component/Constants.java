@@ -37,12 +37,16 @@ public class Constants {
     public static final String BANK_ACTION_PAYMENT = "P";
     public static final String ITM_MTI_WITHDRAW = "0200";
     public static final String ITM_MTI_REVERSE_WITHDRAW = "0400";
+    public static final String STR_CUSTOM_ERR = "-1";
+    public static final String STR_EXCEPTION_ERR = "-2";
+    public static final String STR_ZERO = "0";
 
     /*STATUS TXN CODES*/
     public static final long INITIAL_TXN_STATUS = 1;
     public static final long PRE_AUTHORIZED_TXN_STATUS = 2;
     public static final long AUTHENTICATED_TXN_STATUS = 10;
     public static final long AUTHORIZED_TXN_STATUS = 20;
+    public static final long WAITING_AUTOMATIC_PROCESS_TXN_STATUS = 25;
     public static final long CONFIRM_TXN_STATUS = 30;
     public static final long CANCEL_CONFIRM_TXN_STATUS = 70;
 
@@ -92,5 +96,9 @@ public class Constants {
     //public static String TEMPLATE_NOTIFICATION_SMS =  "Envio de dinero Atlantida Retiro sin tarjeta. Monto: L. %s Codigo de retiro %s";
     public static String TEMPLATE_NOTIFICATION_SMS =  "Retiro de dinero sin tarjeta Atlantida Monto: L. %s, codigo de retiro %s";
 
+    /**/
+    public static final String STR_ACCOUNTING_TRANSFER_SERVICE_NAME = "Transferencia Contable";
+    public static final String STR_FREEZE_SERVICE_NAME = "Congelamiento";
+    public static final String STR_NOTIFICATION_SERVICE_NAME = "Envio Notificacion";
 
 }

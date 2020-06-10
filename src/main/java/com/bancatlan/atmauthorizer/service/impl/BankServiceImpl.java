@@ -345,6 +345,107 @@ public class BankServiceImpl implements IBankService {
     }
 
     @Override
+    public String transferMoneyProcess(String accountDebit, String accountCredit, Double amount, Long ref, String action, String customComment) {
+        LOG.info("transferMoney in bach process: accountDebit: {} , accountCredit {} , amount: {} , comment: {}", accountDebit, accountCredit, amount, customComment);
+        Authenticator.setDefault(new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(busIntegrationUsername,
+                        busIntegrationPassword.toCharArray());
+            }
+        });
+        String urlWs = absolutePathWSDLResources + transferWSDLName;
+        String uniqueTransNum = Constants.STR_DASH_SEPARATOR;
+        URL url;
+        try {
+            url = new URL(urlWs);
+            SIOSTransferenciaContableService port = new SIOSTransferenciaContableService(url);
+            SIOSTransferenciaContable coreBankingTransferClient = port.getHTTPPort();
+
+            DTTransferenciaContable mtTransferenciaContable = new DTTransferenciaContable();
+            mtTransferenciaContable.setActivarMultipleEntrada(BigInteger.ZERO);
+            mtTransferenciaContable.setActivarParametroAdicional("");
+            mtTransferenciaContable.setTransaccionId(transferTransactionId);
+            mtTransferenciaContable.setAplicacionId(transferApplicationId);
+            mtTransferenciaContable.setPaisId(BigInteger.ZERO);
+            mtTransferenciaContable.setEmpresaId(BigInteger.ZERO);
+            mtTransferenciaContable.setCanalId(transferChannelId);
+
+            DTIdentificadorColeccion identificadorColeccion = new DTIdentificadorColeccion();
+            identificadorColeccion.setOmniCanal("");
+            mtTransferenciaContable.getIdentificadorColeccion().add(identificadorColeccion);
+
+            DTTransferenciaContableColeccion transferenciaContableColeccion = new DTTransferenciaContableColeccion();
+
+            DTTransferenciaContableItem transferenciaContableItem = new DTTransferenciaContableItem();
+
+            transferenciaContableItem.setLinea(BigInteger.ONE);
+            transferenciaContableItem.setAccion(transferAction);
+            transferenciaContableItem.setValidar(transferValidate);
+            transferenciaContableItem.setCuentaDebito(accountDebit);
+            transferenciaContableItem.setMonedaDebito(transferDebitCurrency);
+
+
+            transferenciaContableItem.setDebitoDescripcion(customComment);
+            transferenciaContableItem.setComentario(customComment + "DEFROST_TRANSFER");
+            transferenciaContableItem.setMovimientoDebito(transferDebitMovement);
+
+            transferenciaContableItem.setCuentaCredito(accountCredit);
+            transferenciaContableItem.setMonedaCredito(transferCreditCurrency);
+            transferenciaContableItem.setMontoOriginal(amount);
+            transferenciaContableItem.setMovimientoCredito(transferCreditMovement);
+
+            transferenciaContableItem.setMontoDebito(0);
+            transferenciaContableItem.setMontoCredito(0);
+
+            transferenciaContableItem.setFuente(transferSource);
+            transferenciaContableItem.setSucursalCredito(BigInteger.valueOf(101));
+            transferenciaContableItem.setSucursalDebito(BigInteger.ZERO);
+            transferenciaContableItem.setNumeroTransaccionUnico(Long.valueOf(0));
+            transferenciaContableItem.setNumeroReferencia(ref);
+            if (action != null && !action.equals("")) {
+                transferenciaContableItem.setRespuesta(action);
+            }
+
+            och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion campoCollection = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion();
+            och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem campoItem = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem();
+            campoItem.setLinea(new BigInteger(transferLine));
+            campoItem.setTipoCampo(transferFieldType);
+
+            campoItem.setValor("800");
+            campoCollection.getCampoItem().add(campoItem);
+            transferenciaContableItem.setCampoColeccion(campoCollection);
+            transferenciaContableColeccion.setTransferenciaContableItem(transferenciaContableItem);
+            mtTransferenciaContable.setTransferenciaContableColeccion(transferenciaContableColeccion);
+            DTTransferenciaContableResponse response = coreBankingTransferClient
+                    .siOSTransferenciaContable(mtTransferenciaContable);
+
+            DTTransferenciaContableItem responseTransferenciaContableItem = response.getRespuesta()
+                    .getTransferenciaContableColeccion().getTransferenciaContableItem();
+            LOG.info("{} service Response -> Comment : {}", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME, responseTransferenciaContableItem.getComentario());
+
+            DTEstado responseState = response.getRespuesta().getEstado();
+            LOG.info("{} service Response -> State -> Description: {}", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME, responseState.getDescripcion());
+            // Check if the response is successful
+            if (Constants.BANK_SUCCESS_STATUS_CODE.equals(responseState.getCodigo())) {
+                // Response is successful.
+                uniqueTransNum = "" + responseTransferenciaContableItem.getNumeroTransaccionUnico();
+                LOG.debug("{} successful, txnUniqueNumber:{} ", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME, uniqueTransNum);
+            } else {
+                uniqueTransNum = Constants.STR_CUSTOM_ERR;// indicates Error.
+                LOG.error("{}: {} , Type: {}, Code: {}, description {} ", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME,
+                        AuthorizerError.CUSTOM_ERROR_ACCOUNTING_TRANSFER_ESB, responseState.getTipo(),
+                        responseState.getCodigo(), responseState.getDescripcion());
+            }
+
+        } catch (Exception e) {
+            uniqueTransNum = Constants.STR_EXCEPTION_ERR;
+            LOG.error("Exception in {}, {}, message {}, error ", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME, AuthorizerError.ERROR_ACCOUNTING_TRANSFER_FROM_BANK, e.getMessage(), e.getCause());
+        }
+
+        return uniqueTransNum;
+    }
+
+    @Override
     public String freezeFounds(String accountDebit, Double amount, Long ref, String action, String userName, String customComment) {
         LOG.info("FreezeFounds function: comment {}, amount {}, accountDebit {}, action {}", customComment, amount, accountDebit, action);
         String urlS = absolutePathWSDLResources + freezeWSDLName;

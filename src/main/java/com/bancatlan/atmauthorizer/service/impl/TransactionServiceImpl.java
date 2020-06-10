@@ -118,6 +118,13 @@ public class TransactionServiceImpl implements ITransactionService {
     }
 
     @Override
+    public Transaction preConfirm(Transaction txn) {
+        txn.setTxnStatus(status.getById(Constants.WAITING_AUTOMATIC_PROCESS_TXN_STATUS));
+        LOG.info("GET TXN IN PRE-CONFIRM {}", txn.getId());
+        return this.update(txn);
+    }
+
+    @Override
     public Transaction confirm(Transaction txn) {
         Transaction txnRet = this.processConfirm(txn);
         txnRet.setTxnStatus(status.getById(Constants.CONFIRM_TXN_STATUS));
@@ -165,6 +172,23 @@ public class TransactionServiceImpl implements ITransactionService {
             txnList = repo.getTransactionsByPayeeAndUseCaseAndCreationDateBetween(customer, useCase, startDateTime, endDateTime);
         }
         return txnList;
+    }
+
+    @Override
+    public void executeAllConfirmedWithDrawls() {
+        long startTime = System.currentTimeMillis();
+        UseCase useCase = new UseCase();
+        useCase.setId(new Long(800));
+        TxnStatus txnStatus = new TxnStatus();
+        txnStatus.setId(new Long(25));
+        List<Transaction> transactionList = repo.getTransactionsByUseCaseAndTxnStatus(useCase, txnStatus);
+
+        for (Transaction txn : transactionList) {
+            long startTimeProcess = System.currentTimeMillis();
+            this.processBatchConfirm(txn);
+            LOG.info("Id => {}, Amount {},  Paid Voucher {} , time process: {} ms.", txn.getId(), txn.getAmount(), txn.getVoucher().getId(), System.currentTimeMillis() - startTimeProcess);
+        }
+        LOG.info("Finishing bash process, which it took {} ml", System.currentTimeMillis() - startTime);
     }
 
     private Transaction processInit(Transaction txn){
@@ -410,6 +434,27 @@ public class TransactionServiceImpl implements ITransactionService {
 
         }
         return txn;
+    }
+
+    private Transaction processBatchConfirm(Transaction txn) {
+        Transaction creatorTxn = txn.getVoucher().getTxnCreatedBy();
+        PaymentInstrument payerPI = creatorTxn.getPayerPaymentInstrument();
+        PaymentInstrument accountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
+        Customer payee = creatorTxn.getPayee();
+
+        String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
+        String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), accountATMBASA.getStrIdentifier(), txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment);
+        txn.setCoreReference(coreRef);
+        //Update balance payee
+        if (!coreRef.equals(Constants.STR_CUSTOM_ERR) && !coreRef.equals(Constants.STR_EXCEPTION_ERR) && !coreRef.equals(Constants.STR_DASH_SEPARATOR) && !coreRef.equals(Constants.STR_ZERO)) {
+            Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
+            accountATMBASA.setBalance(newBalance);
+            LOG.info("CORE REFERENCE: {}", coreRef);
+            txn.setPayerPaymentInstrument(payerPI);
+            txn.setPayeePaymentInstrument(accountATMBASA);
+            txn.setTxnStatus(status.getById(Constants.CONFIRM_TXN_STATUS));
+        }
+        return this.update(txn);
     }
 
     private Transaction processCancelConfirm(Transaction txn) {

@@ -17,4 +17,5 @@ public interface ITransactionRepo extends JpaRepository<Transaction, Long> {
     List<Transaction> getTransactionsByPayeeAndUseCaseAndCreationDateBetween(Customer payee, UseCase useCase, LocalDateTime startDate, LocalDateTime endDate);
     List<Transaction> getTransactionsByPayerAndUseCaseAndCreationDateBetween(Customer payer,UseCase useCase, LocalDateTime startDate, LocalDateTime endDate);
     List<Transaction> getTransactionsByPayerOrPayeeAndUseCaseAndCreationDateBetween(Customer payer, Customer payee,UseCase useCase, LocalDateTime startDate, LocalDateTime endDate);
+    List<Transaction> getTransactionsByUseCaseAndTxnStatus(UseCase useCase, TxnStatus txnStatus);
 }
