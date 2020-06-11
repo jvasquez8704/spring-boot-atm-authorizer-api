@@ -2,9 +2,11 @@ package com.bancatlan.atmauthorizer.model;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-
+/**
+ * original name in db is identityType, however sql_server not allow this name as table name
+ */
 @Entity
-@Table(name = "identityType")
+@Table(name = "idDocumentType")
 public class IdentityType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,11 +26,11 @@ public class IdentityType {
     private LocalDateTime updateDate;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer_creation", foreignKey = @ForeignKey(name = "fk_identity_creator"))
+    @JoinColumn(name = "id_customer_creation", foreignKey = @ForeignKey(name = "fk_identity_type_creator"))
     private Customer customerCreation;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer_update", foreignKey = @ForeignKey(name = "fk_identity_updater"))
+    @JoinColumn(name = "id_customer_update", foreignKey = @ForeignKey(name = "fk_identity_type_updater"))
     private Customer customerUpdate;
 
     public Long getId() {

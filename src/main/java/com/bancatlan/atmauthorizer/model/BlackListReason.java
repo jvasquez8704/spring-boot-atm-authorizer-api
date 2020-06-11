@@ -33,11 +33,11 @@ public class BlackListReason {
     private LocalDateTime updateDate;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer_creation", nullable = true, foreignKey = @ForeignKey(name = "fk_use_case_creator"))
+    @JoinColumn(name = "id_customer_creation", nullable = true, foreignKey = @ForeignKey(name = "fk_black_list_reason_creator"))
     private Customer customerCreation;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer_update", nullable = true, foreignKey = @ForeignKey(name = "fk_use_case_updater"))
+    @JoinColumn(name = "id_customer_update", nullable = true, foreignKey = @ForeignKey(name = "fk_black_list_reason_updater"))
     private Customer customerUpdate;
 
     public Long getId() {

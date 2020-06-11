@@ -18,11 +18,11 @@ public class Wallet {
     private PaymentInstrument paymentInstrument;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer", nullable = true, foreignKey = @ForeignKey(name = "fk_pi_customer"))
+    @JoinColumn(name = "id_customer", nullable = true, foreignKey = @ForeignKey(name = "fk_wallet_customer"))
     private Customer customer;
 
     @ManyToOne
-    @JoinColumn(name = "id_currency", nullable = true, foreignKey = @ForeignKey(name = "fk_pi_currency"))
+    @JoinColumn(name = "id_currency", nullable = true, foreignKey = @ForeignKey(name = "fk_wallet_currency"))
     private Currency currency;
 
     /*metadata*/
@@ -42,11 +42,11 @@ public class Wallet {
     private LocalDateTime updateDate;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer_creation", nullable = true, foreignKey = @ForeignKey(name = "fk_pi_creator"))
+    @JoinColumn(name = "id_customer_creation", nullable = true, foreignKey = @ForeignKey(name = "fk_wallet_creator"))
     private Customer customerCreation;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer_update", nullable = true, foreignKey = @ForeignKey(name = "fk_pi_updater"))
+    @JoinColumn(name = "id_customer_update", nullable = true, foreignKey = @ForeignKey(name = "fk_wallet_updater"))
     private Customer customerUpdate;
 
     public Long getId() {

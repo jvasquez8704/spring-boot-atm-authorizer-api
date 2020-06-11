@@ -3,8 +3,11 @@ package com.bancatlan.atmauthorizer.model;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * original name in db is identity, however sql_server not allow this name as table name
+ */
 @Entity
-@Table(name = "identity")
+@Table(name = "idDocument")
 public class Identity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

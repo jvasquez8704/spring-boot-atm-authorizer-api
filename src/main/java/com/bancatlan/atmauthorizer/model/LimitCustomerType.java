@@ -15,7 +15,7 @@ public class LimitCustomerType {
     private Limit limit;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer_type", nullable = true, foreignKey = @ForeignKey(name = "fk_customer_type_limit"))
+    @JoinColumn(name = "id_customer_type", nullable = true, foreignKey = @ForeignKey(name = "fk_customer_type_limit_"))
     private CustomerType customerType;
 
     /*metadata*/

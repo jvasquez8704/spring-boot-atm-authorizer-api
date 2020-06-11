@@ -1,20 +1,20 @@
-spring.jpa.database=mysql
+spring.jpa.database=sql_server
 spring.jpa.show-sql=false
 spring.jpa.hibernate.ddl-auto=update
 
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.datasource.url=jdbc:mysql://localhost:3306/authorizerdb
-spring.datasource.username=root
-spring.datasource.password=Pass!234
+spring.datasource.driver-class-name=net.sourceforge.jtds.jdbc.Driver
+#spring.datasource.url=jdbc:jtds:sqlserver://10.128.254.137:1433;databaseName=authorizerdb
+spring.datasource.url=jdbc:jtds:sqlserver://localhost:1433;databaseName=authorizerdb
+spring.datasource.username=developer
+spring.datasource.password=Pass!2345678
+spring.datasource.hikari.connection-test-query=SELECT 1
 
 spring.jpa.open-in-view=true
 
 spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
 spring.jackson.serialization.indent_output=true
-#spring.mvc.static-path-pattern=/resources/**
-#logging.level.root=INFO
-#logging.level.com.bancatlan.atmauthorizer.component=TRACE
 logging.path=/Users/walletmachine/projects/
+
 
 #PO Parameters
 bank.service.po.username=APPOCH19
@@ -43,6 +43,7 @@ bank.service.notification.category=1
 
 #transfer
 bank.service.transfer.transaction.id=0000
+#application id Voucher BASA = 2272, pero genera error
 bank.service.transfer.application.id=2199
 bank.service.transfer.canal.id=1
 bank.service.transfer.action=A
@@ -69,8 +70,5 @@ bus-integration.wsdl.balance-name=SI_OS_ConsultaSaldoV2Service.wsdl
 bus-integration.wsdl.transfer-name=SI_OS_TransferenciaContableService.wsdl
 bus-integration.wsdl.notification-name=SI_OS_EjecutarEnvioNotificacionService.wsdl
 bus-integration.wsdl.freeze-name=SI_OS_CongelamientoCuentas.wsdl
-bus-integration.wsdl.freeze-endpoint=http://sappocoredev.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_CongelamientoCuentas&interfaceNamespace=http://hn.infatlan/ACD169/out/CongelamientoCuentas
-
-
-
+bus-integration.wsdl.freeze-endpoint=http://sappocoreqas.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_QAS_443_HN75OQH&receiverParty=&receiverService=&interface=SI_OS_CongelamientoCuentas&interfaceNamespace=http://hn.infatlan/ACD169/out/CongelamientoCuentas
 

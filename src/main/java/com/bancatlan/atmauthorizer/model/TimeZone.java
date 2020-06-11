@@ -33,11 +33,11 @@ public class TimeZone {
     private LocalDateTime updateDate;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer_creation", nullable = true, foreignKey = @ForeignKey(name = "fk_currency_creator"))
+    @JoinColumn(name = "id_customer_creation", nullable = true, foreignKey = @ForeignKey(name = "fk_time_zone_creator"))
     private Customer customerCreation;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer_update", nullable = true, foreignKey = @ForeignKey(name = "fk_currency_updater"))
+    @JoinColumn(name = "id_customer_update", nullable = true, foreignKey = @ForeignKey(name = "fk_time_zone_updater"))
     private Customer customerUpdate;
 
     public Long getId() {

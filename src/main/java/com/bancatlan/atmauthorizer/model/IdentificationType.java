@@ -25,11 +25,11 @@ public class IdentificationType {
     private LocalDateTime updateDate;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer_creation", foreignKey = @ForeignKey(name = "fk_identity_creator"))
+    @JoinColumn(name = "id_customer_creation", foreignKey = @ForeignKey(name = "fk_identification_type_creator"))
     private Customer customerCreation;
 
     @ManyToOne
-    @JoinColumn(name = "id_customer_update", foreignKey = @ForeignKey(name = "fk_identity_updater"))
+    @JoinColumn(name = "id_customer_update", foreignKey = @ForeignKey(name = "fk_identification_type_updater"))
     private Customer customerUpdate;
 
     public Long getId() {
