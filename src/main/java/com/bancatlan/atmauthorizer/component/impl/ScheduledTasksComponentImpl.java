@@ -27,4 +27,13 @@ public class ScheduledTasksComponentImpl implements IScheduledTasksComponent {
         LOG.info("In Component: Executing Pending Confirmed Withdrawals at => {} " , dateTimeFormatter.format(LocalDateTime.now()));
         transactionService.executeAllConfirmedWithDrawls();
     }
+
+    //@Scheduled(fixedRate = 3600000)
+    @Scheduled(fixedRate = 300000)
+    @Override
+    public void runExpiredVouchers() {
+        LOG.info("RunExpiredVouchers: Executing Pending Confirmed Withdrawals at => {} " , dateTimeFormatter.format(LocalDateTime.now()));
+        transactionService.reverseExpiredVouchers();
+    }
+
 }

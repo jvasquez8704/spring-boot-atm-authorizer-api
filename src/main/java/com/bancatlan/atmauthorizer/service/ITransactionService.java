@@ -21,4 +21,5 @@ public interface ITransactionService extends ICRUD<Transaction> {
     Transaction getTransactionByAtmReference(String atmReference, Long txnStatus);
     List<Transaction> getTransactionsByCustomerAndRangeTime(Customer customer, UseCase useCase, LocalDateTime startDateTime, LocalDateTime endDateTime, Boolean isDebit);
     void executeAllConfirmedWithDrawls();
+    void reverseExpiredVouchers();
 }

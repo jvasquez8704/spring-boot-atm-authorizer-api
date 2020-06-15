@@ -41,6 +41,9 @@ public class TransactionServiceImpl implements ITransactionService {
     @Autowired
     private IUtilComponent utilComponent;
 
+    @Autowired
+    private IVoucherService voucherService;
+
     @Override
     public Transaction create(Transaction txn) {
         txn.setCreationDate(LocalDateTime.now());
@@ -183,12 +186,37 @@ public class TransactionServiceImpl implements ITransactionService {
         txnStatus.setId(new Long(25));
         List<Transaction> transactionList = repo.getTransactionsByUseCaseAndTxnStatus(useCase, txnStatus);
 
-        for (Transaction txn : transactionList) {
-            long startTimeProcess = System.currentTimeMillis();
-            this.processBatchConfirm(txn);
-            LOG.info("Id => {}, Amount {},  Paid Voucher {} , time process: {} ms.", txn.getId(), txn.getAmount(), txn.getVoucher().getId(), System.currentTimeMillis() - startTimeProcess);
+        if (!transactionList.isEmpty()) {
+            for (Transaction txn : transactionList) {
+                long startTimeProcess = System.currentTimeMillis();
+                this.processBatchConfirm(txn);
+                LOG.info("Id => {}, Amount {},  Paid Voucher {} , time process: {} ms.", txn.getId(), txn.getAmount(), txn.getVoucher().getId(), System.currentTimeMillis() - startTimeProcess);
+            }
+            LOG.info("ExecuteAllConfirmedWithDrawls: Finishing bash process, which it took {} ml", System.currentTimeMillis() - startTime);
+        } else {
+            LOG.info("ExecuteAllConfirmedWithDrawls: No transactions found");
         }
-        LOG.info("Finishing bash process, which it took {} ml", System.currentTimeMillis() - startTime);
+    }
+
+    @Override
+    public void reverseExpiredVouchers() {
+        long initTime = System.currentTimeMillis();
+        UseCase useCase = new UseCase();
+        useCase.setId(new Long(174));
+        TxnStatus txnStatus = new TxnStatus();
+        txnStatus.setId(new Long(30));
+        List<Transaction> txnList = repo.getTransactionsByUseCaseAndTxnStatus(useCase, txnStatus);
+
+        if (!txnList.isEmpty()) {
+            for (Transaction txn : txnList) {
+                long initTimeProcess = System.currentTimeMillis();
+                this.processBatchCancelConfirm(txn);
+                LOG.info("Id => {}, Amount {},  Paid Voucher {} , time process: {} ms.", txn.getId(), txn.getAmount(), txn.getVoucher().getId(), System.currentTimeMillis() - initTimeProcess);
+            }
+            LOG.info("ReverseExpiredVouchers: Finishing bash process, which it took {} ml", System.currentTimeMillis() - initTime);
+        } else {
+            LOG.info("ReverseExpiredVouchers: No transactions found");
+        }
     }
 
     private Transaction processInit(Transaction txn){
@@ -457,10 +485,44 @@ public class TransactionServiceImpl implements ITransactionService {
         return this.update(txn);
     }
 
+    private Transaction processBatchCancelConfirm(Transaction txn) {
+        //Defrost founds user
+        LOG.info("customer {}", txn.getPayer().getId());
+        //Account Payer, Amount, comment
+        String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + txn.getPayerPaymentInstrument().getStrIdentifier() + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
+        String coreRef = bankService.freezeFoundsProcess(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_DEFROST, txn.getPayer().getUsername(), customComment);
+        txn.setCoreReference(coreRef);
+
+        //Cancel Voucher
+        if (!coreRef.equals(Constants.STR_CUSTOM_ERR) && !coreRef.equals(Constants.STR_EXCEPTION_ERR) && !coreRef.equals(Constants.STR_DASH_SEPARATOR) && !coreRef.equals(Constants.STR_ZERO)) {
+            Voucher voucher = voucherService.getVoucherByCreatorTransaction(txn);
+            voucher.setActive(false);
+            voucher.setCanceled(true);
+            voucher.setExpired(true);
+            voucherService.update(voucher);
+            txn.setExpirationDate(LocalDateTime.now());
+            txn.setTxnStatus(status.getById(Constants.CANCEL_CONFIRM_TXN_STATUS));
+        }
+        return this.update(txn);
+    }
+
     private Transaction processCancelConfirm(Transaction txn) {
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
-                //Not do nothing
+                //Defrost founds user
+                LOG.info("customer {}", txn.getPayer().getId());
+                //Account Payer, Amount, comment
+                String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + txn.getPayerPaymentInstrument().getStrIdentifier() + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
+                String coreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_DEFROST, txn.getPayer().getUsername(), customComment);
+                txn.setCoreReference(coreRef);
+
+                //Cancel Voucher
+                Voucher voucher = voucherService.getVoucherByCreatorTransaction(txn);
+                voucher.setActive(false);
+                voucher.setCanceled(true);
+                voucher.setExpired(true);
+                voucherService.update(voucher);
+                txn.setExpirationDate(LocalDateTime.now());
                 break;
             case Constants.INT_WITHDRAW_VOUCHER_USE_CASE:
                 PaymentInstrument payerPI = txn.getPayerPaymentInstrument();

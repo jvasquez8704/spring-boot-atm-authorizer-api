@@ -220,6 +220,11 @@ public class VoucherServiceImpl implements IVoucherService {
     }
 
     @Override
+    public Voucher getVoucherByCreatorTransaction(Transaction transaction) {
+        return repo.getVoucherByTxnCreatedByIs(transaction);
+    }
+
+    @Override
     public Voucher update(Voucher voucher) {
         voucher.setUpdateDate(LocalDateTime.now());
         return repo.save(voucher);
