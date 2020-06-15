@@ -24,7 +24,7 @@ public class ScheduledTasksComponentImpl implements IScheduledTasksComponent {
     @Scheduled(fixedRate = 300000)
     @Override
     public void runWithdrawConfirmedAsTransferToControlledAccount() {
-        LOG.info("In Component: Executing Pending Confirmed Withdrawals at => {} " , dateTimeFormatter.format(LocalDateTime.now()));
+        LOG.info("WithdrawConfirmed: Executing Pending Confirmed Withdrawals, Thread => {}" , Thread.currentThread().getName());
         transactionService.executeAllConfirmedWithDrawls();
     }
 
@@ -32,7 +32,7 @@ public class ScheduledTasksComponentImpl implements IScheduledTasksComponent {
     @Scheduled(fixedRate = 300000)
     @Override
     public void runExpiredVouchers() {
-        LOG.info("RunExpiredVouchers: Executing Pending Confirmed Withdrawals at => {} " , dateTimeFormatter.format(LocalDateTime.now()));
+        LOG.info("RunExpiredVouchers: Executing Pending Confirmed Withdrawals Thread => {}" , Thread.currentThread().getName());
         transactionService.reverseExpiredVouchers();
     }
 

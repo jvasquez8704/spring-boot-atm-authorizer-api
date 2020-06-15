@@ -86,7 +86,7 @@ public class VoucherServiceImpl implements IVoucherService {
         Transaction txnVoucher = transaction.init(dto.getTransaction());
         dto.getTransaction().setId(txnVoucher.getId());
         dto.getTransaction().setCurrency(txnVoucher.getCurrency());
-
+        dto.getTransaction().setCreationDate(txnVoucher.getCreationDate());
         //(2)
         transaction.authentication(dto.getTransaction());
 

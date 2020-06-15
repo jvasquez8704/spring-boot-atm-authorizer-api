@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -192,7 +194,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 this.processBatchConfirm(txn);
                 LOG.info("Id => {}, Amount {},  Paid Voucher {} , time process: {} ms.", txn.getId(), txn.getAmount(), txn.getVoucher().getId(), System.currentTimeMillis() - startTimeProcess);
             }
-            LOG.info("ExecuteAllConfirmedWithDrawls: Finishing bash process, which it took {} ml", System.currentTimeMillis() - startTime);
+            LOG.info("ExecuteAllConfirmedWithDrawls: Finishing bash process, which it took {} ms", System.currentTimeMillis() - startTime);
         } else {
             LOG.info("ExecuteAllConfirmedWithDrawls: No transactions found");
         }
@@ -210,8 +212,13 @@ public class TransactionServiceImpl implements ITransactionService {
         if (!txnList.isEmpty()) {
             for (Transaction txn : txnList) {
                 long initTimeProcess = System.currentTimeMillis();
-                this.processBatchCancelConfirm(txn);
-                LOG.info("Id => {}, Amount {},  Paid Voucher {} , time process: {} ms.", txn.getId(), txn.getAmount(), txn.getVoucher().getId(), System.currentTimeMillis() - initTimeProcess);
+                if (txn.getCreationDate() == null) {
+                    txn.setCreationDate(txn.getUpdateDate());
+                }
+                if (Duration.between(txn.getCreationDate(), LocalDateTime.now()).toDays() >= 3) {
+                    this.processBatchCancelConfirm(txn);
+                }
+                LOG.info("Id => {}, Amount {},  Paid Voucher {} , time process: {} ms, days {}", txn.getId(), txn.getAmount(), txn.getVoucher(), System.currentTimeMillis() - initTimeProcess, Duration.between(txn.getCreationDate(), LocalDateTime.now()).toDays());
             }
             LOG.info("ReverseExpiredVouchers: Finishing bash process, which it took {} ml", System.currentTimeMillis() - initTime);
         } else {
