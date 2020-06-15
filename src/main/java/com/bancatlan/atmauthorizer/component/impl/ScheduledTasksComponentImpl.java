@@ -28,8 +28,7 @@ public class ScheduledTasksComponentImpl implements IScheduledTasksComponent {
         transactionService.executeAllConfirmedWithDrawls();
     }
 
-    //@Scheduled(fixedRate = 3600000)
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRate = 3600000)
     @Override
     public void runExpiredVouchers() {
         LOG.info("RunExpiredVouchers: Executing Pending Confirmed Withdrawals Thread => {}" , Thread.currentThread().getName());
