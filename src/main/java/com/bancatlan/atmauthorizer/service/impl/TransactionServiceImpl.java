@@ -145,6 +145,28 @@ public class TransactionServiceImpl implements ITransactionService {
     }
 
     @Override
+    public Transaction processBatchCancelConfirm(Transaction txn) {
+        //Defrost founds user
+        LOG.info("customer {}", txn.getPayer().getId());
+        //Account Payer, Amount, comment
+        String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + txn.getPayerPaymentInstrument().getStrIdentifier() + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
+        String coreRef = bankService.freezeFoundsProcess(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_DEFROST, txn.getPayer().getUsername(), customComment);
+        txn.setCoreReference(coreRef);
+
+        //Cancel Voucher
+        if (!coreRef.equals(Constants.STR_CUSTOM_ERR) && !coreRef.equals(Constants.STR_EXCEPTION_ERR) && !coreRef.equals(Constants.STR_DASH_SEPARATOR) && !coreRef.equals(Constants.STR_ZERO)) {
+            Voucher voucher = voucherService.getVoucherByCreatorTransaction(txn);
+            voucher.setActive(false);
+            voucher.setCanceled(true);
+            voucher.setExpired(true);
+            voucherService.update(voucher);
+            txn.setExpirationDate(LocalDateTime.now());
+            txn.setTxnStatus(status.getById(Constants.CANCEL_CONFIRM_TXN_STATUS));
+        }
+        return this.update(txn);
+    }
+
+    @Override
     public Boolean verifyTxnParticipants(Transaction txn) {
         return customer.checkCustomerStatus(txn.getPayer()) && customer.checkCustomerStatus(txn.getPayee()) &&
                 customer.checkCustomerPrivileges(txn.getPayer()) && customer.checkCustomerPrivileges(txn.getPayee()) &&
@@ -201,7 +223,7 @@ public class TransactionServiceImpl implements ITransactionService {
     }
 
     @Override
-    public void reverseExpiredVouchers() {
+    public void reverseExpiredTransactions() {
         long initTime = System.currentTimeMillis();
         UseCase useCase = new UseCase();
         useCase.setId(new Long(174));
@@ -488,27 +510,6 @@ public class TransactionServiceImpl implements ITransactionService {
             txn.setPayerPaymentInstrument(payerPI);
             txn.setPayeePaymentInstrument(accountATMBASA);
             txn.setTxnStatus(status.getById(Constants.CONFIRM_TXN_STATUS));
-        }
-        return this.update(txn);
-    }
-
-    private Transaction processBatchCancelConfirm(Transaction txn) {
-        //Defrost founds user
-        LOG.info("customer {}", txn.getPayer().getId());
-        //Account Payer, Amount, comment
-        String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + txn.getPayerPaymentInstrument().getStrIdentifier() + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
-        String coreRef = bankService.freezeFoundsProcess(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_DEFROST, txn.getPayer().getUsername(), customComment);
-        txn.setCoreReference(coreRef);
-
-        //Cancel Voucher
-        if (!coreRef.equals(Constants.STR_CUSTOM_ERR) && !coreRef.equals(Constants.STR_EXCEPTION_ERR) && !coreRef.equals(Constants.STR_DASH_SEPARATOR) && !coreRef.equals(Constants.STR_ZERO)) {
-            Voucher voucher = voucherService.getVoucherByCreatorTransaction(txn);
-            voucher.setActive(false);
-            voucher.setCanceled(true);
-            voucher.setExpired(true);
-            voucherService.update(voucher);
-            txn.setExpirationDate(LocalDateTime.now());
-            txn.setTxnStatus(status.getById(Constants.CANCEL_CONFIRM_TXN_STATUS));
         }
         return this.update(txn);
     }

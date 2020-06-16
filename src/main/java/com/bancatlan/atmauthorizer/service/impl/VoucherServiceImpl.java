@@ -5,9 +5,7 @@ import com.bancatlan.atmauthorizer.component.IUtilComponent;
 import com.bancatlan.atmauthorizer.component.impl.UtilComponentImpl;
 import com.bancatlan.atmauthorizer.dto.VoucherTransactionDTO;
 import com.bancatlan.atmauthorizer.exception.*;
-import com.bancatlan.atmauthorizer.model.Customer;
-import com.bancatlan.atmauthorizer.model.Transaction;
-import com.bancatlan.atmauthorizer.model.Voucher;
+import com.bancatlan.atmauthorizer.model.*;
 import com.bancatlan.atmauthorizer.repo.IVoucherRepo;
 import com.bancatlan.atmauthorizer.service.*;
 import org.slf4j.Logger;
@@ -16,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -222,6 +221,22 @@ public class VoucherServiceImpl implements IVoucherService {
     @Override
     public Voucher getVoucherByCreatorTransaction(Transaction transaction) {
         return repo.getVoucherByTxnCreatedByIs(transaction);
+    }
+
+    @Override
+    public void reverseExpiredVouchers() {
+        long startTime = System.currentTimeMillis();
+        List<Voucher> voucherList = repo.getVouchersByActiveAndExpirationDateGreaterThanEqual(true, LocalDateTime.now());
+        if (!voucherList.isEmpty()) {
+            for (Voucher vou : voucherList) {
+                long initTimeProcess = System.currentTimeMillis();
+                transaction.processBatchCancelConfirm(vou.getTxnCreatedBy());
+                LOG.info("Id => {}, initialAmount {}, currentAmount {},  creator txn {} , time process: {} ms, days {}", vou.getId(), vou.getAmountInitial(), vou.getAmountCurrent(), vou.getTxnCreatedBy().getId(), System.currentTimeMillis() - initTimeProcess, Duration.between(vou.getTxnCreatedBy().getCreationDate(), LocalDateTime.now()).toDays());
+            }
+            LOG.info("ReverseExpiredVouchers: Finishing bash process, which it took {} ml", System.currentTimeMillis() - startTime);
+        } else {
+            LOG.info("ReverseExpiredVouchers: No transactions found");
+        }
     }
 
     @Override

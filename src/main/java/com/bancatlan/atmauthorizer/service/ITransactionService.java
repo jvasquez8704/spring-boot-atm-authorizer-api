@@ -15,11 +15,12 @@ public interface ITransactionService extends ICRUD<Transaction> {
     Transaction preConfirm(Transaction txn);
     Transaction confirm(Transaction txn);
     Transaction cancelConfirm(Transaction txn);
+    Transaction processBatchCancelConfirm(Transaction txn);
     Boolean verifyTxnParticipants(Transaction txn);
     Boolean verifyTxnLimits(Transaction txn);
     List<Transaction> getTransactionByAtmReference(String atmReference);
     Transaction getTransactionByAtmReference(String atmReference, Long txnStatus);
     List<Transaction> getTransactionsByCustomerAndRangeTime(Customer customer, UseCase useCase, LocalDateTime startDateTime, LocalDateTime endDateTime, Boolean isDebit);
     void executeAllConfirmedWithDrawls();
-    void reverseExpiredVouchers();
+    void reverseExpiredTransactions();
 }
