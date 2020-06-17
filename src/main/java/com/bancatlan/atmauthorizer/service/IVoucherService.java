@@ -15,6 +15,7 @@ public interface IVoucherService extends ICRUD<Voucher> {
     Voucher findVoucherToWithdraw(String pickupCode, String secretCode, Customer customer);
     Voucher findVoucherToReverse(String pickupCode, String secretCode, Customer customer);
     Voucher cancelWithdraw(VoucherTransactionDTO dto);
+    Voucher reverseInProcess(Voucher voucher);
     List<Voucher> getAllByOcbUser(String ocbUser);
     Voucher getVoucherByCreatorTransaction(Transaction transaction);
     void reverseExpiredVouchers();

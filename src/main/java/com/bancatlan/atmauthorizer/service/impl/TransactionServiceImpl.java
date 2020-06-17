@@ -145,25 +145,29 @@ public class TransactionServiceImpl implements ITransactionService {
     }
 
     @Override
-    public Transaction processBatchCancelConfirm(Transaction txn) {
+    public Boolean processBatchCancelConfirm(Transaction txn) {
+        long initTimeProcess = System.currentTimeMillis();
         //Defrost founds user
-        LOG.info("customer {}", txn.getPayer().getId());
-        //Account Payer, Amount, comment
+        LOG.info("current txn {}", txn);
+        //If this txn is not confirm or this txn is not VOUCHER_USE_CASE do not do nothing
+        if (!txn.getTxnStatus().getId().equals(Constants.CONFIRM_TXN_STATUS) || !txn.getUseCase().getId().equals(Constants.VOUCHER_USE_CASE)) {
+            return false;
+        }
+
         String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + txn.getPayerPaymentInstrument().getStrIdentifier() + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
         String coreRef = bankService.freezeFoundsProcess(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_DEFROST, txn.getPayer().getUsername(), customComment);
         txn.setCoreReference(coreRef);
 
+        LOG.info("Time process: {} ms, days {}", System.currentTimeMillis() - initTimeProcess, Duration.between(txn.getCreationDate(), LocalDateTime.now()).toDays());
         //Cancel Voucher
         if (!coreRef.equals(Constants.STR_CUSTOM_ERR) && !coreRef.equals(Constants.STR_EXCEPTION_ERR) && !coreRef.equals(Constants.STR_DASH_SEPARATOR) && !coreRef.equals(Constants.STR_ZERO)) {
-            Voucher voucher = voucherService.getVoucherByCreatorTransaction(txn);
-            voucher.setActive(false);
-            voucher.setCanceled(true);
-            voucher.setExpired(true);
-            voucherService.update(voucher);
             txn.setExpirationDate(LocalDateTime.now());
             txn.setTxnStatus(status.getById(Constants.CANCEL_CONFIRM_TXN_STATUS));
+            this.update(txn);
+        } else {
+            return false;
         }
-        return this.update(txn);
+        return true;
     }
 
     @Override

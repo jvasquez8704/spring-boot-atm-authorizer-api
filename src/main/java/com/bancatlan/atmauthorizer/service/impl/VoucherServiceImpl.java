@@ -214,6 +214,20 @@ public class VoucherServiceImpl implements IVoucherService {
     }
 
     @Override
+    public Voucher reverseInProcess(Voucher voucher) {
+        //TODO change this validation when voucher has to be withdraw in parts
+        if (voucher.getAmountInitial().equals(voucher.getAmountCurrent()) && voucher.getActive()) {
+            if (transaction.processBatchCancelConfirm(voucher.getTxnCreatedBy())) {
+                voucher.setActive(false);
+                voucher.setCanceled(true);
+                voucher.setExpired(true);
+                voucher.setUpdateDate(LocalDateTime.now());
+            }
+        }
+        return this.update(voucher);
+    }
+
+    @Override
     public List<Voucher> getAllByOcbUser(String ocbUser) {
         return repo.findAllActiveByOcbUser(ocbUser);
     }
@@ -226,12 +240,14 @@ public class VoucherServiceImpl implements IVoucherService {
     @Override
     public void reverseExpiredVouchers() {
         long startTime = System.currentTimeMillis();
-        List<Voucher> voucherList = repo.getVouchersByActiveAndExpirationDateGreaterThanEqual(true, LocalDateTime.now());
+        List<Voucher> voucherList = repo.getVouchersByIsActiveAndExpirationDateIsBefore(true, LocalDateTime.now());
         if (!voucherList.isEmpty()) {
             for (Voucher vou : voucherList) {
-                long initTimeProcess = System.currentTimeMillis();
-                transaction.processBatchCancelConfirm(vou.getTxnCreatedBy());
-                LOG.info("Id => {}, initialAmount {}, currentAmount {},  creator txn {} , time process: {} ms, days {}", vou.getId(), vou.getAmountInitial(), vou.getAmountCurrent(), vou.getTxnCreatedBy().getId(), System.currentTimeMillis() - initTimeProcess, Duration.between(vou.getTxnCreatedBy().getCreationDate(), LocalDateTime.now()).toDays());
+                if (vou.getTxnCreatedBy().getCreationDate() == null) {
+                    vou.getTxnCreatedBy().setCreationDate(vou.getTxnCreatedBy().getUpdateDate());
+                }
+                this.reverseInProcess(vou);
+                LOG.info("Id => {}, initialAmount {}, currentAmount {}", vou.getId(), vou.getAmountInitial(), vou.getAmountCurrent());
             }
             LOG.info("ReverseExpiredVouchers: Finishing bash process, which it took {} ml", System.currentTimeMillis() - startTime);
         } else {
@@ -546,4 +562,6 @@ public class VoucherServiceImpl implements IVoucherService {
     private void securityValidation(VoucherTransactionDTO dto){
         //Todo validate with session if the current id txn belong to the session linked with previous id txn generated
     }
+
+
 }

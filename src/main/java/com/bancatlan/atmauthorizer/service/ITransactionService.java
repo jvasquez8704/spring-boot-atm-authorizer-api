@@ -15,7 +15,7 @@ public interface ITransactionService extends ICRUD<Transaction> {
     Transaction preConfirm(Transaction txn);
     Transaction confirm(Transaction txn);
     Transaction cancelConfirm(Transaction txn);
-    Transaction processBatchCancelConfirm(Transaction txn);
+    Boolean processBatchCancelConfirm(Transaction txn);
     Boolean verifyTxnParticipants(Transaction txn);
     Boolean verifyTxnLimits(Transaction txn);
     List<Transaction> getTransactionByAtmReference(String atmReference);
