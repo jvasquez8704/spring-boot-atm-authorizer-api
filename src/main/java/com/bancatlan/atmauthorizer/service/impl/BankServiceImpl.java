@@ -546,10 +546,16 @@ public class BankServiceImpl implements IBankService {
                     }
                 } else {
                     coreReference = Constants.STR_CUSTOM_ERR;
-                    LOG.error("Error in Freeze Bank Service: Response {}, customError {}", dtRespuesta, AuthorizerError.CUSTOM_ERROR_SERVICE_BANK_FREEZE);
+                    LOG.error("Error in Freeze Bank Service: customError {}, codigo {}, description {}, detail {}", AuthorizerError.CUSTOM_ERROR_SERVICE_BANK_FREEZE, dtRespuesta.getRespuesta().getEstado().getCodigo(), dtRespuesta.getRespuesta().getEstado().getDescripcion(), dtRespuesta.getRespuesta().getEstado().getDetalleTecnico());
                 }
             } else {
-                LOG.error("Error in Freeze Bank Service: Response {}, customError {}", dtRespuesta, AuthorizerError.CUSTOM_ERROR_SERVICE_BANK_FREEZE);
+                LOG.error("Error in freeze Bank Service: customError {}", AuthorizerError.CUSTOM_ERROR_SERVICE_BANK_FREEZE);
+                if (dtRespuesta != null && dtRespuesta.getRespuesta() != null && dtRespuesta.getRespuesta().getEstado() != null) {
+                    LOG.error("Status: code {}", dtRespuesta.getRespuesta().getEstado().getCodigo());
+                    LOG.error("Status: description {}", dtRespuesta.getRespuesta().getEstado().getDescripcion());
+                    LOG.error("Status: detail {}", dtRespuesta.getRespuesta().getEstado().getDetalleTecnico());
+                    LOG.error("Status: type {}", dtRespuesta.getRespuesta().getEstado().getTipo());
+                }
             }
         } catch (Exception ex) {
             coreReference = Constants.STR_EXCEPTION_ERR;
