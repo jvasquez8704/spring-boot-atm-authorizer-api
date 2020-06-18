@@ -348,7 +348,7 @@ public class VoucherServiceImpl implements IVoucherService {
         this.validateAtmRequest(dto);
 
         //find confirmed txn
-        Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference(), Constants.CONFIRM_TXN_STATUS);
+        Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference(), Constants.WAITING_AUTOMATIC_PROCESS_TXN_STATUS);
         if (txn == null) {
             LOG.error("processCancelWithdraw: atmReference was not found or it already cancelled {}", AtmError.ERROR_77);
             throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_77, dto);
