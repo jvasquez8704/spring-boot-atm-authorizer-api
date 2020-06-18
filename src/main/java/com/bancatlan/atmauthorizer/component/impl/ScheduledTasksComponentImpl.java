@@ -25,15 +25,15 @@ public class ScheduledTasksComponentImpl implements IScheduledTasksComponent {
     IVoucherService voucherService;
 
     //@Scheduled(cron = "0 * * * * ?")
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRate = 900000)//15mins
     @Override
     public void runWithdrawConfirmedAsTransferToControlledAccount() {
         LOG.info("WithdrawConfirmed: Name thread => {}" , Thread.currentThread().getName());
         transactionService.executeAllConfirmedWithDrawls();
     }
 
-    //@Scheduled(fixedRate = 3600000)
-    @Scheduled(fixedRate = 600000)
+    //@Scheduled(fixedRate = 3600000)//1hour
+    @Scheduled(fixedRate = 600000)//10mins
     @Override
     public void runExpiredVouchers() {
         LOG.info("RunExpiredVouchers: Name thread => {}" , Thread.currentThread().getName());
