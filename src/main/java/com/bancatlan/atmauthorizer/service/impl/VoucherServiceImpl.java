@@ -294,6 +294,7 @@ public class VoucherServiceImpl implements IVoucherService {
         //(2)
         dto.getTransaction().setId(txn.getId());
         dto.getTransaction().setCurrency(txn.getCurrency());
+        dto.getTransaction().setCreationDate(txn.getCreationDate());
         dto.getTransaction().setAmount(txn.getAmount());
         transaction.authentication(dto.getTransaction());
 

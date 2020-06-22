@@ -412,9 +412,16 @@ public class TransactionServiceImpl implements ITransactionService {
                     LOG.error("processAuthentication: ATM User not configured {}", AtmError.ERROR_03);
                     throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_03);
                 }
+                //TODO Improve assigment to pi for both participants
+                PaymentInstrument accountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
+                if (accountATMBASA == null) {
+                    LOG.error("processAuthentication: account ATM User not configured {}", AtmError.ERROR_N3);
+                    throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_N3);
+                }
 
                 txn.setPayer(cst);
                 txn.setPayee(userATM);
+                txn.setPayeePaymentInstrument(accountATMBASA);
                 break;
             default:
 
