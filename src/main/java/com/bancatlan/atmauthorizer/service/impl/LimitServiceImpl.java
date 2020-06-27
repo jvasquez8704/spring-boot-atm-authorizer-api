@@ -149,25 +149,31 @@ public class LimitServiceImpl implements ILimitService {
     }
     private Boolean isWithInCustomerTypeDebitLimits(Transaction txn){
         if (txn.getPayer() == null) {
+            LOG.info("{},  error: {}", Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_PROPERLY_CONFIGURATION_ON_PAYER);
             throw new ModelCustomErrorException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_PROPERLY_CONFIGURATION_ON_PAYER);
         }
 
         if (txn.getPayer().getCustomerType() == null) {
+            LOG.info("{},  error: {}", Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_PROPERLY_CONFIGURATION_ON_PAYER);
             throw new ModelCustomErrorException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_PROPERLY_CONFIGURATION_ON_PAYER);
         }
 
         if (txn.getPayer().getCustomerType().getLimit() == null) {
+            LOG.info("{},  error: {}", Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_CONFIGURATION_LIMITS_ON_CST_TYPE_PAYER);
             throw new ModelCustomErrorException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_CONFIGURATION_LIMITS_ON_CST_TYPE_PAYER);
         }
         Limit limit = txn.getPayer().getCustomerType().getLimit();
         if(limit != null && limit.getActive()){
             if(getMovementAmountByCurrentDateRange(txn.getPayer(),txn.getUseCase(),Constants.DAILY_RANGE,true) > limit.getDailyDebitLimit()){
+                LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_DAILY_DEBIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_DAILY_DEBIT_LIMIT_EXCEEDED);
             }
             if(getMovementAmountByCurrentDateRange(txn.getPayer(),txn.getUseCase(),Constants.WEEKLY_RANGE,true) > limit.getWeeklyDebitLimit()){
+                LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_WEEKLY_DEBIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_WEEKLY_DEBIT_LIMIT_EXCEEDED);
             }
             if(getMovementAmountByCurrentDateRange(txn.getPayer(),txn.getUseCase(),Constants.MONTHLY_RANGE,true) > limit.getMonthlyDebitLimit()){
+                LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_MONTHLY_DEBIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_MONTHLY_DEBIT_LIMIT_EXCEEDED);
             }
         }
@@ -175,26 +181,32 @@ public class LimitServiceImpl implements ILimitService {
     }
     private Boolean isWithInCustomerTypeCreditLimits(Transaction txn){
         if (txn.getPayee() == null) {
+            LOG.info("{},  error: {}", Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_PROPERLY_CONFIGURATION_ON_PAYEE);
             throw new ModelCustomErrorException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_PROPERLY_CONFIGURATION_ON_PAYEE);
         }
 
         if (txn.getPayee().getCustomerType() == null) {
+            LOG.info("{},  error: {}", Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_PROPERLY_CONFIGURATION_ON_PAYEE);
             throw new ModelCustomErrorException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_PROPERLY_CONFIGURATION_ON_PAYEE);
         }
 
         if (txn.getPayee().getCustomerType().getLimit() == null) {
+            LOG.info("{},  error: {}", Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_CONFIGURATION_LIMITS_ON_CST_TYPE_PAYEE);
             throw new ModelCustomErrorException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.NOT_CONFIGURATION_LIMITS_ON_CST_TYPE_PAYEE);
         }
         Limit limit = txn.getPayee().getCustomerType().getLimit();
         if(limit != null && limit.getActive()){
             if(getMovementAmountByCurrentDateRange(txn.getPayee(),txn.getUseCase(),Constants.DAILY_RANGE,false) > limit.getDailyCreditLimit()){
-                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_DAILY_DEBIT_LIMIT_EXCEEDED);
+                LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_DAILY_CREDIT_LIMIT_EXCEEDED);
+                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_DAILY_CREDIT_LIMIT_EXCEEDED);
             }
             if(getMovementAmountByCurrentDateRange(txn.getPayee(),txn.getUseCase(),Constants.WEEKLY_RANGE,false) > limit.getWeeklyCreditLimit()){
-                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_WEEKLY_DEBIT_LIMIT_EXCEEDED);
+                LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_WEEKLY_CREDIT_LIMIT_EXCEEDED);
+                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_WEEKLY_CREDIT_LIMIT_EXCEEDED);
             }
             if(getMovementAmountByCurrentDateRange(txn.getPayee(),txn.getUseCase(),Constants.MONTHLY_RANGE,false) > limit.getMonthlyCreditLimit()){
-                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_MONTHLY_DEBIT_LIMIT_EXCEEDED);
+                LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_MONTHLY_CREDIT_LIMIT_EXCEEDED);
+                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_MONTHLY_CREDIT_LIMIT_EXCEEDED);
             }
         }
         return true;
