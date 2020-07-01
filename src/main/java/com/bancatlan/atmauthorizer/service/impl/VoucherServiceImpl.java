@@ -201,7 +201,7 @@ public class VoucherServiceImpl implements IVoucherService {
             throw new ModelNotFoundException(" Voucher with txn " +
                     txn.getId() + " - not found");
         }
-        //Todo regresar el dinero de la cuenta de cajeros a la cuenta de ATM (o en el caso de Oscar P. regresar el dinero al usuario (pero en estado de congelado))
+
         //cancel txn
         Transaction txnPaidBy = transaction.cancelConfirm(txn);
         Double currentAmount = voucher.getAmountCurrent() + txnPaidBy.getAmount();
@@ -219,7 +219,6 @@ public class VoucherServiceImpl implements IVoucherService {
         if (voucher.getAmountInitial().equals(voucher.getAmountCurrent()) && voucher.getActive()) {
             if (transaction.processBatchCancelConfirm(voucher.getTxnCreatedBy())) {
                 voucher.setActive(false);
-                voucher.setCanceled(true);
                 voucher.setExpired(true);
                 voucher.setUpdateDate(LocalDateTime.now());
             }
