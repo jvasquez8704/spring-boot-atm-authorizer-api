@@ -151,6 +151,15 @@ public class UtilComponentImpl implements IUtilComponent {
         return sb.toString();
     }
 
+    @Override
+    public String fitTelephone(String telephone) {
+        if (telephone != null && telephone.length() > 8) {
+            int init = telephone.length() - 8;
+            telephone = telephone.substring(init);
+        }
+        return telephone;
+    }
+
     /**
      *It generates a code for verification in a measure time configured
      * @param value it should be cellphone number, email or user

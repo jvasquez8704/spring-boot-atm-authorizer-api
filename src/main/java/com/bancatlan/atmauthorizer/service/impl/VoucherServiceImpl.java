@@ -496,6 +496,10 @@ public class VoucherServiceImpl implements IVoucherService {
             LOG.info("Adjusting Curency from OCB Req. LPS to HNL #{}",dto.getTransaction().getCurrency().getCode());
             dto.getTransaction().getCurrency().setCode(Constants.HN_CURRENCY);
         }
+
+        if (dto.getTransaction().getPayer() != null) {
+            dto.getTransaction().getPayer().setMsisdn(utilComponent.fitTelephone(dto.getTransaction().getPayer().getMsisdn()));
+        }
         return dto;
     }
 
