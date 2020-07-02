@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -498,7 +497,7 @@ public class VoucherServiceImpl implements IVoucherService {
         }
 
         if (dto.getTransaction().getPayer() != null) {
-            dto.getTransaction().getPayer().setMsisdn(utilComponent.fitTelephone(dto.getTransaction().getPayer().getMsisdn()));
+            dto.getTransaction().getPayer().setMsisdn(utilComponent.adjustingTelephone(dto.getTransaction().getPayer().getMsisdn()));
         }
         return dto;
     }

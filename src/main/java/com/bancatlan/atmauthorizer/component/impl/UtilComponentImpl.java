@@ -152,7 +152,7 @@ public class UtilComponentImpl implements IUtilComponent {
     }
 
     @Override
-    public String fitTelephone(String telephone) {
+    public String adjustingTelephone(String telephone) {
         if (telephone != null && telephone.length() > 8) {
             int init = telephone.length() - 8;
             telephone = telephone.substring(init);

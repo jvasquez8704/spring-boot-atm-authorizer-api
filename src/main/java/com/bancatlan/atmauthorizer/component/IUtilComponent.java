@@ -12,5 +12,5 @@ public interface IUtilComponent {
     Double convertAmountWithDecimals(Double amount);
     Double getAmountFromKey(String key);
     String createAuthorizationCode(int length);
-    String fitTelephone(String telephone);
+    String adjustingTelephone(String telephone);
 }
