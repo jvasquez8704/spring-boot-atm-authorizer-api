@@ -511,7 +511,7 @@ public class BankServiceImpl implements IBankService {
             dtPeticionCongelamientoItem.setTipoDebito("");
             dtPeticionCongelamientoItem.setCuentaDebito(accountDebit);
             dtPeticionCongelamientoItem.setMonedaDebito(Constants.BANK_HN_CURRENCY);
-            dtPeticionCongelamientoItem.setDebitoDescripcion(customComment + Constants.STR_DASH_SEPARATOR + Constants.STR_DEFROST_SERVICE_NAME);
+            dtPeticionCongelamientoItem.setDebitoDescripcion(customComment);
             dtPeticionCongelamientoItem.setComentario(customComment);
             dtPeticionCongelamientoItem.setSucursalDebito(new BigInteger(freezeSucursalId));
             dtPeticionCongelamientoItem.setMontoOriginal(amount.toString());
@@ -633,13 +633,10 @@ public class BankServiceImpl implements IBankService {
             dtPeticionCongelamientoItem.setMonedaDebito(Constants.BANK_HN_CURRENCY);
             //dtPeticionCongelamientoItem.setTitularDebito("");
             dtPeticionCongelamientoItem.setDebitoDescripcion(customComment);
-            dtPeticionCongelamientoItem.setComentario(customComment + "-COMMENT");
-            //dtPeticionCongelamientoItem.setMovimientoDebito("");
+            dtPeticionCongelamientoItem.setComentario(customComment);
             //dtPeticionCongelamientoItem.setMovimientoDebito("");
             dtPeticionCongelamientoItem.setSucursalDebito(new BigInteger(freezeSucursalId));
             //dtPeticionCongelamientoItem.setTipoCredito("");
-            //dtPeticionCongelamientoItem.setComentario("");
-            //dtPeticionCongelamientoItem.setMontoOriginal("150");
             dtPeticionCongelamientoItem.setMontoOriginal(amount.toString());
             //dtPeticionCongelamientoItem.setMontoDebito("");
             //dtPeticionCongelamientoItem.setOrigenDivisa("");
@@ -649,7 +646,6 @@ public class BankServiceImpl implements IBankService {
             dtPeticionCongelamientoItem.setDiasCongelamiento(new BigInteger(freezeDays));
             //dtPeticionCongelamientoItem.setUsuarioOperador("");
             //dtPeticionCongelamientoItem.setUsuarioAutorizador("");
-            //dtPeticionCongelamientoItem.setFechaProceso("20200528");
             dtPeticionCongelamientoItem.setFechaProceso(bankFormatCurrentDate);
             dtPeticionCongelamientoItem.setFechaVencimiento(bankFormatExpirationDate);
             //dtPeticionCongelamientoItem.setRespuesta("");

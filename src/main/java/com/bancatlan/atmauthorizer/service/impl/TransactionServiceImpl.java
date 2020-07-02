@@ -148,13 +148,14 @@ public class TransactionServiceImpl implements ITransactionService {
     public Boolean processBatchCancelConfirm(Transaction txn) {
         long initTimeProcess = System.currentTimeMillis();
         //Defrost founds user
-        LOG.info("current txn {}", txn);
+        LOG.info("Current txn {}", txn.getId());
         //If this txn is not confirm or this txn is not VOUCHER_USE_CASE do not do nothing
         if (!txn.getTxnStatus().getId().equals(Constants.CONFIRM_TXN_STATUS) || !txn.getUseCase().getId().equals(Constants.VOUCHER_USE_CASE)) {
+            LOG.info("Rejected txn in process txn status {}, txn use case {}", txn.getTxnStatus().getId(), txn.getUseCase().getId());
             return false;
         }
 
-        String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + txn.getPayerPaymentInstrument().getStrIdentifier() + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
+        String customComment = Constants.STR_DEFROST_SERVICE_NAME + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getPayerPaymentInstrument().getStrIdentifier() + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
         String coreRef = bankService.freezeFoundsProcess(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_DEFROST, txn.getPayer().getUsername(), customComment);
         txn.setCoreReference(coreRef);
 
@@ -467,7 +468,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 PaymentInstrument cstBank = paymentInstrumentService.getById(txn.getPayer().getId());
                 LOG.info(" {} account number of customer {}",cstBank, txn.getPayer().getId());
                 //Account Payer, Amount, comment
-                String _customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + txn.getPayerPaymentInstrument().getStrIdentifier() + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
+                String _customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
                 String _coreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_FREEZE, txn.getPayer().getUsername(), _customComment);
                 txn.setCoreReference(_coreRef);
                 //Update balance payer
@@ -483,7 +484,7 @@ public class TransactionServiceImpl implements ITransactionService {
 
                 //Account Payer, Account Payee, Amount = cta contable qa => 750099900684 RT-USECASE-CTA_ORIGEN-MSISDN_DESTINO
                 //this is a bank transfer with a implicit defrost
-                String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
+                String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
                 String coreRef = bankService.transferMoney(payerPI.getStrIdentifier(), accountATMBASA.getStrIdentifier(), txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment);
                 txn.setCoreReference(coreRef);
                 //Update balance payee
@@ -529,9 +530,9 @@ public class TransactionServiceImpl implements ITransactionService {
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
                 //Defrost founds user
-                LOG.info("customer {}", txn.getPayer().getId());
+                LOG.info("Cancel txn {}", txn.getId());
                 //Account Payer, Amount, comment
-                String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + txn.getPayerPaymentInstrument().getStrIdentifier() + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
+                String customComment = Constants.STR_DEFROST_SERVICE_NAME + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getPayerPaymentInstrument().getStrIdentifier() + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
                 String coreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_DEFROST, txn.getPayer().getUsername(), customComment);
                 txn.setCoreReference(coreRef);
 

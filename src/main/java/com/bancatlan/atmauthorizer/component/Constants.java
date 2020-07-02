@@ -99,7 +99,7 @@ public class Constants {
     /**/
     public static final String STR_ACCOUNTING_TRANSFER_SERVICE_NAME = "Transferencia Contable";
     public static final String STR_FREEZE_SERVICE_NAME = "Congelamiento";
-    public static final String STR_DEFROST_SERVICE_NAME = "Descongelamiento";
+    public static final String STR_DEFROST_SERVICE_NAME = "RST-DEFROST";
     public static final String STR_NOTIFICATION_SERVICE_NAME = "Envio Notificacion";
 
 }
