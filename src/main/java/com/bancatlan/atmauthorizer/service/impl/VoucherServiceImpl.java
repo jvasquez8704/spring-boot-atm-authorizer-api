@@ -325,7 +325,6 @@ public class VoucherServiceImpl implements IVoucherService {
 
         txn.setAtmReference(dto.getTransaction().getAtmReference());
         txn.setVoucher(voucher);//Todo Es mejor crear una tabla maestra
-        //Transaction txnPaidBy = transaction.confirm(txn);
         Transaction txnPaidBy = transaction.preConfirm(txn);
 
         Double currentAmount = voucher.getAmountCurrent() - txnPaidBy.getAmount();

@@ -511,7 +511,7 @@ public class TransactionServiceImpl implements ITransactionService {
         PaymentInstrument accountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
         Customer payee = creatorTxn.getPayee();
 
-        String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
+        String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
         String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), accountATMBASA.getStrIdentifier(), txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment);
         txn.setCoreReference(coreRef);
         //Update balance payee
