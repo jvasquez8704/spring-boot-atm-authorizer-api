@@ -2,13 +2,11 @@ package com.bancatlan.atmauthorizer.service.impl;
 import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
-import com.bancatlan.atmauthorizer.model.Customer;
-import com.bancatlan.atmauthorizer.model.Limit;
-import com.bancatlan.atmauthorizer.model.Transaction;
-import com.bancatlan.atmauthorizer.model.UseCase;
+import com.bancatlan.atmauthorizer.model.*;
 import com.bancatlan.atmauthorizer.repo.ILimitRepo;
 import com.bancatlan.atmauthorizer.service.ILimitService;
 import com.bancatlan.atmauthorizer.service.ITransactionService;
+import com.bancatlan.atmauthorizer.service.ITxnStatusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +29,9 @@ public class LimitServiceImpl implements ILimitService {
 
     @Autowired
     ITransactionService transaction;
+
+    @Autowired
+    ITxnStatusService txnStatusService;
 
     @Override
     public Limit create(Limit obj) {
@@ -105,8 +106,9 @@ public class LimitServiceImpl implements ILimitService {
     /*
     * Get total of debits or credits for a customer in period time specified
     * */
-    private Double getMovementAmountByCurrentDateRange(Customer customer, UseCase useCase, String dateRangeType, Boolean isDebit) {
-        Double amountResult = new Double(0);
+    private Double getMovementAmountByCurrentDateRange(Transaction currentTxn ,Customer customer, UseCase useCase, String dateRangeType, Boolean isDebit) {
+        Double amountResult = currentTxn.getAmount();
+        TxnStatus status = txnStatusService.getById(Constants.CONFIRM_TXN_STATUS);
         LocalDateTime startDay = null;
         LocalDateTime endDay = null;
         LocalDate localDate = LocalDate.now();
@@ -132,7 +134,7 @@ public class LimitServiceImpl implements ILimitService {
 
         LOG.info("isDebit " + isDebit);
         LOG.info("Query for getTransactionsByPayerAndRangeTime " + customer.getId() + " startDay " + startDay.toString() + " endDay " + endDay.toString());
-        List<Transaction> txnList = transaction.getTransactionsByCustomerAndRangeTime(customer, useCase, startDay, endDay,isDebit);
+        List<Transaction> txnList = transaction.getTransactionsByCustomerAndRangeTime(customer, useCase, status, startDay, endDay,isDebit);
        if(!txnList.isEmpty()){
            for (Transaction txn : txnList) {
                amountResult += txn.getAmount();
@@ -164,15 +166,15 @@ public class LimitServiceImpl implements ILimitService {
         }
         Limit limit = txn.getPayer().getCustomerType().getLimit();
         if(limit != null && limit.getActive()){
-            if(getMovementAmountByCurrentDateRange(txn.getPayer(),txn.getUseCase(),Constants.DAILY_RANGE,true) > limit.getDailyDebitLimit()){
+            if (getMovementAmountByCurrentDateRange(txn, txn.getPayer(), txn.getUseCase(), Constants.DAILY_RANGE, true) > limit.getDailyDebitLimit()) {
                 LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_DAILY_DEBIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_DAILY_DEBIT_LIMIT_EXCEEDED);
             }
-            if(getMovementAmountByCurrentDateRange(txn.getPayer(),txn.getUseCase(),Constants.WEEKLY_RANGE,true) > limit.getWeeklyDebitLimit()){
+            if (getMovementAmountByCurrentDateRange(txn, txn.getPayer(), txn.getUseCase(), Constants.WEEKLY_RANGE, true) > limit.getWeeklyDebitLimit()) {
                 LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_WEEKLY_DEBIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_WEEKLY_DEBIT_LIMIT_EXCEEDED);
             }
-            if(getMovementAmountByCurrentDateRange(txn.getPayer(),txn.getUseCase(),Constants.MONTHLY_RANGE,true) > limit.getMonthlyDebitLimit()){
+            if (getMovementAmountByCurrentDateRange(txn, txn.getPayer(), txn.getUseCase(), Constants.MONTHLY_RANGE, true) > limit.getMonthlyDebitLimit()) {
                 LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_MONTHLY_DEBIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_MONTHLY_DEBIT_LIMIT_EXCEEDED);
             }
@@ -196,15 +198,15 @@ public class LimitServiceImpl implements ILimitService {
         }
         Limit limit = txn.getPayee().getCustomerType().getLimit();
         if(limit != null && limit.getActive()){
-            if(getMovementAmountByCurrentDateRange(txn.getPayee(),txn.getUseCase(),Constants.DAILY_RANGE,false) > limit.getDailyCreditLimit()){
+            if (getMovementAmountByCurrentDateRange(txn, txn.getPayee(), txn.getUseCase(), Constants.DAILY_RANGE, false) > limit.getDailyCreditLimit()) {
                 LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_DAILY_CREDIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_DAILY_CREDIT_LIMIT_EXCEEDED);
             }
-            if(getMovementAmountByCurrentDateRange(txn.getPayee(),txn.getUseCase(),Constants.WEEKLY_RANGE,false) > limit.getWeeklyCreditLimit()){
+            if (getMovementAmountByCurrentDateRange(txn, txn.getPayee(), txn.getUseCase(), Constants.WEEKLY_RANGE, false) > limit.getWeeklyCreditLimit()) {
                 LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_WEEKLY_CREDIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_WEEKLY_CREDIT_LIMIT_EXCEEDED);
             }
-            if(getMovementAmountByCurrentDateRange(txn.getPayee(),txn.getUseCase(),Constants.MONTHLY_RANGE,false) > limit.getMonthlyCreditLimit()){
+            if (getMovementAmountByCurrentDateRange(txn, txn.getPayee(), txn.getUseCase(), Constants.MONTHLY_RANGE, false) > limit.getMonthlyCreditLimit()) {
                 LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_MONTHLY_CREDIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_MONTHLY_CREDIT_LIMIT_EXCEEDED);
             }

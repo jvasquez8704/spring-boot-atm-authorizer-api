@@ -194,14 +194,17 @@ public class TransactionServiceImpl implements ITransactionService {
     }
 
     @Override
-    public List<Transaction> getTransactionsByCustomerAndRangeTime(Customer customer, UseCase useCase, LocalDateTime startDateTime, LocalDateTime endDateTime, Boolean isDebit) {
+    public List<Transaction> getTransactionsByCustomerAndRangeTime(Customer customer, UseCase useCase, TxnStatus status, LocalDateTime startDateTime, LocalDateTime endDateTime, Boolean isDebit) {
         List<Transaction> txnList = null;
         if (isDebit == null) {
-            txnList = repo.getTransactionsByPayerOrPayeeAndUseCaseAndCreationDateBetween(customer, customer, useCase, startDateTime, endDateTime);
+            //txnList = repo.getTransactionsByPayerOrPayeeAndUseCaseAndCreationDateBetween(customer, customer, useCase, startDateTime, endDateTime);
+            txnList = repo.getTransactionsByPayerOrPayeeAndUseCaseAndTxnStatusAndCreationDateBetween(customer, customer, useCase, status, startDateTime, endDateTime);
         } else if (isDebit) {
-            txnList = repo.getTransactionsByPayerAndUseCaseAndCreationDateBetween(customer, useCase, startDateTime, endDateTime);
+            //txnList = repo.getTransactionsByPayerAndUseCaseAndCreationDateBetween(customer, useCase, startDateTime, endDateTime);
+            txnList = repo.getTransactionsByPayerAndUseCaseAndTxnStatusAndCreationDateBetween(customer, useCase, status, startDateTime, endDateTime);
         } else {
-            txnList = repo.getTransactionsByPayeeAndUseCaseAndCreationDateBetween(customer, useCase, startDateTime, endDateTime);
+            //txnList = repo.getTransactionsByPayeeAndUseCaseAndCreationDateBetween(customer, useCase, startDateTime, endDateTime);
+            txnList = repo.getTransactionsByPayeeAndUseCaseAndTxnStatusAndCreationDateBetween(customer, useCase, status, startDateTime, endDateTime);
         }
         return txnList;
     }
