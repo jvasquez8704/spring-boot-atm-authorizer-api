@@ -471,10 +471,10 @@ public class VoucherServiceImpl implements IVoucherService {
 
         /**
          * Validation for status account */
-        if (dto.getTransaction().getPayerPaymentInstrument() == null || dto.getTransaction().getPayerPaymentInstrument().getStrCustomStatus() == null || !dto.getTransaction().getPayerPaymentInstrument().getStrCustomStatus().equals(Constants.BANK_CURRENCY_STATUS_ACTIVE)) {
+        /*if (dto.getTransaction().getPayerPaymentInstrument() == null || dto.getTransaction().getPayerPaymentInstrument().getStrCustomStatus() == null || !dto.getTransaction().getPayerPaymentInstrument().getStrCustomStatus().equals(Constants.BANK_CURRENCY_STATUS_ACTIVE)) {
             LOG.error("Custom Exception {}", AuthorizerError.CUSTOM_ERROR_NOT_VALID_ACCOUNT_STATUS);
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.CUSTOM_ERROR_NOT_VALID_ACCOUNT_STATUS);
-        }
+        }*/
 
         /**
          * Validation for currency type account */
