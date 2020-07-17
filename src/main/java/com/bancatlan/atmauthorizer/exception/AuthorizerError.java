@@ -49,7 +49,7 @@ public enum AuthorizerError implements IError {
     REQUEST_PASSWORD_NULL(38,"The user password cannot be empty or null"),
     ADMIN_SYNC_ERROR(39,"Error when syncronizing the user token"),
     REQUEST_SYNC_NULL(40,"The syncronization request cannot be null"),
-    CRM_NOT_FOUND(41,"Could not retrieve customer information for this id"),
+    CUSTOM_ERROR_NOT_VALID_ACCOUNT_TYPE(41,"Selecciona una cuenta."),
     PARSING_ERROR_VALIDATING_INSUFFICIENT_FUNDS(42,"Error al validar la cuenta seleccionada."),
     CUSTOM_ERROR_INSUFFICIENT_FUNDS(43,"Fondos insuficientes en la cuenta seleccionada."),
     CUSTOM_ERROR_NOT_VALID_ACCOUNT_STATUS(44,"Selecciona una cuenta valida."),

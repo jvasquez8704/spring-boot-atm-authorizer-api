@@ -477,6 +477,14 @@ public class VoucherServiceImpl implements IVoucherService {
         }*/
 
         /**
+         * Validation for type account
+         */
+        if (dto.getTransaction().getPayerPaymentInstrument() == null || dto.getTransaction().getPayerPaymentInstrument().getStrIdentifier() == null || dto.getTransaction().getPayerPaymentInstrument().getStrIdentifier().length() > 15 ) {
+            LOG.error("Custom Exception {}", AuthorizerError.CUSTOM_ERROR_NOT_VALID_ACCOUNT_TYPE);
+            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.CUSTOM_ERROR_NOT_VALID_ACCOUNT_TYPE);
+        }
+
+        /**
          * Validation for currency type account */
         if (dto.getTransaction().getCurrency() == null || dto.getTransaction().getCurrency().getCode() == null || !(dto.getTransaction().getCurrency().getCode().equals(Constants.BANK_HN_CURRENCY) || dto.getTransaction().getCurrency().getCode().equals(Constants.HN_CURRENCY))) {
             LOG.error("Custom Exception {}", AuthorizerError.NOT_SUPPORT_CURRENCY_DIFFERENT_HN);
