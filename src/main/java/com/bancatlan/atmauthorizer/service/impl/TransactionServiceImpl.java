@@ -407,8 +407,9 @@ public class TransactionServiceImpl implements ITransactionService {
 
                 Customer cst = customer.getByMsisdn(txn.getPayer().getMsisdn());
                 if (cst == null) {
-                    LOG.error("processAuthentication: Customer with numberPhone specified in request not fount, error: {}", AtmError.ERROR_25);
-                    throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_25);
+                    //Replaced 14 instead 25
+                    LOG.error("processAuthentication: Customer with numberPhone specified in request not fount, error: {}", AtmError.ERROR_14);
+                    throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_14);
                 }
 
                 Customer userATM = customer.getById(Constants.ATM_USER_ID);

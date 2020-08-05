@@ -555,8 +555,9 @@ public class VoucherServiceImpl implements IVoucherService {
 
         Customer cst = customer.getByMsisdn(dto.getTransaction().getPayer().getMsisdn());
         if (cst == null) {
-            LOG.error("Customer with numberPhone specified in request not fount {}", AtmError.ERROR_25);
-            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_25, dto);
+            //Replaced 14 instead 25
+            LOG.error("Customer with numberPhone specified in request not fount {}", AtmError.ERROR_14);
+            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_14, dto);
         }
 
         Customer userATM = customer.getById(Constants.ATM_USER_ID);
