@@ -36,7 +36,7 @@ public enum AuthorizerError implements IError {
     MISSING_CONFIRM_TARGET_TELEPHONE_FIELD(25,"Confirma teléfono destino."),
     MISSING_TARGET_TELEPHONE_FIELD(26,"Ingresa teléfono destino."),
     NOT_MATCH_CONFIRM_TARGET_TELEPHONE(27,"Campos de teléfono no coinciden."),
-    BAD_FORMAT_TARGET_TELEPHONE(28,"Favor validar los campos de número de teléfono. Debe cumplir con valores númericos y de 8 dígitos."),
+    BAD_FORMAT_TARGET_TELEPHONE(28,"Favor validar los campos de número de teléfono. Debe cumplir con valores númericos de 8 dígitos."),
     MISSING_WRITTEN_AMOUNT(29,"Ingresa el monto."),
     NOT_MATCH_AMOUNT_WITH_ATM(30,"Los montos deben ser múltiplos de LPS. 100, máximo LPS.5,000."),
     USER_NOT_EXIST(31,"The user does not exist"),
@@ -100,7 +100,7 @@ public enum AuthorizerError implements IError {
     NOT_FOUND_CURRENCY(82, "Currency not found"),
     ERROR_SERVICE_BANK_FREEZE(83,"Error invoking SIOSCongelamientoCuentas service"),
     CUSTOM_ERROR_SERVICE_BANK_FREEZE(84,"Custom error in response SIOSCongelamientoCuentas service"),
-    NOT_SUPPORT_CURRENCY_DIFFERENT_HN(85, "Seleccione una cuenta en LPS."),
+    NOT_SUPPORT_CURRENCY_DIFFERENT_HN(85, "Selecciona una cuenta en LPS."),
     ;
 
 
