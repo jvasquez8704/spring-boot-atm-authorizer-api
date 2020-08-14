@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.concurrent.TimeUnit;
+import java.util.Random;
 
 @RestController
 @RequestMapping("/vouchers")
@@ -19,6 +21,12 @@ public class VoucherController {
     @Autowired
     IVoucherService service;
     CustomStatus successStatus = new CustomStatus(Constants.INT_BANK_SUCCESS_STATUS_CODE, Constants.BANK_SUCCESS_STATUS_TYPE, Constants.BANK_SUCCESS_STATUS_MESSAGE, Constants.BANK_STRING_ZERO);
+    
+    @Value("${util.similator.required}")
+    String isSimulatorRequired;
+
+    @Value("${util.similator.ramdon.delay}")
+    String isSimulatorRamdon;
 
     @PostMapping("/process")
     private ResponseEntity<CustomResponse> processVoucher(@RequestBody VoucherTransactionDTO dto) {
@@ -33,6 +41,7 @@ public class VoucherController {
         if (dto.getTransaction() == null || dto.getTransaction().getPayer() == null || dto.getTransaction().getPayer().getUsername() == null || dto.getTransaction().getPayer().getUsername().equals("")) {
             throw new ModelCustomErrorException("Some parameter required on request is missing", AuthorizerError.MALFORMED_URL);
         }
+        this.getSimulator();
         return new ResponseEntity<>(new CustomResponse(service.getAllByOcbUser(dto.getTransaction().getPayer().getUsername()), successStatus), HttpStatus.CREATED);
     }
 
@@ -49,7 +58,23 @@ public class VoucherController {
     @PostMapping("/atm-process")
     private ResponseEntity<CustomResponse> atmProcessVoucher(@RequestBody VoucherTransactionDTO dto){
         successStatus.setCode(Constants.ATM_SUCCESS_STATUS_CODE);
+        this.getSimulator();
         return new ResponseEntity<CustomResponse>(new CustomResponse(service.voucherProcess(dto), successStatus),HttpStatus.OK);
+    }
+
+    private void getSimulator(){
+        if(isSimulatorRequired != null && isSimulatorRequired.equalsIgnoreCase("Y")){
+            try {
+                Random r = new Random( System.currentTimeMillis() );
+                int num =  ((1 + r.nextInt(2)) * 10000 + r.nextInt(10000));
+                if(isSimulatorRamdon != null && isSimulatorRamdon.equalsIgnoreCase("Y") && num % 2 == 0){
+                    TimeUnit.SECONDS.sleep(17);
+                }
+                System.out.println("Delay for 17 SECONDS " + num);
+            } catch(Exception e) {
+                System.out.println("error in Delay" + e.getMessage());
+            }
+        }
     }
 
       /*
