@@ -68,7 +68,7 @@ public class VoucherController {
             try {
                 Random r = new Random( System.currentTimeMillis() );
                 int num =  ((1 + r.nextInt(2)) * 10000 + r.nextInt(10000));
-                num = isSimulatorRamdon != null && isSimulatorRamdon.equalsIgnoreCase("Y") ? num : 3;
+                num = isSimulatorRamdon != null && isSimulatorRamdon.equalsIgnoreCase("Y") ? num : 2;
                 if(num % 2 == 0){
                     TimeUnit.SECONDS.sleep(17);
                 }
