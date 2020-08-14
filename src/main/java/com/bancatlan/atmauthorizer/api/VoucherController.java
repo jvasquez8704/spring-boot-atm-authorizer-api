@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
 import java.util.concurrent.TimeUnit;
 import java.util.Random;
 
@@ -67,7 +68,8 @@ public class VoucherController {
             try {
                 Random r = new Random( System.currentTimeMillis() );
                 int num =  ((1 + r.nextInt(2)) * 10000 + r.nextInt(10000));
-                if(isSimulatorRamdon != null && isSimulatorRamdon.equalsIgnoreCase("Y") && num % 2 == 0){
+                num = isSimulatorRamdon != null && isSimulatorRamdon.equalsIgnoreCase("Y") ? num : 3;
+                if(num % 2 == 0){
                     TimeUnit.SECONDS.sleep(17);
                 }
                 System.out.println("Delay for 17 SECONDS " + num);
