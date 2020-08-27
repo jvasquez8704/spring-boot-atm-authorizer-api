@@ -5,6 +5,7 @@ target/
 !**/src/test/**
 *.properties
 logs/
+pom.xml
 ### STS ###
 .apt_generated
 .classpath
