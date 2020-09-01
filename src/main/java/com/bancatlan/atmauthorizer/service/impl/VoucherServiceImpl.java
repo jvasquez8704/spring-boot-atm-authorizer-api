@@ -70,6 +70,8 @@ public class VoucherServiceImpl implements IVoucherService {
             case Constants.BANK_ACTION_GUIP:
                 VoucherTransactionDTO firstCall = this.bankVerifyPayment(dto);
                 return this.bankConfirmPayment(firstCall);
+            case Constants.BANK_ACTION_CANCEL:
+                return processCancelVoucher(dto);
             default:
                 LOG.error("Action not supported {}", dto.getAction());
                 throw new ModelAtmErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_SUPPORTED_VOUCHER_ACTION, dto);
@@ -226,6 +228,34 @@ public class VoucherServiceImpl implements IVoucherService {
     }
 
     @Override
+    public Voucher cancel(Voucher voucher) {
+        Voucher vhr = getById(voucher.getId());
+        if (!voucher.getAmountInitial().equals(voucher.getAmountCurrent()) || !vhr.getActive()) {
+            LOG.error("Voucher {} could not be cancelled voucher amount {} and status voucher {}", vhr.getId(), vhr.getAmountCurrent(), vhr.getActive());
+            throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.VOUCHER_ALREADY_INACTIVE_ERROR);
+        }
+
+        transaction.cancelConfirm(vhr.getTxnCreatedBy());
+        voucher.setActive(false);
+        voucher.setCanceled(true);
+        return this.update(voucher);
+    }
+
+    @Override
+    public Voucher cancelByTxn(Transaction txn) {
+        Voucher voucher = getVoucherByCreatorTransaction(txn);
+        if (!voucher.getAmountInitial().equals(voucher.getAmountCurrent()) || !voucher.getActive()) {
+            LOG.error("Voucher {} could not be cancelled voucher amount {} and status voucher {}", voucher.getId(), voucher.getAmountCurrent(), voucher.getActive());
+            throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.VOUCHER_ALREADY_INACTIVE_ERROR);
+        }
+
+        transaction.cancelConfirm(txn);
+        voucher.setActive(false);
+        voucher.setCanceled(true);
+        return this.update(voucher);
+    }
+
+    @Override
     public List<Voucher> getAllByOcbUser(String ocbUser) {
         return repo.findAllActiveByOcbUser(ocbUser);
     }
@@ -367,6 +397,13 @@ public class VoucherServiceImpl implements IVoucherService {
         voucher.setCustomerUpdate(voucher.getCustomer());
         dto.setTransaction(txnPaidBy);
         dto.setVoucher(this.update(voucher));
+        return dto;
+    }
+
+    public VoucherTransactionDTO processCancelVoucher(VoucherTransactionDTO dto) {
+        Voucher voucher = cancelByTxn(dto.getTransaction());
+        dto.setTransaction(voucher.getTxnCreatedBy());
+        dto.setVoucher(voucher);
         return dto;
     }
 

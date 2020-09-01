@@ -30,6 +30,7 @@ public class Constants {
     public static final String STR_VALUE_1 = "1";
     public static final String BANK_ACCOUNT_TYPE_1 = "1";
     public static final String BANK_ACCOUNT_TYPE_2 = "2";
+    public static final String BANK_ACTION_CANCEL = "R";
     public static final String BANK_ACTION_VERIFY = "C";
     public static final String BANK_ACTION_FREEZE = "C";
     public static final String BANK_ACTION_GUIP = "N";
