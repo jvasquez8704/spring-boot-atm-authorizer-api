@@ -103,4 +103,9 @@ public class Constants {
     public static final String STR_DEFROST_SERVICE_NAME = "RST-DEFROST";
     public static final String STR_NOTIFICATION_SERVICE_NAME = "Envio Notificacion";
 
+    /*application Id*/
+    public static final String OCB_APP_ID = "001";
+    public static final String GUIP_APP_ID = "2278";
+    public static final String VOUCHER_BASA_APP_ID = "2272";
+
 }

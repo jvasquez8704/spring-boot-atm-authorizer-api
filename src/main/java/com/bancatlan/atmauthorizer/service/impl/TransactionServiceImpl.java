@@ -195,6 +195,11 @@ public class TransactionServiceImpl implements ITransactionService {
     }
 
     @Override
+    public Transaction getTransactionByApplicationIdAndChannelReference(String applicationId, String channelReference) {
+        return repo.getTransactionByApplicationIdAndChannelReference(applicationId, channelReference);
+    }
+
+    @Override
     public List<Transaction> getTransactionsByCustomerAndRangeTime(Customer customer, UseCase useCase, TxnStatus status, LocalDateTime startDateTime, LocalDateTime endDateTime, Boolean isDebit) {
         List<Transaction> txnList = null;
         if (isDebit == null) {

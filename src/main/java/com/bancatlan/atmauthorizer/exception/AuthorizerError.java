@@ -18,7 +18,7 @@ public enum AuthorizerError implements IError {
     ADMIN_LOGOUT_ERROR(7,"LogOut failed!"),
     ADMIN_USER_LIST_ERROR(8,"Error when retrieving the user list"),
     ADMIN_CREATE_USER_ERROR(9,"Error when creating the user"),
-    ADMIN_CREATE_SOFT_TOKEN_ERROR(10,"Error when creating the soft token"),
+    GUIP_TXN_NOT_FOUND(10,"Mymo Txn not found"),
     VOUCHER_ALREADY_INACTIVE_ERROR(11,"Voucher is already inactive or so"),
     NOT_SUPPORT_USE_CASE(12,"Use case not support"),
     DUPLICATE_USER_ERROR(13,"More than one user found with the same id, cannot continue"),
