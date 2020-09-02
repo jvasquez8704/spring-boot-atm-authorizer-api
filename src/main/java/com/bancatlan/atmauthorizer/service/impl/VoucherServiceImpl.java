@@ -407,6 +407,7 @@ public class VoucherServiceImpl implements IVoucherService {
                 LOG.error("Guip TXN with app ID {} and channelReference {} not found, error {} ", dto.getTransaction().getApplicationId(), dto.getTransaction().getChannelReference(), AuthorizerError.GUIP_TXN_NOT_FOUND);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.GUIP_TXN_NOT_FOUND);
             }
+            dto.setTransaction(mymoTxn);
         }
 
         Voucher voucher = cancelByTxn(dto.getTransaction());
