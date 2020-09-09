@@ -44,8 +44,8 @@ public enum AuthorizerError implements IError {
     BAD_FORMAT_SECRET_CODE(33,"El campo clave de retiro debe ser un número de 4 dígitos."),
     REQUEST_UNLOCK_USER_ERROR(34,"The unlock user code cannot be null or empty"),
     CUSTOM_ERROR_NOT_SUPPORTED_COMMUNICATION_COMPANY(35,"Campos de teléfono deben iniciar con 3, 7, 8 y 9."),
-    OCB_LOGOUT_ERROR(36,"Error when executing the logout of OCB"),
-    REQUEST_OCB_VERIFY_NULL(37,"The ocb verifier request cannot be null"),
+    MISSING_PAYER_MSISDN(36,"Debes actualizar el número móvil de tu AOL, contacta nuestro call center."),/*Todo: error 36 => system message: Payer msisdn it's missed */
+    BAD_FORMAT_PAYER_MSISDN(37,"Debes actualizar el número móvil de tu AOL, contacta nuestro call center."),/*Todo: error 37 => system message: Payer msisdn it's bad format */
     REQUEST_PASSWORD_NULL(38,"The user password cannot be empty or null"),
     ADMIN_SYNC_ERROR(39,"Error when syncronizing the user token"),
     REQUEST_SYNC_NULL(40,"The syncronization request cannot be null"),
