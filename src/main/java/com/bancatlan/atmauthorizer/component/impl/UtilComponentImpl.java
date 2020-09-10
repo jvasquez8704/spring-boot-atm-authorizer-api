@@ -9,14 +9,14 @@ import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.lang.ref.SoftReference;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -158,6 +158,13 @@ public class UtilComponentImpl implements IUtilComponent {
             telephone = telephone.substring(init);
         }
         return telephone;
+    }
+
+    @Override
+    public String generateAtmReference(String key1, String key2) {
+        Optional<String> k1 = Optional.ofNullable(key1);
+        Optional<String> k2 = Optional.ofNullable(key2);
+        return (LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE) + k1.orElse(Constants.BANK_STRING_ZERO) + k2.orElse(Constants.BANK_STRING_ZERO)).trim();
     }
 
     /**
