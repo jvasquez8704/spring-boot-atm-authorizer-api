@@ -440,7 +440,7 @@ public class VoucherServiceImpl implements IVoucherService {
 
         /**
          * Validating format payer telephone */
-        if (!utilComponent.isValidPhoneNumber(dto.getTransaction().getPayer().getMsisdn())) {
+        if (!utilComponent.isValidMsisdn(dto.getTransaction().getPayer().getMsisdn())) {
             LOG.error("Custom Exception Payer MSISDN {}", AuthorizerError.BAD_FORMAT_PAYER_MSISDN);
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.BAD_FORMAT_PAYER_MSISDN);
         }
