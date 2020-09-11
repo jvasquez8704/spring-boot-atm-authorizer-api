@@ -63,6 +63,8 @@ public class Constants {
 
     /*COUNTRY CODES*/
     public static final String HN_COUNTRY2CODE =  "HN";
+    public static final String HN_MSISDN_CODE = "+504";
+    public static final String HND_MSISDN_CODE = "504";
 
     /*DEFAULT LIMIT CONFIGURED*/
     public static final long DEFAULT_LIMIT =  1;
