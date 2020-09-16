@@ -451,7 +451,11 @@ public class VoucherServiceImpl implements IVoucherService {
         }
 
         /**
-         * Validating format telephone of beneficiary/payee */
+         * Validating format telephone of beneficiary/payee
+         * Before cleaning spaces
+         * */
+        dto.getTransaction().getPayee().setMsisdn(dto.getTransaction().getPayee().getMsisdn().trim());
+
         if (!utilComponent.isValidPhoneNumber(dto.getTransaction().getPayee().getMsisdn())) {
             LOG.error("Custom Exception Payee MSISDN {}", AuthorizerError.BAD_FORMAT_TARGET_TELEPHONE);
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.BAD_FORMAT_TARGET_TELEPHONE);
@@ -470,7 +474,10 @@ public class VoucherServiceImpl implements IVoucherService {
         }
 
         /**
-         * Confirmation of telephone fields */
+         * Confirmation of telephone fields
+         * Before cleaning spaces
+         * */
+        dto.setValidatePayeeMsisdn(dto.getValidatePayeeMsisdn().trim());
         if (!dto.getValidatePayeeMsisdn().equals(dto.getTransaction().getPayee().getMsisdn())) {
             LOG.error("Custom Exception {}", AuthorizerError.NOT_MATCH_CONFIRM_TARGET_TELEPHONE.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_MATCH_CONFIRM_TARGET_TELEPHONE);
