@@ -30,7 +30,10 @@ public class UtilComponentImpl implements IUtilComponent {
     private Map<String, Double> amountValues = new HashMap<>();
     @Override
     public String getPickupCodeByCellPhoneNumber(String cellPhoneNumber) {
-        return this.getRandomNumber(Constants.PIVOT_PICKUP_CODE_RANGE) + this.getCode(cellPhoneNumber);
+        /**
+         * use getCode => to make less collision-able the pickupCode for a customer
+         */
+        return this.getRandomNumber(Constants.PIVOT_PICKUP_CODE_RANGE) + this.encrypt(cellPhoneNumber);
     }
 
     @Override
