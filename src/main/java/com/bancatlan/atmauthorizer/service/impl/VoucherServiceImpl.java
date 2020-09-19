@@ -322,7 +322,7 @@ public class VoucherServiceImpl implements IVoucherService {
         //(4)
         transaction.verify(dto.getTransaction());
 
-        txn.setAtmReference(dto.getTransaction().getAtmReference());
+        txn.setAtmReference(utilComponent.generateAtmReference(dto.getAtmBody().getF11(), dto.getTransaction().getAtmReference()));
         txn.setVoucher(voucher);//Todo Es mejor crear una tabla maestra
         Transaction txnPaidBy = transaction.preConfirm(txn);
 
@@ -346,7 +346,7 @@ public class VoucherServiceImpl implements IVoucherService {
         this.validateAtmRequest(dto);
 
         //find confirmed txn
-        Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference(), Constants.WAITING_AUTOMATIC_PROCESS_TXN_STATUS);
+        Transaction txn = transaction.getTransactionByAtmReference(utilComponent.generateAtmReference(dto.getAtmBody().getF11(), dto.getTransaction().getAtmReference()), Constants.WAITING_AUTOMATIC_PROCESS_TXN_STATUS);
         if (txn == null) {
             LOG.error("processCancelWithdraw: atmReference was not found or it already cancelled {}", AtmError.ERROR_77);
             throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_77, dto);

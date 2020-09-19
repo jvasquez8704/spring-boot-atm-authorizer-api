@@ -14,4 +14,5 @@ public interface IUtilComponent {
     Double getAmountFromKey(String key);
     String createAuthorizationCode(int length);
     String adjustingTelephone(String telephone);
+    String generateAtmReference(String key1, String key2);
 }
