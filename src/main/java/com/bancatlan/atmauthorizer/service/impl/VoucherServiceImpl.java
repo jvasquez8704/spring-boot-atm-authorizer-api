@@ -323,7 +323,7 @@ public class VoucherServiceImpl implements IVoucherService {
         transaction.verify(dto.getTransaction());
 
         txn.setAtmReference(utilComponent.generateAtmReference(dto.getAtmBody().getF11(), dto.getTransaction().getAtmReference()));
-        txn.setVoucher(voucher);//Todo Es mejor crear una tabla maestra
+        txn.setVoucher(voucher);//Todo consider to make a transactional table
         Transaction txnPaidBy = transaction.preConfirm(txn);
 
         Double currentAmount = voucher.getAmountCurrent() - txnPaidBy.getAmount();
@@ -337,7 +337,7 @@ public class VoucherServiceImpl implements IVoucherService {
         voucher.setCustomerUpdate(txn.getPayer());
         dto.setVoucher(this.update(voucher));
 
-        //TODO according Oscar's new architecture call a service to inform GUIP payer a success txn
+        //TODO call MYMO update transaction
         return dto;
     }
 
@@ -517,7 +517,7 @@ public class VoucherServiceImpl implements IVoucherService {
         }
 
         if (dto.getAction().equals(Constants.ITM_MTI_WITHDRAW)) {
-            Transaction txn = transaction.getTransactionByAtmReference(dto.getTransaction().getAtmReference(), Constants.CONFIRM_TXN_STATUS);
+            Transaction txn = transaction.getTransactionByAtmReference(utilComponent.generateAtmReference(dto.getAtmBody().getF11(), dto.getTransaction().getAtmReference()), Constants.CONFIRM_TXN_STATUS);
             if (txn != null) {
                 LOG.error("txn already exist with atmReference in request {}", AtmError.ERROR_94);
                 throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_94, dto);
