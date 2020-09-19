@@ -397,6 +397,7 @@ public class VoucherServiceImpl implements IVoucherService {
         }
 
         /**
+         * PAYEE
          * Validating telephone field */
         if (dto.getTransaction().getPayee() == null || dto.getTransaction().getPayee().getMsisdn() == null || dto.getTransaction().getPayee().getMsisdn().equals("")) {
             LOG.error("Custom Exception {}", AuthorizerError.MISSING_TARGET_TELEPHONE_FIELD);
@@ -404,9 +405,13 @@ public class VoucherServiceImpl implements IVoucherService {
         }
 
         /**
-         * Validating format telephone of beneficiary/payee */
+         * Validating format telephone of beneficiary/payee
+         * Before cleaning spaces
+         * */
+        dto.getTransaction().getPayee().setMsisdn(dto.getTransaction().getPayee().getMsisdn().trim());
+
         if (!utilComponent.isValidPhoneNumber(dto.getTransaction().getPayee().getMsisdn())) {
-            LOG.error("Custom Exception {}", AuthorizerError.BAD_FORMAT_TARGET_TELEPHONE);
+            LOG.error("Custom Exception Payee MSISDN {}", AuthorizerError.BAD_FORMAT_TARGET_TELEPHONE);
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.BAD_FORMAT_TARGET_TELEPHONE);
         }
 
@@ -423,10 +428,28 @@ public class VoucherServiceImpl implements IVoucherService {
         }
 
         /**
-         * Confirmation of telephone fields */
+         * Confirmation of telephone fields
+         * Before cleaning spaces
+         * */
+        dto.setValidatePayeeMsisdn(dto.getValidatePayeeMsisdn().trim());
         if (!dto.getValidatePayeeMsisdn().equals(dto.getTransaction().getPayee().getMsisdn())) {
             LOG.error("Custom Exception {}", AuthorizerError.NOT_MATCH_CONFIRM_TARGET_TELEPHONE.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_MATCH_CONFIRM_TARGET_TELEPHONE);
+        }
+
+        /**
+         * PAYER
+         * Validating telephone field */
+        if (dto.getTransaction().getPayer() == null || dto.getTransaction().getPayer().getMsisdn() == null || dto.getTransaction().getPayer().getMsisdn().equals("")) {
+            LOG.error("Custom Exception {}", AuthorizerError.MISSING_PAYER_MSISDN);
+            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_PAYER_MSISDN);
+        }
+
+        /**
+         * Validating format payer telephone */
+        if (!utilComponent.isValidMsisdn(dto.getTransaction().getPayer().getMsisdn())) {
+            LOG.error("Custom Exception Payer MSISDN {}", AuthorizerError.BAD_FORMAT_PAYER_MSISDN);
+            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.BAD_FORMAT_PAYER_MSISDN);
         }
 
         if (dto.getAmountKey() == null || dto.getAmountKey().equals("")) {

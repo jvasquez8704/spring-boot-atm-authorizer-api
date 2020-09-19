@@ -49,6 +49,25 @@ public class UtilComponentImpl implements IUtilComponent {
     }
 
     @Override
+    public Boolean isValidMsisdn(String cellPhoneNumber) {
+        if (cellPhoneNumber == null) {
+            return false;
+        }
+
+        cellPhoneNumber = cellPhoneNumber.replaceAll("[^0-9]", "");
+
+        if (!(cellPhoneNumber.length() == 8 || cellPhoneNumber.length() == 11)) {
+            return false;
+        }
+
+        if (cellPhoneNumber.length() == 11 && !cellPhoneNumber.startsWith(Constants.HND_MSISDN_CODE)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
     public Boolean isValidAvailableBalance(String availableBalance, Double txnAmount) {
         if (pattern.matcher(availableBalance).matches()) {
             Double _availableBalance = Double.parseDouble(availableBalance);

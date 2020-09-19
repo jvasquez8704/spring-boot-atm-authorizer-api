@@ -20,12 +20,12 @@ public enum AuthorizerError implements IError {
     ADMIN_CREATE_USER_ERROR(9,"Error when creating the user"),
     ADMIN_CREATE_SOFT_TOKEN_ERROR(10,"Error when creating the soft token"),
     ADMIN_ACTIVATE_SOFT_TOKEN_ERROR(11,"Error when activating soft token"),
-    NOT_SUPPORT_USE_CASE(12,"Use case not support"),
+    UNEXPECTED_ERROR(12,"Error en el servicio, por favor intenta de nuevo, si el problema persiste contacta nuestro call center."),/*Unexpected exception*/
     DUPLICATE_USER_ERROR(13,"More than one user found with the same id, cannot continue"),
     MISSING_AMOUNT_TO_TRANSFER_FIELD(14,"Seleccione monto."),
     EXTERNAL_USER_DATA_ERROR(15,"Error when recovering the user data"),
     EXTERNAL_SMS_ERROR(16,"Basa Custom error when tried sending the sms"),
-    UNEXPECTED_ERROR(17,"Unexpected exception"),
+    NOT_SUPPORT_USE_CASE(17,"Use case not support"),
     EXTERNAL_USER_DATA_NOT_FOUND_ERROR(18,"Data not defined for the user"),
     PARSING_ERROR_VALIDATING_COMMUNICATION_COMPANY(19,"Error validando compañia telefónica."),
     ENCRYPT_ERROR(20,"Error when generating the encryption"),
@@ -44,8 +44,8 @@ public enum AuthorizerError implements IError {
     BAD_FORMAT_SECRET_CODE(33,"El campo clave de retiro debe ser un número de 4 dígitos."),
     REQUEST_UNLOCK_USER_ERROR(34,"The unlock user code cannot be null or empty"),
     CUSTOM_ERROR_NOT_SUPPORTED_COMMUNICATION_COMPANY(35,"Campos de teléfono deben iniciar con 3, 7, 8 y 9."),
-    OCB_LOGOUT_ERROR(36,"Error when executing the logout of OCB"),
-    REQUEST_OCB_VERIFY_NULL(37,"The ocb verifier request cannot be null"),
+    MISSING_PAYER_MSISDN(36,"Actualiza el número móvil de tu banca en línea, contacta nuestro call center."),/*Todo: error 36 => system message: Payer msisdn it's missed */
+    BAD_FORMAT_PAYER_MSISDN(37,"Actualiza el número móvil de tu banca en línea, contacta nuestro call center."),/*Todo: error 37 => system message: Payer msisdn it's bad format */
     REQUEST_PASSWORD_NULL(38,"The user password cannot be empty or null"),
     ADMIN_SYNC_ERROR(39,"Error when syncronizing the user token"),
     REQUEST_SYNC_NULL(40,"The syncronization request cannot be null"),
