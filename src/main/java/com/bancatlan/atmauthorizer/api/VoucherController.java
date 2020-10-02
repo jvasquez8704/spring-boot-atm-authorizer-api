@@ -2,6 +2,7 @@ package com.bancatlan.atmauthorizer.api;
 
 import com.bancatlan.atmauthorizer.api.http.CustomStatus;
 import com.bancatlan.atmauthorizer.api.http.CustomResponse;
+import com.bancatlan.atmauthorizer.api.http.OcbRequest;
 import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.dto.VoucherTransactionDTO;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
@@ -50,6 +51,18 @@ public class VoucherController {
     private ResponseEntity<CustomResponse> atmProcessVoucher(@RequestBody VoucherTransactionDTO dto){
         successStatus.setCode(Constants.ATM_SUCCESS_STATUS_CODE);
         return new ResponseEntity<CustomResponse>(new CustomResponse(service.voucherProcess(dto), successStatus),HttpStatus.OK);
+    }
+
+    @PostMapping("/verify")
+    private ResponseEntity<CustomResponse> verifyVoucher(@RequestBody OcbRequest dto){
+        successStatus.setCode(Constants.ATM_SUCCESS_STATUS_CODE);
+        return new ResponseEntity<>(new CustomResponse(dto, successStatus),HttpStatus.OK);
+    }
+
+    @PostMapping("/confirm")
+    private ResponseEntity<CustomResponse> confirmVoucher(@RequestBody OcbRequest dto){
+        successStatus.setCode(Constants.ATM_SUCCESS_STATUS_CODE);
+        return new ResponseEntity<>(new CustomResponse(dto, successStatus),HttpStatus.OK);
     }
 
       /*
