@@ -5,7 +5,7 @@ import com.bancatlan.atmauthorizer.api.model.SpareParametersDTO;
 import com.bancatlan.atmauthorizer.model.Transaction;
 import com.bancatlan.atmauthorizer.model.Voucher;
 
-public class OcbRequest {
+public class OcbRequest implements IOcbRequest {
     private Voucher voucher;
     private Transaction transaction;
     private Auth auth;

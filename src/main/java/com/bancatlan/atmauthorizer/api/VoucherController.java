@@ -8,6 +8,7 @@ import com.bancatlan.atmauthorizer.dto.VoucherTransactionDTO;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.service.IVoucherService;
+import com.bancatlan.atmauthorizer.service.impl.VoucherServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ public class VoucherController {
 
     @Autowired
     IVoucherService service;
+    VoucherServiceImpl _service;
     CustomStatus successStatus = new CustomStatus(Constants.INT_BANK_SUCCESS_STATUS_CODE, Constants.BANK_SUCCESS_STATUS_TYPE, Constants.BANK_SUCCESS_STATUS_MESSAGE, Constants.BANK_STRING_ZERO);
 
     @PostMapping("/process")
@@ -56,13 +58,13 @@ public class VoucherController {
     @PostMapping("/verify")
     private ResponseEntity<CustomResponse> verifyVoucher(@RequestBody OcbRequest dto){
         successStatus.setCode(Constants.ATM_SUCCESS_STATUS_CODE);
-        return new ResponseEntity<>(new CustomResponse(dto, successStatus),HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse(_service.bankVerifyPayment(dto), successStatus),HttpStatus.OK);
     }
 
     @PostMapping("/confirm")
     private ResponseEntity<CustomResponse> confirmVoucher(@RequestBody OcbRequest dto){
         successStatus.setCode(Constants.ATM_SUCCESS_STATUS_CODE);
-        return new ResponseEntity<>(new CustomResponse(dto, successStatus),HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse(_service.bankConfirmPayment(dto), successStatus),HttpStatus.OK);
     }
 
       /*
