@@ -1,6 +1,6 @@
 package com.bancatlan.atmauthorizer.service.impl;
 
-import com.bancatlan.atmauthorizer.api.http.OcbRequest;
+import com.bancatlan.atmauthorizer.dto.OcbVoucherDTO;
 import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.component.IUtilComponent;
 import com.bancatlan.atmauthorizer.component.impl.UtilComponentImpl;
@@ -112,6 +112,67 @@ public class VoucherServiceImpl implements IVoucherService {
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.ALREADY_PROCESSED_TXN);
         }
         this.securityValidation(dto);
+        //(5)
+        transaction.confirm(txnVoucher);
+        String pickupCode = utilComponent.getPickupCodeByCellPhoneNumber(dto.getTransaction().getPayee().getMsisdn());
+
+        dto.getVoucher().setPickupCode(pickupCode);
+        dto.getVoucher().setTxnCreatedBy(txnVoucher);
+        dto.getVoucher().setAmountInitial(txnVoucher.getAmount());
+        dto.getVoucher().setAmountCurrent(txnVoucher.getAmount());
+        dto.getVoucher().setActive(true);
+        dto.getVoucher().setExpired(false);
+        dto.getVoucher().setCanceled(false);
+        dto.getVoucher().setDeleted(false);
+        Voucher voucherResult = this.create(dto.getVoucher());
+
+        dto.setTransaction(txnVoucher);
+        dto.setVoucher(voucherResult);
+
+        if(voucherResult != null){
+            String template = Constants.TEMPLATE_NOTIFICATION_SMS;//Todo get template from DB
+            String sms = String.format(template, String.format("%.2f", txnVoucher.getAmount()), pickupCode);
+            bankService.sendNotification(dto.getTransaction().getPayee().getMsisdn(),"",sms,Constants.BANK_NOTIFICATION_SMS);
+        }
+
+        return dto;
+    }
+
+    @Override
+    public OcbVoucherDTO verify(OcbVoucherDTO dto) {
+        //dto = this.validateAndFitOcbRequest(dto);
+        UtilComponentImpl.setSessionKey(dto.getAuth().getSessionKey());
+        //(1)
+        Transaction txnVoucher = transaction.init(dto.getTransaction());
+        dto.getTransaction().setId(txnVoucher.getId());
+        dto.getTransaction().setCurrency(txnVoucher.getCurrency());
+        dto.getTransaction().setCreationDate(txnVoucher.getCreationDate());
+        //(2)
+        transaction.authentication(dto.getTransaction());
+
+        //(3)
+        transaction.authorization(txnVoucher);
+
+        //(4)
+        transaction.verify(dto.getTransaction());
+        return dto;
+    }
+
+    @Override
+    public OcbVoucherDTO confirm(OcbVoucherDTO dto) {
+        if(dto.getTransaction() == null || dto.getTransaction().getId() == null){
+            throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_TXN_ON_REQUEST);
+        }
+
+        Transaction txnVoucher = transaction.getById(dto.getTransaction().getId());
+        if(txnVoucher == null){
+            throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_TXN_DOES_NOT_EXIST);
+        }
+
+        if (txnVoucher.getTxnStatus() != null && txnVoucher.getTxnStatus().getId() != null && txnVoucher.getTxnStatus().getId() >= Constants.CONFIRM_TXN_STATUS) {
+            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.ALREADY_PROCESSED_TXN);
+        }
+        //this.securityValidation(req);
         //(5)
         transaction.confirm(txnVoucher);
         String pickupCode = utilComponent.getPickupCodeByCellPhoneNumber(dto.getTransaction().getPayee().getMsisdn());
@@ -596,63 +657,4 @@ public class VoucherServiceImpl implements IVoucherService {
     private void securityValidation(VoucherTransactionDTO dto){
         //Todo validate with session if the current id txn belong to the session linked with previous id txn generated
     }
-
-    public OcbRequest bankVerifyPayment(OcbRequest dto) {
-        //(1)
-        Transaction txnVoucher = transaction.init(dto.getTransaction());
-        dto.getTransaction().setId(txnVoucher.getId());
-        dto.getTransaction().setCurrency(txnVoucher.getCurrency());
-        dto.getTransaction().setCreationDate(txnVoucher.getCreationDate());
-        //(2)
-        transaction.authentication(dto.getTransaction());
-
-        //(3)
-        transaction.authorization(txnVoucher);
-
-        //(4)
-        transaction.verify(dto.getTransaction());
-        return dto;
-    }
-
-    public OcbRequest bankConfirmPayment(OcbRequest req) {
-        if(req.getTransaction() == null || req.getTransaction().getId() == null){
-            throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_TXN_ON_REQUEST);
-        }
-
-        Transaction txnVoucher = transaction.getById(req.getTransaction().getId());
-        if(txnVoucher == null){
-            throw new ModelNotFoundException(Constants.MODEL_NOT_FOUND_MESSAGE_ERROR, AuthorizerError.MISSING_TXN_DOES_NOT_EXIST);
-        }
-
-        if (txnVoucher.getTxnStatus() != null && txnVoucher.getTxnStatus().getId() != null && txnVoucher.getTxnStatus().getId() >= Constants.CONFIRM_TXN_STATUS) {
-            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.ALREADY_PROCESSED_TXN);
-        }
-        //this.securityValidation(req);
-        //(5)
-        transaction.confirm(txnVoucher);
-        String pickupCode = utilComponent.getPickupCodeByCellPhoneNumber(req.getTransaction().getPayee().getMsisdn());
-
-        req.getVoucher().setPickupCode(pickupCode);
-        req.getVoucher().setTxnCreatedBy(txnVoucher);
-        req.getVoucher().setAmountInitial(txnVoucher.getAmount());
-        req.getVoucher().setAmountCurrent(txnVoucher.getAmount());
-        req.getVoucher().setActive(true);
-        req.getVoucher().setExpired(false);
-        req.getVoucher().setCanceled(false);
-        req.getVoucher().setDeleted(false);
-        Voucher voucherResult = this.create(req.getVoucher());
-
-        req.setTransaction(txnVoucher);
-        req.setVoucher(voucherResult);
-
-        if(voucherResult != null){
-            String template = Constants.TEMPLATE_NOTIFICATION_SMS;//Todo get template from DB
-            String sms = String.format(template, String.format("%.2f", txnVoucher.getAmount()), pickupCode);
-            bankService.sendNotification(req.getTransaction().getPayee().getMsisdn(),"",sms,Constants.BANK_NOTIFICATION_SMS);
-        }
-
-        return req;
-    }
-
-
 }
