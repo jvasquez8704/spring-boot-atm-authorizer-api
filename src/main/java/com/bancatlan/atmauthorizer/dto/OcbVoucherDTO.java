@@ -1,11 +1,11 @@
-package com.bancatlan.atmauthorizer.api.http;
+package com.bancatlan.atmauthorizer.dto;
 
 import com.bancatlan.atmauthorizer.api.model.Auth;
 import com.bancatlan.atmauthorizer.api.model.SpareParametersDTO;
 import com.bancatlan.atmauthorizer.model.Transaction;
 import com.bancatlan.atmauthorizer.model.Voucher;
 
-public class OcbRequest {
+public class OcbVoucherDTO {
     private Voucher voucher;
     private Transaction transaction;
     private Auth auth;

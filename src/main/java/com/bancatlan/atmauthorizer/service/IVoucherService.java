@@ -1,5 +1,6 @@
 package com.bancatlan.atmauthorizer.service;
 
+import com.bancatlan.atmauthorizer.dto.OcbVoucherDTO;
 import com.bancatlan.atmauthorizer.dto.VoucherTransactionDTO;
 import com.bancatlan.atmauthorizer.model.Customer;
 import com.bancatlan.atmauthorizer.model.Transaction;
@@ -11,6 +12,8 @@ public interface IVoucherService extends ICRUD<Voucher> {
     VoucherTransactionDTO voucherProcess(VoucherTransactionDTO dto);
     VoucherTransactionDTO bankVerifyPayment(VoucherTransactionDTO dto);
     VoucherTransactionDTO bankConfirmPayment(VoucherTransactionDTO dto);
+    OcbVoucherDTO verify(OcbVoucherDTO dto);
+    OcbVoucherDTO confirm(OcbVoucherDTO dto);
     Voucher withdraw(VoucherTransactionDTO dto);
     Voucher findVoucherToWithdraw(String pickupCode, String secretCode, Customer customer);
     Voucher findVoucherToReverse(String pickupCode, String secretCode, Customer customer);

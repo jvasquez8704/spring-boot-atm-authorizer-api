@@ -2,8 +2,8 @@ package com.bancatlan.atmauthorizer.api;
 
 import com.bancatlan.atmauthorizer.api.http.CustomStatus;
 import com.bancatlan.atmauthorizer.api.http.CustomResponse;
-import com.bancatlan.atmauthorizer.api.http.OcbRequest;
 import com.bancatlan.atmauthorizer.component.Constants;
+import com.bancatlan.atmauthorizer.dto.OcbVoucherDTO;
 import com.bancatlan.atmauthorizer.dto.VoucherTransactionDTO;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
@@ -54,15 +54,15 @@ public class VoucherController {
     }
 
     @PostMapping("/verify")
-    private ResponseEntity<CustomResponse> verifyVoucher(@RequestBody OcbRequest dto){
+    private ResponseEntity<CustomResponse> verifyVoucher(@RequestBody OcbVoucherDTO dto){
         successStatus.setCode(Constants.ATM_SUCCESS_STATUS_CODE);
-        return new ResponseEntity<>(new CustomResponse(dto, successStatus),HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse(service.verify(dto), successStatus),HttpStatus.OK);
     }
 
     @PostMapping("/confirm")
-    private ResponseEntity<CustomResponse> confirmVoucher(@RequestBody OcbRequest dto){
+    private ResponseEntity<CustomResponse> confirmVoucher(@RequestBody OcbVoucherDTO dto){
         successStatus.setCode(Constants.ATM_SUCCESS_STATUS_CODE);
-        return new ResponseEntity<>(new CustomResponse(dto, successStatus),HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse(service.confirm(dto), successStatus),HttpStatus.OK);
     }
 
       /*
