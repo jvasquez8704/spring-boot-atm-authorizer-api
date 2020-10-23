@@ -147,6 +147,7 @@ public class VoucherServiceImpl implements IVoucherService {
         dto.getTransaction().setId(txnVoucher.getId());
         dto.getTransaction().setCurrency(txnVoucher.getCurrency());
         dto.getTransaction().setCreationDate(txnVoucher.getCreationDate());
+        dto.getTransaction().setOrderId(dto.getVoucher().getSecretCode());//todo mejorar esto
         //(2)
         transaction.authentication(dto.getTransaction());
 
@@ -172,10 +173,12 @@ public class VoucherServiceImpl implements IVoucherService {
         if (txnVoucher.getTxnStatus() != null && txnVoucher.getTxnStatus().getId() != null && txnVoucher.getTxnStatus().getId() >= Constants.CONFIRM_TXN_STATUS) {
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.ALREADY_PROCESSED_TXN);
         }
+        dto.getVoucher().setSecretCode(txnVoucher.getOrderId());//todo mejorar para sp05
+        txnVoucher.setOrderId(null);//todo mejorar para sp05
         //this.securityValidation(req);
         //(5)
         transaction.confirm(txnVoucher);
-        String pickupCode = utilComponent.getPickupCodeByCellPhoneNumber(dto.getTransaction().getPayee().getMsisdn());
+        String pickupCode = utilComponent.getPickupCodeByCellPhoneNumber(txnVoucher.getPayee().getMsisdn());
 
         dto.getVoucher().setPickupCode(pickupCode);
         dto.getVoucher().setTxnCreatedBy(txnVoucher);
@@ -193,7 +196,7 @@ public class VoucherServiceImpl implements IVoucherService {
         if(voucherResult != null){
             String template = Constants.TEMPLATE_NOTIFICATION_SMS;//Todo get template from DB
             String sms = String.format(template, String.format("%.2f", txnVoucher.getAmount()), pickupCode);
-            bankService.sendNotification(dto.getTransaction().getPayee().getMsisdn(),"",sms,Constants.BANK_NOTIFICATION_SMS);
+            bankService.sendNotification(txnVoucher.getPayee().getMsisdn(),"",sms,Constants.BANK_NOTIFICATION_SMS);
         }
 
         return dto;
