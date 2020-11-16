@@ -55,13 +55,13 @@ public class VoucherController {
 
     @PostMapping("/verify")
     private ResponseEntity<CustomResponse> verifyVoucher(@RequestBody OcbVoucherDTO dto){
-        successStatus.setCode(Constants.ATM_SUCCESS_STATUS_CODE);
+        successStatus.setCode(Constants.BANK_SUCCESS_STATUS_CODE);
         return new ResponseEntity<>(new CustomResponse(service.verify(dto), successStatus),HttpStatus.OK);
     }
 
     @PostMapping("/confirm")
     private ResponseEntity<CustomResponse> confirmVoucher(@RequestBody OcbVoucherDTO dto){
-        successStatus.setCode(Constants.ATM_SUCCESS_STATUS_CODE);
+        successStatus.setCode(Constants.BANK_SUCCESS_STATUS_CODE);
         return new ResponseEntity<>(new CustomResponse(service.confirm(dto), successStatus),HttpStatus.OK);
     }
 
