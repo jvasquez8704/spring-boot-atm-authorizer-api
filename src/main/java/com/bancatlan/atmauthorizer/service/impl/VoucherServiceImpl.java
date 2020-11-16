@@ -11,6 +11,7 @@ import com.bancatlan.atmauthorizer.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,10 +43,13 @@ public class VoucherServiceImpl implements IVoucherService {
     @Autowired
     IUtilComponent utilComponent;
 
+   @Value("${voucher.freeze.days}")
+   String voucherFreezeDays;
+
     @Override
     public Voucher create(Voucher voucher) {
         voucher.setCreationDate(LocalDateTime.now());
-        voucher.setExpirationDate(LocalDateTime.now().plusDays(3));
+        voucher.setExpirationDate(LocalDateTime.now().plusDays(Long.valueOf(voucherFreezeDays)));
         voucher.setCustomer(voucher.getTxnCreatedBy().getPayee());
         return repo.save(voucher);
     }
