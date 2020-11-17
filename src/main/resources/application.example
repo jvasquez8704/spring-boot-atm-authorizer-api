@@ -3,9 +3,9 @@ spring.jpa.show-sql=false
 spring.jpa.hibernate.ddl-auto=update
 
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.datasource.url=jdbc:mysql://localhost:3306/authorizerdb
-spring.datasource.username=root
-spring.datasource.password=Pass!234
+spring.datasource.url=jdbc:mysql://localhost:3306/dbaname
+spring.datasource.username=username
+spring.datasource.password=P@ssW0rD
 
 spring.jpa.open-in-view=true
 
@@ -17,14 +17,12 @@ spring.jackson.serialization.indent_output=true
 #logging.file=file:/Users/walletmachine/projects/bank-git-repository/atm-authorizer-mysql/src/main/resources/
 logging.path=/Users/walletmachine/projects/
 
+#Global params
+voucher.freeze.days=1
 
 #PO Parameters
 bank.service.po.username=APPOCH19
 bank.service.po.password=hm@x.G0{
-
-#PO DEV credentials
-bank.service.po.qa.username=APPOCH19
-bank.service.po.qa.password=hm@x.G0{
 
 #PO DEV credentials
 bank.service.po.dev.username=opagoaga
