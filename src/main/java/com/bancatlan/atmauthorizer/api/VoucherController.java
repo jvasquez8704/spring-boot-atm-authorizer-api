@@ -7,6 +7,7 @@ import com.bancatlan.atmauthorizer.dto.OcbVoucherDTO;
 import com.bancatlan.atmauthorizer.dto.VoucherTransactionDTO;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
+import com.bancatlan.atmauthorizer.service.ICardlessWithdrawal;
 import com.bancatlan.atmauthorizer.service.IVoucherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,10 +17,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/vouchers")
 public class VoucherController {
+    CustomStatus successStatus = new CustomStatus(Constants.INT_BANK_SUCCESS_STATUS_CODE, Constants.BANK_SUCCESS_STATUS_TYPE, Constants.BANK_SUCCESS_STATUS_MESSAGE, Constants.BANK_STRING_ZERO);
 
     @Autowired
     IVoucherService service;
-    CustomStatus successStatus = new CustomStatus(Constants.INT_BANK_SUCCESS_STATUS_CODE, Constants.BANK_SUCCESS_STATUS_TYPE, Constants.BANK_SUCCESS_STATUS_MESSAGE, Constants.BANK_STRING_ZERO);
+
+    @Autowired
+    ICardlessWithdrawal cardlessWithdrawalService;
 
     @PostMapping("/process")
     private ResponseEntity<CustomResponse> processVoucher(@RequestBody VoucherTransactionDTO dto) {
@@ -56,13 +60,13 @@ public class VoucherController {
     @PostMapping("/verify")
     private ResponseEntity<CustomResponse> verifyVoucher(@RequestBody OcbVoucherDTO dto){
         successStatus.setCode(Constants.BANK_SUCCESS_STATUS_CODE);
-        return new ResponseEntity<>(new CustomResponse(service.verify(dto), successStatus),HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse(cardlessWithdrawalService.verify(dto), successStatus),HttpStatus.OK);
     }
 
     @PostMapping("/confirm")
     private ResponseEntity<CustomResponse> confirmVoucher(@RequestBody OcbVoucherDTO dto){
         successStatus.setCode(Constants.BANK_SUCCESS_STATUS_CODE);
-        return new ResponseEntity<>(new CustomResponse(service.confirm(dto), successStatus),HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse(cardlessWithdrawalService.confirm(dto), successStatus),HttpStatus.OK);
     }
 
       /*
