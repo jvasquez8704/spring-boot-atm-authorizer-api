@@ -137,21 +137,6 @@ public class SP05CardlessWithdrawal implements ICardlessWithdrawal {
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.CUSTOM_ERROR_NOT_SUPPORTED_COMMUNICATION_COMPANY);
         }
 
-        /*if (dto.getValidatePayeeMsisdn() == null || dto.getValidatePayeeMsisdn().equals("")) {
-            LOG.error("Custom Exception {}", AuthorizerError.MISSING_CONFIRM_TARGET_TELEPHONE_FIELD.toString());
-            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_CONFIRM_TARGET_TELEPHONE_FIELD);
-        }*/
-
-        /**
-         * Confirmation of telephone fields
-         * Before cleaning spaces
-         * */
-        /*dto.setValidatePayeeMsisdn(dto.getValidatePayeeMsisdn().trim());
-        if (!dto.getValidatePayeeMsisdn().equals(dto.getTransaction().getPayee().getMsisdn())) {
-            LOG.error("Custom Exception {}", AuthorizerError.NOT_MATCH_CONFIRM_TARGET_TELEPHONE.toString());
-            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_MATCH_CONFIRM_TARGET_TELEPHONE);
-        }*/
-
         /**
          * PAYER
          * Validating telephone field */
@@ -166,32 +151,6 @@ public class SP05CardlessWithdrawal implements ICardlessWithdrawal {
             LOG.error("Custom Exception Payer MSISDN {}", AuthorizerError.BAD_FORMAT_PAYER_MSISDN);
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.BAD_FORMAT_PAYER_MSISDN);
         }
-
-        /*if (dto.getAmountKey() == null || dto.getAmountKey().equals("")) {
-            LOG.error("Custom Exception {}", AuthorizerError.MISSING_AMOUNT_TO_TRANSFER_FIELD.toString());
-            throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_AMOUNT_TO_TRANSFER_FIELD);
-        }*/
-
-        /**
-         *General validation for amount */
-        /*if (dto.getAmountKey().equals(Constants.ATM_ANOTHER_AMOUNT_KEY)) {
-            if (dto.getAmount() == null || dto.getAmount().equals("")) {
-                LOG.error("Custom Exception {}", AuthorizerError.MISSING_WRITTEN_AMOUNT.toString());
-                throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.MISSING_WRITTEN_AMOUNT);
-            }
-            if (!utilComponent.isValidAmountWithAtm(dto.getAmount())) {
-                LOG.error("Custom Exception {}", AuthorizerError.NOT_MATCH_AMOUNT_WITH_ATM.toString());
-                throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.NOT_MATCH_AMOUNT_WITH_ATM);
-            }
-            dto.getTransaction().setAmount(Double.parseDouble(dto.getAmount()));
-        } else {
-            Double amountFromMapKeys = utilComponent.getAmountFromKey(dto.getAmountKey());
-            if (amountFromMapKeys == null) {
-                LOG.error("Custom Exception {}", AuthorizerError.AMOUNT_KEY_DOES_NOT_EXIST.toString());
-                throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.AMOUNT_KEY_DOES_NOT_EXIST);
-            }
-            dto.getTransaction().setAmount(utilComponent.getAmountFromKey(dto.getAmountKey()));
-        }*/
 
         if (dto.getTransaction().getAmount() == null || dto.getTransaction().getAmount().equals("")) {
             LOG.error("Custom Exception {}", AuthorizerError.MISSING_WRITTEN_AMOUNT.toString());
