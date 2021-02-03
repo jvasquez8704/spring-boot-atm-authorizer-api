@@ -154,6 +154,24 @@
 						<id>wsimport-generate-SI_OS_CongelamientoCuentas</id>
 						<phase>generate-sources</phase>
 					</execution>
+					<execution>
+						<goals>
+							<goal>wsimport</goal>
+						</goals>
+						<configuration>
+							<wsdlFiles>
+								<wsdlFile>${project.basedir}/src/main/resources/wsdl/SI_OS_UpdateTransactionService.wsdl</wsdlFile>
+							</wsdlFiles>
+							<packageName></packageName>
+							<vmArgs>
+								<vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
+							</vmArgs>
+							<wsdlLocation>${project.build.directory}/src/wsdl/SI_OS_UpdateTransactionService.wsdl</wsdlLocation>
+							<staleFile>${project.build.directory}/jaxws/stale/SI_OS_UpdateTransactionService.stale</staleFile>
+						</configuration>
+						<id>wsimport-generate-SI_OS_UpdateTransactionService</id>
+						<phase>generate-sources</phase>
+					</execution>
 				</executions>
 				<dependencies>
 					<dependency>

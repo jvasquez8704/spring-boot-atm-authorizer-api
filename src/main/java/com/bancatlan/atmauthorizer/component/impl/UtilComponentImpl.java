@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -29,6 +30,9 @@ public class UtilComponentImpl implements IUtilComponent {
     private Map<String, Double> amountValues = new HashMap<>();
     @Override
     public String getPickupCodeByCellPhoneNumber(String cellPhoneNumber) {
+        /**
+         * use getCode => to make less collision-able the pickupCode for a customer
+         */
         return this.getRandomNumber(Constants.PIVOT_PICKUP_CODE_RANGE) + this.encrypt(cellPhoneNumber);
     }
 
@@ -202,6 +206,15 @@ public class UtilComponentImpl implements IUtilComponent {
         return val;
     }
 
+    private String getCode(final String value) throws ModelCustomErrorException {
+        String val = "";
+
+        String addedValue = value + LocalDateTime.now().getDayOfMonth() + LocalDateTime.now().getMinute() + LocalDateTime.now().getSecond();
+
+        val = encryptString(addedValue, Constants.SIZE_PICKUP_CODE);
+
+        return val;
+    }
     /**
      * Verify the encrypted code against a new one using the
      * same seed. Use a validity of X minutes (configurable)
@@ -278,7 +291,7 @@ public class UtilComponentImpl implements IUtilComponent {
     }
 
     private boolean isValidAmountAccordingATMRules(Double amount) {
-        if (amount % 100 != 0 || amount > 5000) {
+        if (amount % 100 != 0 || amount > 5000) { //Todo make this parameterizable
             return false;
         }
         return true;

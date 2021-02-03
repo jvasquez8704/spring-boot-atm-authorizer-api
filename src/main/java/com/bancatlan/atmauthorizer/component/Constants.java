@@ -30,6 +30,7 @@ public class Constants {
     public static final String STR_VALUE_1 = "1";
     public static final String BANK_ACCOUNT_TYPE_1 = "1";
     public static final String BANK_ACCOUNT_TYPE_2 = "2";
+    public static final String BANK_ACTION_CANCEL = "R";
     public static final String BANK_ACTION_VERIFY = "C";
     public static final String BANK_ACTION_FREEZE = "C";
     public static final String BANK_ACTION_GUIP = "N";
@@ -103,5 +104,10 @@ public class Constants {
     public static final String STR_FREEZE_SERVICE_NAME = "Congelamiento";
     public static final String STR_DEFROST_SERVICE_NAME = "RST-DEFROST";
     public static final String STR_NOTIFICATION_SERVICE_NAME = "Envio Notificacion";
+
+    /*application Id*/
+    public static final String OCB_APP_ID = "001";
+    public static final String GUIP_APP_ID = "2278";
+    public static final String VOUCHER_BASA_APP_ID = "2272";
 
 }
