@@ -14,6 +14,7 @@ import java.util.List;
 public interface ITransactionRepo extends JpaRepository<Transaction, Long> {
     List<Transaction> getTransactionByAtmReference(String atmReference);
     Transaction getTransactionByAtmReferenceAndTxnStatus(String atmReference, TxnStatus txnStatus);
+    Transaction getTransactionByApplicationIdAndChannelReference(String applicationId, String channelReference);
     List<Transaction> getTransactionsByPayeeAndUseCaseAndCreationDateBetween(Customer payee, UseCase useCase, LocalDateTime startDate, LocalDateTime endDate);
     List<Transaction> getTransactionsByPayeeAndUseCaseAndTxnStatusAndCreationDateBetween(Customer payee, UseCase useCase, TxnStatus txnStatus, LocalDateTime startDate, LocalDateTime endDate);
     List<Transaction> getTransactionsByPayerAndUseCaseAndCreationDateBetween(Customer payer,UseCase useCase, LocalDateTime startDate, LocalDateTime endDate);

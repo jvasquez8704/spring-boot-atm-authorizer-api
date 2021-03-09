@@ -1,4 +1,3 @@
-
 spring.jpa.database=mysql
 spring.jpa.show-sql=false
 spring.jpa.hibernate.ddl-auto=update
@@ -12,6 +11,10 @@ spring.jpa.open-in-view=true
 
 spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
 spring.jackson.serialization.indent_output=true
+#spring.mvc.static-path-pattern=/resources/**
+#logging.level.root=INFO
+#logging.level.com.bancatlan.atmauthorizer.component=TRACE
+#logging.file=file:/Users/walletmachine/projects/bank-git-repository/atm-authorizer-mysql/src/main/resources/
 logging.path=/Users/walletmachine/projects/
 
 #Global params
@@ -24,6 +27,10 @@ bank.service.po.password=hm@x.G0{
 #PO DEV credentials
 bank.service.po.dev.username=opagoaga
 bank.service.po.dev.password=inicio01
+
+#PO DEV 2 credentials
+bank.service.po.dev1.username=opagoaga
+bank.service.po.dev1.password=Inicio01
 
 #ConsultaSaldoV2
 bank.service.account.list.transaction.id=100128
@@ -67,5 +74,11 @@ bus-integration.wsdl.transfer-name=SI_OS_TransferenciaContableService.wsdl
 bus-integration.wsdl.notification-name=SI_OS_EjecutarEnvioNotificacionService.wsdl
 bus-integration.wsdl.freeze-name=SI_OS_CongelamientoCuentas.wsdl
 bus-integration.wsdl.update-txn-name=SI_OS_UpdateTransactionServiceDEV.wsdl
+
 bus-integration.wsdl.freeze-endpoint=http://sappocoreqas.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_QAS_443_HN75OQH&receiverParty=&receiverService=&interface=SI_OS_CongelamientoCuentas&interfaceNamespace=http://hn.infatlan/ACD169/out/CongelamientoCuentas
 bus-integration.wsdl.update-txn-endpoint=http://hndespombapp.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_UpdateTransaction&interfaceNamespace=http://hn.infatlan.mymo/ws/MYMO001/out/UpdateTransaction
+#bus-integration.wsdl.freeze-endpoint=http://sappocoredev.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_CongelamientoCuentas&interfaceNamespace=http://hn.infatlan/ACD169/out/CongelamientoCuentas
+#bus-integration.wsdl.freeze-endpoint=http://sappocoreqas.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_QAS_443_HN75OQH&receiverParty=&receiverService=&interface=SI_OS_CongelamientoCuentas&interfaceNamespace=http://hn.infatlan/ACD169/out/CongelamientoCuentas
+#bus-integration.wsdl.update-txn-endpoint=http://hndespombapp.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_UpdateTransaction&interfaceNamespace=http://hn.infatlan.mymo/ws/MYMO001/out/UpdateTransaction
+#bus-integration.wsdl.update-txn-endpoint=http://hnqaspocrmapp.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_QAS_443_HN75OQH&receiverParty=&receiverService=&interface=SI_OS_UpdateTransaction&interfaceNamespace=http://hn.infatlan.mymo/ws/MYMO001/out/UpdateTransaction
+

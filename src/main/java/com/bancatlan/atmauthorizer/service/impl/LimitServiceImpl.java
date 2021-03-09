@@ -128,7 +128,7 @@ public class LimitServiceImpl implements ILimitService {
             case Constants.MONTHLY_RANGE:
                 //todo check this if(localDate.isLeapYear())
                 startDay = LocalDateTime.of(localDate.withDayOfMonth(1), LocalTime.MIDNIGHT);
-                endDay = LocalDateTime.of(localDate.withDayOfMonth(localDate.getMonth().maxLength()), LocalTime.MAX);
+                endDay = LocalDateTime.of(localDate.withDayOfMonth(localDate.getMonth().length(localDate.isLeapYear())), LocalTime.MAX);
                 break;
         }
 

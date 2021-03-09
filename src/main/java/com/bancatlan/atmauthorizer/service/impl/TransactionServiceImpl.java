@@ -149,7 +149,8 @@ public class TransactionServiceImpl implements ITransactionService {
         long initTimeProcess = System.currentTimeMillis();
         //Defrost founds user
         LOG.info("Current txn {}", txn.getId());
-        //If this txn is not confirm or this txn is not VOUCHER_USE_CASE do not do nothing
+
+        //this line verify if txn is confirm status and this one is a init voucher use case
         if (!txn.getTxnStatus().getId().equals(Constants.CONFIRM_TXN_STATUS) || !txn.getUseCase().getId().equals(Constants.VOUCHER_USE_CASE)) {
             LOG.info("Rejected txn in process txn status {}, txn use case {}", txn.getTxnStatus().getId(), txn.getUseCase().getId());
             return false;
@@ -191,6 +192,11 @@ public class TransactionServiceImpl implements ITransactionService {
     @Override
     public Transaction getTransactionByAtmReference(String atmReference, Long txnStatus) {
         return repo.getTransactionByAtmReferenceAndTxnStatus(atmReference, status.getById(txnStatus));
+    }
+
+    @Override
+    public Transaction getTransactionByApplicationIdAndChannelReference(String applicationId, String channelReference) {
+        return repo.getTransactionByApplicationIdAndChannelReference(applicationId, channelReference);
     }
 
     @Override
@@ -407,8 +413,9 @@ public class TransactionServiceImpl implements ITransactionService {
 
                 Customer cst = customer.getByMsisdn(txn.getPayer().getMsisdn());
                 if (cst == null) {
-                    LOG.error("processAuthentication: Customer with numberPhone specified in request not fount, error: {}", AtmError.ERROR_25);
-                    throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_25);
+                    //Replaced 14 instead 25
+                    LOG.error("processAuthentication: Customer with numberPhone specified in request not fount, error: {}", AtmError.ERROR_14);
+                    throw new ModelNotFoundException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_14);
                 }
 
                 Customer userATM = customer.getById(Constants.ATM_USER_ID);
@@ -543,9 +550,8 @@ public class TransactionServiceImpl implements ITransactionService {
                 Voucher voucher = voucherService.getVoucherByCreatorTransaction(txn);
                 voucher.setActive(false);
                 voucher.setCanceled(true);
-                voucher.setExpired(true);
                 voucherService.update(voucher);
-                txn.setExpirationDate(LocalDateTime.now());
+                txn.setUpdateDate(LocalDateTime.now());
                 break;
             case Constants.INT_WITHDRAW_VOUCHER_USE_CASE:
                 PaymentInstrument payerPI = txn.getPayerPaymentInstrument();

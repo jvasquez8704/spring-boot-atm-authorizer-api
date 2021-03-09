@@ -205,6 +205,7 @@ public class BankServiceImpl implements IBankService {
             peticion.setTransaccionId(Integer.valueOf(notificationTransactionId));
             peticion.setCanalId(notificationChannelId);
             peticion.setAplicacionId(notificationApplicationId);
+            peticion.setDispositivoId(cellPhone);
 
             DTEjecutarEnvioNotificacion smsData = new DTEjecutarEnvioNotificacion();
             smsData.setMensajeColeccion(dtMensaje);
