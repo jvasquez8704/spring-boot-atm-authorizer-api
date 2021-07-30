@@ -76,11 +76,15 @@ public class SP05CardlessWithdrawal implements ICardlessWithdrawal {
         //(5)
         transactionService.confirm(txnVoucher);
         String pickupCode = utilComponent.getPickupCodeByCellPhoneNumber(txnVoucher.getPayee().getMsisdn());
+        String secretCode = utilComponent.getSecretCodeByCellPhoneNumber(txnVoucher.getPayee().getMsisdn());
+        String encryptedCode = utilComponent.encryptCode(txnVoucher.getPayee().getMsisdn() + "|" + secretCode +"|" + pickupCode + "|" + txnVoucher.getAmount());
 
+        dto.getVoucher().setSecretCode(secretCode);
         dto.getVoucher().setPickupCode(pickupCode);
         dto.getVoucher().setTxnCreatedBy(txnVoucher);
         dto.getVoucher().setAmountInitial(txnVoucher.getAmount());
         dto.getVoucher().setAmountCurrent(txnVoucher.getAmount());
+        dto.getVoucher().setEncryptedCode(encryptedCode);
         dto.getVoucher().setActive(true);
         dto.getVoucher().setExpired(false);
         dto.getVoucher().setCanceled(false);

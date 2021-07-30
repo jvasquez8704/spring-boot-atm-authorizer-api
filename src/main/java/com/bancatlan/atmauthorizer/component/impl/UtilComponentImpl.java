@@ -8,17 +8,22 @@ import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Component
@@ -28,12 +33,20 @@ public class UtilComponentImpl implements IUtilComponent {
     public static AtmBody atmBody;
     private Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
     private Map<String, Double> amountValues = new HashMap<>();
+
+    @Value("${bank.service.account.list.transaction.id}")
+    private String secretPhrase = "werwrwer";
     @Override
     public String getPickupCodeByCellPhoneNumber(String cellPhoneNumber) {
         /**
          * use getCode => to make less collision-able the pickupCode for a customer
          */
         return this.getRandomNumber(Constants.PIVOT_PICKUP_CODE_RANGE) + this.encrypt(cellPhoneNumber);
+    }
+
+    @Override
+    public String getSecretCodeByCellPhoneNumber(String cellPhoneNumber) {
+        return this.getRandomNumber(Constants.SIZE_PICKUP_CODE) + this.encrypt(cellPhoneNumber);
     }
 
     @Override
@@ -190,6 +203,59 @@ public class UtilComponentImpl implements IUtilComponent {
         return (LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE) + k1.orElse(Constants.BANK_STRING_ZERO) + k2.orElse(Constants.BANK_STRING_ZERO)).trim();
     }
 
+    @Override
+    public String encryptCode(String str) {
+        try {
+
+            SecretKeySpec secretKey = getSecretKey();
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            byte[] encryptData = str.getBytes("UTF-8");
+            byte[] encryptBytes = cipher.doFinal(encryptData);
+            return Base64.getEncoder().encodeToString(encryptBytes);
+
+        } catch (UnsupportedEncodingException uex) {
+            System.out.println(uex.getMessage());
+        } catch (NoSuchAlgorithmException nex) {
+            System.out.println(nex.getMessage());
+        } catch (InvalidKeyException ik_ex) {
+            System.out.println(ik_ex.getMessage());
+        } catch (NoSuchPaddingException nsp_ex) {
+            System.out.println(nsp_ex.getMessage());
+        } catch (IllegalBlockSizeException iex) {
+            System.out.println(iex.getMessage());
+        } catch (BadPaddingException bex) {
+            System.out.println(bex.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public String decryptCode(String encryptedStr) {
+        try {
+            SecretKeySpec secretKey = getSecretKey();
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            byte[] encryptedBytes = Base64.getDecoder().decode(encryptedStr);
+            byte[] decryptData = cipher.doFinal(encryptedBytes);
+            return new String(decryptData);
+
+        } catch (UnsupportedEncodingException uex) {
+            System.out.println(uex.getMessage());
+        } catch (NoSuchAlgorithmException nex) {
+            System.out.println(nex.getMessage());
+        } catch (InvalidKeyException ik_ex) {
+            System.out.println(ik_ex.getMessage());
+        } catch (NoSuchPaddingException nsp_ex) {
+            System.out.println(nsp_ex.getMessage());
+        } catch (IllegalBlockSizeException iex) {
+            System.out.println(iex.getMessage());
+        } catch (BadPaddingException bex) {
+            System.out.println(bex.getMessage());
+        }
+        return null;
+    }
+
     /**
      *It generates a code for verification in a measure time configured
      * @param value it should be cellphone number, email or user
@@ -295,5 +361,15 @@ public class UtilComponentImpl implements IUtilComponent {
             return false;
         }
         return true;
+    }
+
+    private SecretKeySpec getSecretKey() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+       /* byte[] claveEncriptacion = clave.getBytes("UTF-8");
+        MessageDigest sha = MessageDigest.getInstance("SHA-256");
+        claveEncriptacion = sha.digest(claveEncriptacion);
+        claveEncriptacion = Arrays.copyOf(claveEncriptacion, 32);
+        SecretKeySpec secretKey = new SecretKeySpec(claveEncriptacion, "AES");*/
+        byte[] decodedKey = Base64.getDecoder().decode(secretPhrase);
+        return new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
     }
 }
