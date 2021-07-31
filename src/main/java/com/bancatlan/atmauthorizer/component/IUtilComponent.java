@@ -3,7 +3,7 @@ package com.bancatlan.atmauthorizer.component;
 
 public interface IUtilComponent {
     String getPickupCodeByCellPhoneNumber(String cellPhoneNumber);
-    String getSecretCodeByCellPhoneNumber(String cellPhoneNumber);
+    String getSecretCodeByCellPhoneNumber(String seed);
     Boolean isValidPhoneNumber(String cellPhoneNumber);
     Boolean isValidMsisdn(String cellPhoneNumber);
     Boolean isValidAvailableBalance(String availableBalance, Double txnAmount);

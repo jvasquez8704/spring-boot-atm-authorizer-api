@@ -6,21 +6,17 @@ import com.bancatlan.atmauthorizer.component.IUtilComponent;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -34,8 +30,10 @@ public class UtilComponentImpl implements IUtilComponent {
     private Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
     private Map<String, Double> amountValues = new HashMap<>();
 
-    @Value("${bank.service.account.list.transaction.id}")
-    private String secretPhrase = "werwrwer";
+    @Value("${secret.qr.phrase}")
+    private String secretPhrase;
+
+    public static final String IV = "1234567890123456";
     @Override
     public String getPickupCodeByCellPhoneNumber(String cellPhoneNumber) {
         /**
@@ -45,8 +43,8 @@ public class UtilComponentImpl implements IUtilComponent {
     }
 
     @Override
-    public String getSecretCodeByCellPhoneNumber(String cellPhoneNumber) {
-        return this.getRandomNumber(Constants.SIZE_PICKUP_CODE) + this.encrypt(cellPhoneNumber);
+    public String getSecretCodeByCellPhoneNumber(String seed) {
+        return this.encrypt(seed);
     }
 
     @Override
@@ -205,55 +203,26 @@ public class UtilComponentImpl implements IUtilComponent {
 
     @Override
     public String encryptCode(String str) {
-        try {
-
-            SecretKeySpec secretKey = getSecretKey();
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            byte[] encryptData = str.getBytes("UTF-8");
-            byte[] encryptBytes = cipher.doFinal(encryptData);
-            return Base64.getEncoder().encodeToString(encryptBytes);
-
-        } catch (UnsupportedEncodingException uex) {
-            System.out.println(uex.getMessage());
-        } catch (NoSuchAlgorithmException nex) {
-            System.out.println(nex.getMessage());
-        } catch (InvalidKeyException ik_ex) {
-            System.out.println(ik_ex.getMessage());
-        } catch (NoSuchPaddingException nsp_ex) {
-            System.out.println(nsp_ex.getMessage());
-        } catch (IllegalBlockSizeException iex) {
-            System.out.println(iex.getMessage());
-        } catch (BadPaddingException bex) {
-            System.out.println(bex.getMessage());
-        }
-        return null;
+        byte[] aesEncrypt = aesEncrypt(str, secretPhrase);
+        String base64EncodeStr = org.apache.tomcat.util.codec.binary.Base64.encodeBase64String(aesEncrypt);
+        return base64EncodeStr;
     }
 
     @Override
-    public String decryptCode(String encryptedStr) {
+    public String decryptCode(String content) {
         try {
-            SecretKeySpec secretKey = getSecretKey();
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            byte[] encryptedBytes = Base64.getDecoder().decode(encryptedStr);
-            byte[] decryptData = cipher.doFinal(encryptedBytes);
-            return new String(decryptData);
-
-        } catch (UnsupportedEncodingException uex) {
-            System.out.println(uex.getMessage());
-        } catch (NoSuchAlgorithmException nex) {
-            System.out.println(nex.getMessage());
-        } catch (InvalidKeyException ik_ex) {
-            System.out.println(ik_ex.getMessage());
-        } catch (NoSuchPaddingException nsp_ex) {
-            System.out.println(nsp_ex.getMessage());
-        } catch (IllegalBlockSizeException iex) {
-            System.out.println(iex.getMessage());
-        } catch (BadPaddingException bex) {
-            System.out.println(bex.getMessage());
+            byte[] base64DecodeStr = org.apache.tomcat.util.codec.binary.Base64.decodeBase64(content);
+            byte[] aesDecode = aesDecode(base64DecodeStr, secretPhrase);
+            if(aesDecode == null){
+                return null;
+            }
+            String result;
+            result = new String(aesDecode,"UTF-8");
+            return result;
+        } catch (Exception e) {
+            LOG.error("decryptCode {}", e.getMessage());
+            throw new ModelCustomErrorException("decryptCode error", AuthorizerError.ENCRYPT_ERROR);
         }
-        return null;
     }
 
     /**
@@ -363,13 +332,50 @@ public class UtilComponentImpl implements IUtilComponent {
         return true;
     }
 
-    private SecretKeySpec getSecretKey() throws UnsupportedEncodingException, NoSuchAlgorithmException {
-       /* byte[] claveEncriptacion = clave.getBytes("UTF-8");
-        MessageDigest sha = MessageDigest.getInstance("SHA-256");
-        claveEncriptacion = sha.digest(claveEncriptacion);
-        claveEncriptacion = Arrays.copyOf(claveEncriptacion, 32);
-        SecretKeySpec secretKey = new SecretKeySpec(claveEncriptacion, "AES");*/
-        byte[] decodedKey = Base64.getDecoder().decode(secretPhrase);
-        return new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+    /**
+     * Cifrar 128 bit
+     *
+     * @param content El contenido original que necesita ser encriptado
+     * @param pkey key
+     * @return
+     */
+    public byte[] aesEncrypt(String content, String pkey) {
+        try {
+            SecretKeySpec skey = new SecretKeySpec(pkey.getBytes(), "AES");
+            Security.addProvider(new BouncyCastleProvider());// Para usar el relleno PKCS7Padding, se debe agregar un proveedor que admita PKCS7Padding
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");// "Algoritmo / Cifrado / Relleno"
+            IvParameterSpec iv = new IvParameterSpec(IV.getBytes());
+            cipher.init(Cipher.ENCRYPT_MODE, skey, iv);// Inicializa el encriptador
+            byte[] encrypted = cipher.doFinal(content.getBytes("UTF-8"));
+            return encrypted;
+        } catch (Exception e) {
+            LOG.error("aesEncrypt {}", e.getMessage());
+            throw new ModelCustomErrorException("aesEncrypt error", AuthorizerError.ENCRYPT_ERROR);
+        }
+    }
+    /**
+     * Consigue la llave
+     * @param secretKey
+     * @return
+     * @throws Exception
+     */
+    private static SecretKey generateKey(String secretKey) throws Exception{
+        Provider p= Security.getProvider("SUN");
+        SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG",p);
+        secureRandom.setSeed(secretKey.getBytes());
+        KeyGenerator kg = KeyGenerator.getInstance("AES");
+        kg.init(secureRandom);
+        return kg.generateKey();
+    }
+
+
+
+    public static byte[] aesDecode(byte[] content, String pkey) throws Exception {
+        SecretKeySpec skey = new SecretKeySpec(pkey.getBytes(), "AES");
+        IvParameterSpec iv = new IvParameterSpec(IV.getBytes("UTF-8"));
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");
+        cipher.init(Cipher.DECRYPT_MODE, skey,iv);
+        byte[] result = cipher.doFinal(content);
+        return result;
     }
 }
