@@ -70,7 +70,6 @@ public class Voucher {
     @JoinColumn(name = "id_customer_update",  foreignKey = @ForeignKey(name = "fk_voucher_customer_u"))
     private Customer customerUpdate;
 
-    @Lob
     @Column(name = "encrypted_code")
     private String encryptedCode;
 
