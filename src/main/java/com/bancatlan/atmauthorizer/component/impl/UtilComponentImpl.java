@@ -6,7 +6,6 @@ import com.bancatlan.atmauthorizer.component.IUtilComponent;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.*;
 import java.time.LocalDateTime;
@@ -29,6 +29,9 @@ public class UtilComponentImpl implements IUtilComponent {
     public static AtmBody atmBody;
     private Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
     private Map<String, Double> amountValues = new HashMap<>();
+    private SecretKeySpec secretKey;
+    private IvParameterSpec ivspec;
+
 
     @Value("${secret.qr.phrase}")
     private String secretPhrase;
@@ -203,22 +206,26 @@ public class UtilComponentImpl implements IUtilComponent {
 
     @Override
     public String encryptCode(String str) {
-        byte[] aesEncrypt = aesEncrypt(str, secretPhrase);
-        String base64EncodeStr = org.apache.tomcat.util.codec.binary.Base64.encodeBase64String(aesEncrypt);
-        return base64EncodeStr;
+        try {
+            setKeyAndIV(secretPhrase);
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
+            return Base64.getEncoder().encodeToString(cipher.doFinal(str.getBytes("UTF-8")));
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error while encrypting: " + e.toString());
+            throw new ModelCustomErrorException("Error while cipher Code: ", AuthorizerError.ENCRYPT_ERROR);
+        }
     }
 
     @Override
-    public String decryptCode(String content) {
+    public String decryptCode(String strToDecrypt) {
         try {
-            byte[] base64DecodeStr = org.apache.tomcat.util.codec.binary.Base64.decodeBase64(content);
-            byte[] aesDecode = aesDecode(base64DecodeStr, secretPhrase);
-            if(aesDecode == null){
-                return null;
-            }
-            String result;
-            result = new String(aesDecode,"UTF-8");
-            return result;
+            setKeyAndIV(secretPhrase);
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivspec);
+            return new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)));
         } catch (Exception e) {
             LOG.error("decryptCode {}", e.getMessage());
             throw new ModelCustomErrorException("decryptCode error", AuthorizerError.ENCRYPT_ERROR);
@@ -332,50 +339,35 @@ public class UtilComponentImpl implements IUtilComponent {
         return true;
     }
 
-    /**
-     * Cifrar 128 bit
-     *
-     * @param content El contenido original que necesita ser encriptado
-     * @param pkey key
-     * @return
-     */
-    public byte[] aesEncrypt(String content, String pkey) {
+    public void setKeyAndIV(String myKey) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        byte[][] keys2 = GetHashKeys(myKey);
+
+        ivspec = new IvParameterSpec(keys2[1]);
+        secretKey = new SecretKeySpec(keys2[0], "AES");
+    }
+    private byte[][] GetHashKeys(String key) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         try {
-            SecretKeySpec skey = new SecretKeySpec(pkey.getBytes(), "AES");
-            Security.addProvider(new BouncyCastleProvider());// Para usar el relleno PKCS7Padding, se debe agregar un proveedor que admita PKCS7Padding
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");// "Algoritmo / Cifrado / Relleno"
-            IvParameterSpec iv = new IvParameterSpec(IV.getBytes());
-            cipher.init(Cipher.ENCRYPT_MODE, skey, iv);// Inicializa el encriptador
-            byte[] encrypted = cipher.doFinal(content.getBytes("UTF-8"));
-            return encrypted;
-        } catch (Exception e) {
-            LOG.error("aesEncrypt {}", e.getMessage());
-            throw new ModelCustomErrorException("aesEncrypt error", AuthorizerError.ENCRYPT_ERROR);
+            byte[][] result = new byte[2][];
+            MessageDigest sha2 = MessageDigest.getInstance("SHA-256");
+            byte[] rawKey = key.getBytes("UTF-8");
+            byte[] rawIV = key.getBytes("UTF-8");
+            byte[] hashKey = sha2.digest(rawKey);
+            byte[] hashIV = sha2.digest(rawIV);
+
+            byte[] hashIV2 = Arrays.copyOf(hashIV, 16);
+
+            result[0] = hashKey;
+            result[1] = hashIV2;
+
+            return result;
         }
-    }
-    /**
-     * Consigue la llave
-     * @param secretKey
-     * @return
-     * @throws Exception
-     */
-    private static SecretKey generateKey(String secretKey) throws Exception{
-        Provider p= Security.getProvider("SUN");
-        SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG",p);
-        secureRandom.setSeed(secretKey.getBytes());
-        KeyGenerator kg = KeyGenerator.getInstance("AES");
-        kg.init(secureRandom);
-        return kg.generateKey();
-    }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
-
-
-    public static byte[] aesDecode(byte[] content, String pkey) throws Exception {
-        SecretKeySpec skey = new SecretKeySpec(pkey.getBytes(), "AES");
-        IvParameterSpec iv = new IvParameterSpec(IV.getBytes("UTF-8"));
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");
-        cipher.init(Cipher.DECRYPT_MODE, skey,iv);
-        byte[] result = cipher.doFinal(content);
-        return result;
+        catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
