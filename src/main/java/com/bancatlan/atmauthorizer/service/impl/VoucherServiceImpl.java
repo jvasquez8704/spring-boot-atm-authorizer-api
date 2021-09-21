@@ -44,6 +44,9 @@ public class VoucherServiceImpl implements IVoucherService {
     @Autowired
     IUtilComponent utilComponent;
 
+    @Autowired
+    IIDmissionService idMissionService;
+
    @Value("${voucher.freeze.days}")
    String voucherFreezeDays;
 
@@ -291,6 +294,12 @@ public class VoucherServiceImpl implements IVoucherService {
                 voucher.setActive(false);
                 voucher.setExpired(true);
                 voucher.setUpdateDate(LocalDateTime.now());
+                //check if this transaction is from mymo
+                if(voucher.getTxnCreatedBy().getApplicationId().equals(Constants.GUIP_APP_ID) && !voucher.getTxnCreatedBy().getChannelReference().equals(null)) {
+                    long startTimeProcess = System.currentTimeMillis();
+                    idMissionService.setFailTransaction(voucher.getTxnCreatedBy());
+                    LOG.info("MYMO Txn Id => {}, time process: {} ms.", voucher.getTxnCreatedBy().getId(), System.currentTimeMillis() - startTimeProcess);
+                }
             }
         }
         return this.update(voucher);

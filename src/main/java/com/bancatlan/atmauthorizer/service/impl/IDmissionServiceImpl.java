@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 @Service
 public class IDmissionServiceImpl implements IIDmissionService {
     Logger LOG = LoggerFactory.getLogger(IDmissionServiceImpl.class);
+    String SUCCESS_TXN_STATUS = "Approved";
+    String FAIL_TXN_STATUS = "DISPENSE_FAIL";
     /**
      * references Files and Endpoints WSDL's
      */
@@ -43,10 +45,9 @@ public class IDmissionServiceImpl implements IIDmissionService {
     @Value("${bus-integration.wsdl.update-txn-endpoint}")
     String updateTxnSOAPEndpoint;
 
-    @Override
-    public Boolean updateTransaction(Transaction txn, String status) {
+    private Boolean updateTransaction(Transaction txn, String status) {
         boolean retVal = true;
-        LOG.info("updateTransaction: txn {} ", txn.getId());
+        LOG.info("updateTransaction: txn {} , id_mission_status: {}", txn.getId(), status);
 
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -147,4 +148,13 @@ public class IDmissionServiceImpl implements IIDmissionService {
         return retVal;
     }
 
+    @Override
+    public Boolean setSuccessTransaction(Transaction txn) {
+        return updateTransaction(txn, SUCCESS_TXN_STATUS);
+    }
+
+    @Override
+    public Boolean setFailTransaction(Transaction txn) {
+        return updateTransaction(txn, FAIL_TXN_STATUS);
+    }
 }
