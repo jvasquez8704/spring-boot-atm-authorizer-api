@@ -176,8 +176,10 @@ public class SP05CardlessWithdrawal implements ICardlessWithdrawal {
         }
 
         /**
-         * General validation for secret code */
-        if (!utilComponent.isANumber(dto.getVoucher().getSecretCode()) || dto.getVoucher().getSecretCode().length() != 4) {
+         * General validation for secret code
+         * Exclude QR txn
+         * */
+        if (!dto.getTransaction().getUseCase().getId().equals(Constants.INT_VOUCHER_USE_CASE_QR) && (!utilComponent.isANumber(dto.getVoucher().getSecretCode()) || dto.getVoucher().getSecretCode().length() != 4)) {
             LOG.error("Custom Exception {}", AuthorizerError.BAD_FORMAT_SECRET_CODE.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.BAD_FORMAT_SECRET_CODE);
         }

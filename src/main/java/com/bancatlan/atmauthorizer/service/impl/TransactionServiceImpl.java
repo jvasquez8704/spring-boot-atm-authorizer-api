@@ -262,10 +262,11 @@ public class TransactionServiceImpl implements ITransactionService {
         }
     }
 
-    private Transaction processInit(Transaction txn){
+    private Transaction processInit(Transaction txn) {
         Transaction initTxn = new Transaction();
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_VOUCHER_USE_CASE_QR:
                 initTxn.setAmount(txn.getAmount());
                 break;
             case Constants.INT_WITHDRAW_VOUCHER_USE_CASE:
@@ -312,6 +313,7 @@ public class TransactionServiceImpl implements ITransactionService {
     private Transaction processAuthentication(Transaction txn) {
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_VOUCHER_USE_CASE_QR:
                 //CHECK PAYER USER AND PAYEE NO CLIENT
                 if (txn.getPayer() == null || txn.getPayer().getUsername() == null || txn.getPayer().getUsername().equals("")) {
                     LOG.error("processAuthentication: {}", AuthorizerError.MISSING_OCB_USER);
@@ -440,9 +442,10 @@ public class TransactionServiceImpl implements ITransactionService {
         return this.update(txn);
     }
 
-    private Transaction processAuthorization(Transaction txn){
+    private Transaction processAuthorization(Transaction txn) {
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_VOUCHER_USE_CASE_QR:
                 //Todo verifyBasaUser , here code things related with permissions, privileges, user roles etc...
                 //Todo account
                 break;
@@ -455,9 +458,10 @@ public class TransactionServiceImpl implements ITransactionService {
         return txn;
     }
 
-    private Transaction processVerification(Transaction txn){
+    private Transaction processVerification(Transaction txn) {
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_VOUCHER_USE_CASE_QR:
                 if(!this.verifyTxnParticipants(txn) && !this.verifyTxnLimits(txn)){
                     throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.ERROR_ON_VERIFY);
                 }
