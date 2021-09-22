@@ -76,16 +76,21 @@ public class SP05CardlessWithdrawal implements ICardlessWithdrawal {
         //(5)
         transactionService.confirm(txnVoucher);
         String pickupCode = utilComponent.getPickupCodeByCellPhoneNumber(txnVoucher.getPayee().getMsisdn());
-        String secretCode = utilComponent.getSecretCodeByCellPhoneNumber(txnVoucher.getPayee().getId().toString());
-        String encryptedCode = utilComponent.encryptCode(txnVoucher.getPayee().getMsisdn() + "|" + secretCode +"|" + pickupCode + "|" + txnVoucher.getAmount());
-        LOG.info("DecryptedCode {}", utilComponent.decryptCode(encryptedCode));
 
-        dto.getVoucher().setSecretCode(secretCode);
+
+
         dto.getVoucher().setPickupCode(pickupCode);
+        if(txnVoucher.getUseCase().getId().equals(Constants.INT_VOUCHER_USE_CASE_QR)) {
+            String secretCode = utilComponent.getSecretCodeByCellPhoneNumber(txnVoucher.getPayee().getId().toString());
+            dto.getVoucher().setSecretCode(secretCode);
+            String encryptedCode = utilComponent.encryptCode(txnVoucher.getPayee().getMsisdn() + "|" + secretCode +"|" + pickupCode + "|" + txnVoucher.getAmount());
+            LOG.info("DecryptedCode {}", utilComponent.decryptCode(encryptedCode));
+            dto.getVoucher().setEncryptedCode(encryptedCode);
+        }
         dto.getVoucher().setTxnCreatedBy(txnVoucher);
         dto.getVoucher().setAmountInitial(txnVoucher.getAmount());
         dto.getVoucher().setAmountCurrent(txnVoucher.getAmount());
-        dto.getVoucher().setEncryptedCode(encryptedCode);
+
         dto.getVoucher().setActive(true);
         dto.getVoucher().setExpired(false);
         dto.getVoucher().setCanceled(false);
@@ -95,7 +100,7 @@ public class SP05CardlessWithdrawal implements ICardlessWithdrawal {
         dto.setTransaction(txnVoucher);
         dto.setVoucher(voucherResult);
 
-        if(voucherResult != null){
+        if(voucherResult != null && !txnVoucher.getUseCase().getId().equals(Constants.INT_VOUCHER_USE_CASE_QR)) {
             String template = Constants.TEMPLATE_NOTIFICATION_SMS;//Todo get template from DB
             String sms = String.format(template, String.format("%.2f", txnVoucher.getAmount()), pickupCode);
             bankService.sendNotification(txnVoucher.getPayee().getMsisdn(),"",sms,Constants.BANK_NOTIFICATION_SMS);

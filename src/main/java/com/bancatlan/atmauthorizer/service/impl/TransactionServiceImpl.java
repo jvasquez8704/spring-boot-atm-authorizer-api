@@ -478,13 +478,15 @@ public class TransactionServiceImpl implements ITransactionService {
     private Transaction processConfirm(Transaction txn) {
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_VOUCHER_USE_CASE_QR:
                 //Freeze founds for ocb user
                 PaymentInstrument cstBank = paymentInstrumentService.getById(txn.getPayer().getId());
                 LOG.info(" {} account number of customer {}",cstBank, txn.getPayer().getId());
                 //Account Payer, Amount, comment
-                String _customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
-                String _coreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_FREEZE, txn.getPayer().getUsername(), _customComment);
-                txn.setCoreReference(_coreRef);
+                String freezeFoundsComment = txn.getUseCase().getId().equals(Constants.INT_VOUCHER_USE_CASE) ? Constants.STR_ID_RETIRO_SIN_TARGETA : Constants.STR_ID_RETIRO_SIN_TARGETA_QR;
+                freezeFoundsComment = Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
+                String freezeFoundsCoreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_FREEZE, txn.getPayer().getUsername(), freezeFoundsComment);
+                txn.setCoreReference(freezeFoundsCoreRef);
                 //Update balance payer
                 //Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
                 //accountATMBASA.setBalance(newBalance);

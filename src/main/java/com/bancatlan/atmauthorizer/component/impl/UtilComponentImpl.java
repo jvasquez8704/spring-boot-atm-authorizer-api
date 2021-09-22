@@ -42,12 +42,12 @@ public class UtilComponentImpl implements IUtilComponent {
         /**
          * use getCode => to make less collision-able the pickupCode for a customer
          */
-        return this.getRandomNumber(Constants.PIVOT_PICKUP_CODE_RANGE) + this.encrypt(cellPhoneNumber);
+        return this.getRandomNumber(Constants.PIVOT_PICKUP_CODE_RANGE) + this.getOTP(cellPhoneNumber);
     }
 
     @Override
     public String getSecretCodeByCellPhoneNumber(String seed) {
-        return this.encrypt(seed);
+        return this.getOTP(seed);
     }
 
     @Override
@@ -238,7 +238,7 @@ public class UtilComponentImpl implements IUtilComponent {
      * @return a otp (pickup code)
      * @throws ModelCustomErrorException exception
      */
-    private String encrypt(final String value) throws ModelCustomErrorException {
+    private String getOTP(final String value) throws ModelCustomErrorException {
         String val = "";
 
         String addedValue = value + LocalDateTime.now().getDayOfMonth() + LocalDateTime.now().getMinute();
@@ -339,7 +339,7 @@ public class UtilComponentImpl implements IUtilComponent {
         return true;
     }
 
-    public void setKeyAndIV(String myKey) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    private void setKeyAndIV(String myKey) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         byte[][] keys2 = GetHashKeys(myKey);
 
         ivspec = new IvParameterSpec(keys2[1]);
