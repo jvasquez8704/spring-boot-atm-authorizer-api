@@ -50,6 +50,10 @@ bank.service.transfer.transaction.id=0000
 #application id Voucher BASA = 2272, IDmission = 2278 pero genera error
 bank.service.transfer.application.id=2272
 bank.service.transfer.canal.id=108
+
+#bank.service.transfer.application.id=2199
+#bank.service.transfer.canal.id=1
+
 bank.service.transfer.action=A
 bank.service.transfer.validate=1
 bank.service.transfer.debit.currency=LPS
@@ -89,8 +93,14 @@ bus-integration.wsdl.transfer-name=SI_OS_TransferenciaContableService.wsdl
 bus-integration.wsdl.notification-name=SI_OS_EjecutarEnvioNotificacionService.wsdl
 bus-integration.wsdl.freeze-name=SI_OS_CongelamientoCuentas.wsdl
 bus-integration.wsdl.update-txn-name=SI_OS_UpdateTransactionServiceDEV.wsdl
+
 #bus-integration.wsdl.freeze-endpoint=http://sappocoredev.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_CongelamientoCuentas&interfaceNamespace=http://hn.infatlan/ACD169/out/CongelamientoCuentas
 #bus-integration.wsdl.freeze-endpoint=http://sappocoredev.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_CongelamientoCuentas&interfaceNamespace=http://hn.infatlan/ACD169/out/CongelamientoCuentas
+
 bus-integration.wsdl.freeze-endpoint=http://sappocoreqas.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_QAS_443_HN75OQH&receiverParty=&receiverService=&interface=SI_OS_CongelamientoCuentas&interfaceNamespace=http://hn.infatlan/ACD169/out/CongelamientoCuentas
 bus-integration.wsdl.update-txn-endpoint=http://hndespombapp.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_UpdateTransaction&interfaceNamespace=http://hn.infatlan.mymo/ws/MYMO001/out/UpdateTransaction
+#bus-integration.wsdl.freeze-endpoint=http://sappocoredev.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_CongelamientoCuentas&interfaceNamespace=http://hn.infatlan/ACD169/out/CongelamientoCuentas
+#bus-integration.wsdl.freeze-endpoint=http://sappocoreqas.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_QAS_443_HN75OQH&receiverParty=&receiverService=&interface=SI_OS_CongelamientoCuentas&interfaceNamespace=http://hn.infatlan/ACD169/out/CongelamientoCuentas
+#bus-integration.wsdl.update-txn-endpoint=http://hndespombapp.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_UpdateTransaction&interfaceNamespace=http://hn.infatlan.mymo/ws/MYMO001/out/UpdateTransaction
 #bus-integration.wsdl.update-txn-endpoint=http://hnqaspocrmapp.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_QAS_443_HN75OQH&receiverParty=&receiverService=&interface=SI_OS_UpdateTransaction&interfaceNamespace=http://hn.infatlan.mymo/ws/MYMO001/out/UpdateTransaction
+
