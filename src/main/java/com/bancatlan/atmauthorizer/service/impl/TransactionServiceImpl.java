@@ -232,10 +232,10 @@ public class TransactionServiceImpl implements ITransactionService {
                 long startTimeProcess = System.currentTimeMillis();
                 this.processBatchConfirm(txn);
                 LOG.info("Id => {}, Amount {},  Paid Voucher {} , time process: {} ms.", txn.getId(), txn.getAmount(), txn.getVoucher().getId(), System.currentTimeMillis() - startTimeProcess);
-                if(txn.getApplicationId().equals(Constants.GUIP_APP_ID) && !txn.getChannelReference().equals(null)) {
+                if(txn.getVoucher().getTxnCreatedBy().getApplicationId().equals(Constants.GUIP_APP_ID) && !txn.getVoucher().getTxnCreatedBy().getChannelReference().equals(null)) {
                     long startingTimeProcess = System.currentTimeMillis();
-                    idMissionService.setSuccessTransaction(txn);
-                    LOG.info("MYMO Txn Id => {}, time process: {} ms.", txn.getId(), System.currentTimeMillis() - startingTimeProcess);
+                    idMissionService.setSuccessTransaction(txn.getVoucher().getTxnCreatedBy());
+                    LOG.info("MYMO Txn Id => {}, time process: {} ms.", txn.getVoucher().getTxnCreatedBy().getId(), System.currentTimeMillis() - startingTimeProcess);
                 }
             }
             LOG.info("ExecuteAllConfirmedWithDrawls: Finishing bash process, which it took {} ms", System.currentTimeMillis() - startTime);

@@ -65,6 +65,9 @@ public class IDmissionServiceImpl implements IIDmissionService {
             SIOSUpdateTransactionService port = new SIOSUpdateTransactionService(url);
             SIOSUpdateTransaction updateTransactionService = port.getHTTPPort();
 
+            BindingProvider provider = (BindingProvider) updateTransactionService;
+            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, updateTxnSOAPEndpoint);
+
             /**
              * identificadorColeccion
              */
@@ -98,28 +101,15 @@ public class IDmissionServiceImpl implements IIDmissionService {
             transactionItem.setAccion(status);//Approved --- DISPENSE_FAIL
             transactionItem.setMonto(txn.getAmount().toString());
             transactionItem.setMoneda(txn.getCurrency().getCode());
-            //transactionItem.setPais("United States");
             transactionItem.setFuente("KBAPP");
             transactionItem.setFlujoAtm("Y");
             transactionItem.setGeneraUrl("Y");
-            //transactionItem.setCuenta("10111004791");
-            //transactionItem.setBanco("Banco Atltida");
-            //transactionItem.setTipoCuenta("Default");
-
             /**
              * parametroAdicionalColeccion to updateTransaction
              */
-            /*DTParametroAdicionalColeccion parameterAdditionalCollectionUpdateTransaction = new DTParametroAdicionalColeccion();
-            DTParametroAdicionalItem parametroAdicionalItem = new DTParametroAdicionalItem();
-            parametroAdicionalItem.setLinea(new BigInteger("0"));
-            parametroAdicionalItem.setTipoRegistro("?");
-            parametroAdicionalItem.setValor("?");
-            parameterAdditionalCollectionUpdateTransaction.getParametroAdicionalItem().add(parametroAdicionalItem);
-            transactionItem.setParametroAdicionalColeccion(parameterAdditionalCollectionUpdateTransaction);*/
             updateTransactionColeccion.getUpdateTransactionItem().add(transactionItem);
 
             DTUpdateTransaction updateTransaction = new DTUpdateTransaction();
-            //updateTransaction.setVersion("6.4.7.11");
             updateTransaction.setLlaveSesion(idmissionAuthPassword);
             updateTransaction.setToken(idmissionAuthMerchantId);
 
@@ -134,7 +124,7 @@ public class IDmissionServiceImpl implements IIDmissionService {
 
             if (response != null && response.getEstado() != null && response.getEstado().getCodigo() != null
                     && response.getEstado().getCodigo().equals("0000")) {
-                LOG.info("Successful Response IDmission txn => {}", response.getEstado().getDetalleTecnico());
+                LOG.info("Successful Response IDmission txn => {}", response.getEstado().getDescripcion());
             } else {
                 LOG.info("Custom response error IDmission txn => {}", response.getEstado().getDescripcion());
                 retVal = false;
