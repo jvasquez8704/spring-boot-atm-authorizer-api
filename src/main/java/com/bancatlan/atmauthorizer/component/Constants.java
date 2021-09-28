@@ -92,6 +92,7 @@ public class Constants {
     /*GENERIC MESSAGES*/
     public static final String MSG_ATM_TO_BANK_ACCOUNT =  "TRANSFER OCB USER ACCOUNT TO ATM AUTHORIZER BANK ACCOUNT";
     public static final String STR_ID_RETIRO_SIN_TARGETA =  "RETIRO_SIN_TARJETA";
+    public static final String STR_RTS_MYMO_CORE_DESC =  "RST Teclado Atlantida";
     public static final String STR_DASH_SEPARATOR =  "-";
 
     /*NOTIFICATION TYPES*/
@@ -108,7 +109,7 @@ public class Constants {
 
     /*application Id*/
     public static final String OCB_APP_ID = "001";
-    public static final String GUIP_APP_ID = "2278";
+    public static final String ID_MISSION_APP_ID = "2278";
     public static final String VOUCHER_BASA_APP_ID = "2272";
 
 }

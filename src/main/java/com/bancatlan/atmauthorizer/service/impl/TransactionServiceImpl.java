@@ -232,7 +232,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 long startTimeProcess = System.currentTimeMillis();
                 this.processBatchConfirm(txn);
                 LOG.info("Id => {}, Amount {},  Paid Voucher {} , time process: {} ms.", txn.getId(), txn.getAmount(), txn.getVoucher().getId(), System.currentTimeMillis() - startTimeProcess);
-                if(txn.getVoucher().getTxnCreatedBy().getApplicationId().equals(Constants.GUIP_APP_ID) && !txn.getVoucher().getTxnCreatedBy().getChannelReference().equals(null)) {
+                if(txn.getVoucher().getTxnCreatedBy().getApplicationId().equals(Constants.ID_MISSION_APP_ID) && !txn.getVoucher().getTxnCreatedBy().getChannelReference().equals(null)) {
                     long startingTimeProcess = System.currentTimeMillis();
                     idMissionService.setSuccessTransaction(txn.getVoucher().getTxnCreatedBy());
                     LOG.info("MYMO Txn Id => {}, time process: {} ms.", txn.getVoucher().getTxnCreatedBy().getId(), System.currentTimeMillis() - startingTimeProcess);
@@ -528,8 +528,8 @@ public class TransactionServiceImpl implements ITransactionService {
         PaymentInstrument payerPI = creatorTxn.getPayerPaymentInstrument();
         PaymentInstrument accountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
         Customer payee = creatorTxn.getPayee();
-
-        String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
+        String prefix_core_desc = (!creatorTxn.getApplicationId().equals(null) && creatorTxn.getApplicationId().equals(Constants.ID_MISSION_APP_ID)) ? Constants.STR_RTS_MYMO_CORE_DESC : Constants.STR_ID_RETIRO_SIN_TARGETA;
+        String customComment = prefix_core_desc + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
         String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), accountATMBASA.getStrIdentifier(), txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment);
         txn.setCoreReference(coreRef);
         //Update balance payee
