@@ -56,6 +56,7 @@ public class Constants {
     public static final long WITHDRAW_VOUCHER_USE_CASE =  800;
     public static final int INT_VOUCHER_USE_CASE =  174;
     public static final int INT_WITHDRAW_VOUCHER_USE_CASE =  800;
+    public static final String STR_WITHDRAW_MYMO =  "WITHDRAWAL";
 
     /*CURRENCY CODES*/
     public static final long HN_CURRENCY_ID =  1;

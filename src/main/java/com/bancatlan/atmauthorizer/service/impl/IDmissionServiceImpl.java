@@ -1,5 +1,6 @@
 package com.bancatlan.atmauthorizer.service.impl;
 
+import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.model.Transaction;
 import com.bancatlan.atmauthorizer.service.IIDmissionService;
 import mymo.infatlan.hn.ws.mymo001.out.updatetransaction.*;
@@ -97,7 +98,7 @@ public class IDmissionServiceImpl implements IIDmissionService {
             DTUpdateTransactionColeccion updateTransactionColeccion = new DTUpdateTransactionColeccion();
             DTUpdateTransactionItem transactionItem = new DTUpdateTransactionItem();
             transactionItem.setFechaHora(LocalDateTime.now().toString());
-            transactionItem.setTipoAccion("TRANSFER");
+            transactionItem.setTipoAccion(Constants.STR_WITHDRAW_MYMO);
             transactionItem.setAccion(status);//Approved --- DISPENSE_FAIL
             transactionItem.setMonto(txn.getAmount().toString());
             transactionItem.setMoneda(txn.getCurrency().getCode());
