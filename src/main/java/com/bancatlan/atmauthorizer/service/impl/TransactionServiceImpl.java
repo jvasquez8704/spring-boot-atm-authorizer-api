@@ -497,7 +497,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 LOG.info(" {} account number of customer {}",cstBank, txn.getPayer().getId());
                 //Account Payer, Amount, comment
                 String freezeFoundsComment = txn.getUseCase().getId().equals(Constants.INT_VOUCHER_USE_CASE) ? Constants.STR_ID_RETIRO_SIN_TARGETA : Constants.STR_ID_RETIRO_SIN_TARGETA_QR;
-                freezeFoundsComment = Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
+                freezeFoundsComment += Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
                 String freezeFoundsCoreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_FREEZE, txn.getPayer().getUsername(), freezeFoundsComment);
                 txn.setCoreReference(freezeFoundsCoreRef);
                 //Update balance payer
@@ -558,6 +558,7 @@ public class TransactionServiceImpl implements ITransactionService {
     private Transaction processCancelConfirm(Transaction txn) {
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_VOUCHER_USE_CASE_QR:
                 //Defrost founds user
                 LOG.info("Cancel txn {}", txn.getId());
                 //Account Payer, Amount, comment
