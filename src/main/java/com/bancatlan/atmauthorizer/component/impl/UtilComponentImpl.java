@@ -8,17 +8,18 @@ import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
+import java.security.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Component
@@ -28,12 +29,25 @@ public class UtilComponentImpl implements IUtilComponent {
     public static AtmBody atmBody;
     private Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
     private Map<String, Double> amountValues = new HashMap<>();
+    private SecretKeySpec secretKey;
+    private IvParameterSpec ivspec;
+
+
+    @Value("${secret.qr.phrase}")
+    private String secretPhrase;
+
+    public static final String IV = "1234567890123456";
     @Override
     public String getPickupCodeByCellPhoneNumber(String cellPhoneNumber) {
         /**
          * use getCode => to make less collision-able the pickupCode for a customer
          */
-        return this.getRandomNumber(Constants.PIVOT_PICKUP_CODE_RANGE) + this.encrypt(cellPhoneNumber);
+        return this.getRandomNumber(Constants.PIVOT_PICKUP_CODE_RANGE) + this.getOTP(cellPhoneNumber);
+    }
+
+    @Override
+    public String getSecretCodeByCellPhoneNumber(String seed) {
+        return this.getOTP(seed);
     }
 
     @Override
@@ -190,13 +204,41 @@ public class UtilComponentImpl implements IUtilComponent {
         return (LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE) + k1.orElse(Constants.BANK_STRING_ZERO) + k2.orElse(Constants.BANK_STRING_ZERO)).trim();
     }
 
+    @Override
+    public String encryptCode(String str) {
+        try {
+            setKeyAndIV(secretPhrase);
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
+            return Base64.getEncoder().encodeToString(cipher.doFinal(str.getBytes("UTF-8")));
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error while encrypting: " + e.toString());
+            throw new ModelCustomErrorException("Error while cipher Code: ", AuthorizerError.ENCRYPT_ERROR);
+        }
+    }
+
+    @Override
+    public String decryptCode(String strToDecrypt) {
+        try {
+            setKeyAndIV(secretPhrase);
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivspec);
+            return new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)));
+        } catch (Exception e) {
+            LOG.error("decryptCode {}", e.getMessage());
+            throw new ModelCustomErrorException("decryptCode error", AuthorizerError.ENCRYPT_ERROR);
+        }
+    }
+
     /**
      *It generates a code for verification in a measure time configured
      * @param value it should be cellphone number, email or user
      * @return a otp (pickup code)
      * @throws ModelCustomErrorException exception
      */
-    private String encrypt(final String value) throws ModelCustomErrorException {
+    private String getOTP(final String value) throws ModelCustomErrorException {
         String val = "";
 
         String addedValue = value + LocalDateTime.now().getDayOfMonth() + LocalDateTime.now().getMinute();
@@ -295,5 +337,37 @@ public class UtilComponentImpl implements IUtilComponent {
             return false;
         }
         return true;
+    }
+
+    private void setKeyAndIV(String myKey) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        byte[][] keys2 = GetHashKeys(myKey);
+
+        ivspec = new IvParameterSpec(keys2[1]);
+        secretKey = new SecretKeySpec(keys2[0], "AES");
+    }
+    private byte[][] GetHashKeys(String key) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        try {
+            byte[][] result = new byte[2][];
+            MessageDigest sha2 = MessageDigest.getInstance("SHA-256");
+            byte[] rawKey = key.getBytes("UTF-8");
+            byte[] rawIV = key.getBytes("UTF-8");
+            byte[] hashKey = sha2.digest(rawKey);
+            byte[] hashIV = sha2.digest(rawIV);
+
+            byte[] hashIV2 = Arrays.copyOf(hashIV, 16);
+
+            result[0] = hashKey;
+            result[1] = hashIV2;
+
+            return result;
+        }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

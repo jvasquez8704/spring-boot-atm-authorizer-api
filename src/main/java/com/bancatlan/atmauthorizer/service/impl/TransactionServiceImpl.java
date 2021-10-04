@@ -270,10 +270,11 @@ public class TransactionServiceImpl implements ITransactionService {
         }
     }
 
-    private Transaction processInit(Transaction txn){
+    private Transaction processInit(Transaction txn) {
         Transaction initTxn = new Transaction();
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_VOUCHER_USE_CASE_QR:
             case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 initTxn.setAmount(txn.getAmount());
                 break;
@@ -321,6 +322,7 @@ public class TransactionServiceImpl implements ITransactionService {
     private Transaction processAuthentication(Transaction txn) {
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_VOUCHER_USE_CASE_QR:
             case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 //CHECK PAYER USER AND PAYEE NO CLIENT
                 if (txn.getPayer() == null || txn.getPayer().getUsername() == null || txn.getPayer().getUsername().equals("")) {
@@ -450,9 +452,10 @@ public class TransactionServiceImpl implements ITransactionService {
         return this.update(txn);
     }
 
-    private Transaction processAuthorization(Transaction txn){
+    private Transaction processAuthorization(Transaction txn) {
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_VOUCHER_USE_CASE_QR:
             case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 //Todo verifyBasaUser , here code things related with permissions, privileges, user roles etc...
                 //Todo account
@@ -466,9 +469,10 @@ public class TransactionServiceImpl implements ITransactionService {
         return txn;
     }
 
-    private Transaction processVerification(Transaction txn){
+    private Transaction processVerification(Transaction txn) {
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_VOUCHER_USE_CASE_QR:
             case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 if(!this.verifyTxnParticipants(txn) && !this.verifyTxnLimits(txn)){
                     throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.ERROR_ON_VERIFY);
@@ -486,14 +490,16 @@ public class TransactionServiceImpl implements ITransactionService {
     private Transaction processConfirm(Transaction txn) {
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_VOUCHER_USE_CASE_QR:
             case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 //Freeze founds for ocb user
                 PaymentInstrument cstBank = paymentInstrumentService.getById(txn.getPayer().getId());
                 LOG.info(" {} account number of customer {}",cstBank, txn.getPayer().getId());
                 //Account Payer, Amount, comment
-                String _customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
-                String _coreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_FREEZE, txn.getPayer().getUsername(), _customComment);
-                txn.setCoreReference(_coreRef);
+                String freezeFoundsComment = txn.getUseCase().getId().equals(Constants.INT_VOUCHER_USE_CASE) ? Constants.STR_ID_RETIRO_SIN_TARGETA : Constants.STR_ID_RETIRO_SIN_TARGETA_QR;
+                freezeFoundsComment = Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
+                String freezeFoundsCoreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_FREEZE, txn.getPayer().getUsername(), freezeFoundsComment);
+                txn.setCoreReference(freezeFoundsCoreRef);
                 //Update balance payer
                 //Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
                 //accountATMBASA.setBalance(newBalance);

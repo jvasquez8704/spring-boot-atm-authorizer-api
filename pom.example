@@ -69,6 +69,12 @@
 			<artifactId>wss4j</artifactId>
 			<version>1.5.1</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.69</version>
+        </dependency>
 	</dependencies>
 
 	<build>

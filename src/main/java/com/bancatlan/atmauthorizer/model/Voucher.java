@@ -70,6 +70,9 @@ public class Voucher {
     @JoinColumn(name = "id_customer_update",  foreignKey = @ForeignKey(name = "fk_voucher_customer_u"))
     private Customer customerUpdate;
 
+    @Column(name = "encrypted_code")
+    private String encryptedCode;
+
     public Long getId() {
         return id;
     }
@@ -203,5 +206,13 @@ public class Voucher {
 
     public void setCustomerUpdate(Customer customerUpdate) {
         this.customerUpdate = customerUpdate;
+    }
+
+    public String getEncryptedCode() {
+        return encryptedCode;
+    }
+
+    public void setEncryptedCode(String encryptedCode) {
+        this.encryptedCode = encryptedCode;
     }
 }

@@ -53,8 +53,10 @@ public class Constants {
 
     /*TXN USE CASE CODES*/
     public static final long VOUCHER_USE_CASE =  174;
+    public static final long VOUCHER_USE_CASE_QR =  177;
     public static final long WITHDRAW_VOUCHER_USE_CASE =  800;
     public static final int INT_VOUCHER_USE_CASE =  174;
+    public static final int INT_VOUCHER_USE_CASE_QR =  177;
     public static final int INT_CASH_OUT_KEYBOARD_USE_CASE =  176;
     public static final int INT_WITHDRAW_VOUCHER_USE_CASE =  800;
     public static final String STR_WITHDRAW_MYMO =  "WITHDRAWAL";
@@ -93,6 +95,7 @@ public class Constants {
     /*GENERIC MESSAGES*/
     public static final String MSG_ATM_TO_BANK_ACCOUNT =  "TRANSFER OCB USER ACCOUNT TO ATM AUTHORIZER BANK ACCOUNT";
     public static final String STR_ID_RETIRO_SIN_TARGETA =  "RETIRO_SIN_TARJETA";
+    public static final String STR_ID_RETIRO_SIN_TARGETA_QR =  "RETIRO_SIN_TARJETA QR";
     public static final String STR_RTS_MYMO_CORE_DESC =  "RST Teclado Atlantida";
     public static final String STR_DASH_SEPARATOR =  "-";
 
