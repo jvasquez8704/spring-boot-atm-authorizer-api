@@ -274,6 +274,7 @@ public class TransactionServiceImpl implements ITransactionService {
         Transaction initTxn = new Transaction();
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 initTxn.setAmount(txn.getAmount());
                 break;
             case Constants.INT_WITHDRAW_VOUCHER_USE_CASE:
@@ -320,6 +321,7 @@ public class TransactionServiceImpl implements ITransactionService {
     private Transaction processAuthentication(Transaction txn) {
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 //CHECK PAYER USER AND PAYEE NO CLIENT
                 if (txn.getPayer() == null || txn.getPayer().getUsername() == null || txn.getPayer().getUsername().equals("")) {
                     LOG.error("processAuthentication: {}", AuthorizerError.MISSING_OCB_USER);
@@ -451,6 +453,7 @@ public class TransactionServiceImpl implements ITransactionService {
     private Transaction processAuthorization(Transaction txn){
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 //Todo verifyBasaUser , here code things related with permissions, privileges, user roles etc...
                 //Todo account
                 break;
@@ -466,6 +469,7 @@ public class TransactionServiceImpl implements ITransactionService {
     private Transaction processVerification(Transaction txn){
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 if(!this.verifyTxnParticipants(txn) && !this.verifyTxnLimits(txn)){
                     throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.ERROR_ON_VERIFY);
                 }
@@ -482,6 +486,7 @@ public class TransactionServiceImpl implements ITransactionService {
     private Transaction processConfirm(Transaction txn) {
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
+            case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 //Freeze founds for ocb user
                 PaymentInstrument cstBank = paymentInstrumentService.getById(txn.getPayer().getId());
                 LOG.info(" {} account number of customer {}",cstBank, txn.getPayer().getId());
