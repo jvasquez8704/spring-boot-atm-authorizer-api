@@ -80,7 +80,7 @@ public class SP05CardlessWithdrawal implements ICardlessWithdrawal {
 
 
         dto.getVoucher().setPickupCode(pickupCode);
-        if(txnVoucher.getUseCase().getId().equals(Constants.INT_VOUCHER_USE_CASE_QR)) {
+        if(txnVoucher.getUseCase().getId().equals(Constants.VOUCHER_USE_CASE_QR)) {
             String secretCode = utilComponent.getSecretCodeByCellPhoneNumber(txnVoucher.getPayee().getId().toString());
             dto.getVoucher().setSecretCode(secretCode);
             String encryptedCode = utilComponent.encryptCode(txnVoucher.getPayee().getMsisdn() + "|" + secretCode +"|" + pickupCode + "|" + txnVoucher.getAmount());
@@ -100,7 +100,7 @@ public class SP05CardlessWithdrawal implements ICardlessWithdrawal {
         dto.setTransaction(txnVoucher);
         dto.setVoucher(voucherResult);
 
-        if(voucherResult != null && !txnVoucher.getUseCase().getId().equals(Constants.INT_VOUCHER_USE_CASE_QR)) {
+        if(voucherResult != null && !txnVoucher.getUseCase().getId().equals(Constants.VOUCHER_USE_CASE_QR)) {
             String template = Constants.TEMPLATE_NOTIFICATION_SMS;//Todo get template from DB
             String sms = String.format(template, String.format("%.2f", txnVoucher.getAmount()), pickupCode);
             bankService.sendNotification(txnVoucher.getPayee().getMsisdn(),"",sms,Constants.BANK_NOTIFICATION_SMS);
@@ -184,7 +184,7 @@ public class SP05CardlessWithdrawal implements ICardlessWithdrawal {
          * General validation for secret code
          * Exclude QR txn
          * */
-        if (!dto.getTransaction().getUseCase().getId().equals(Constants.INT_VOUCHER_USE_CASE_QR) && (!utilComponent.isANumber(dto.getVoucher().getSecretCode()) || dto.getVoucher().getSecretCode().length() != 4)) {
+        if (!dto.getTransaction().getUseCase().getId().equals(Constants.VOUCHER_USE_CASE_QR) && (!utilComponent.isANumber(dto.getVoucher().getSecretCode()) || dto.getVoucher().getSecretCode().length() != 4)) {
             LOG.error("Custom Exception {}", AuthorizerError.BAD_FORMAT_SECRET_CODE.toString());
             throw new ModelNotFoundException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.BAD_FORMAT_SECRET_CODE);
         }

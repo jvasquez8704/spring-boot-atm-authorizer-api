@@ -53,6 +53,7 @@ public class Constants {
 
     /*TXN USE CASE CODES*/
     public static final long VOUCHER_USE_CASE =  174;
+    public static final long VOUCHER_USE_CASE_QR =  177;
     public static final long WITHDRAW_VOUCHER_USE_CASE =  800;
     public static final int INT_VOUCHER_USE_CASE =  174;
     public static final int INT_VOUCHER_USE_CASE_QR =  177;
