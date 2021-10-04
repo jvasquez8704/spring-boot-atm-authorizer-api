@@ -44,6 +44,9 @@ public class VoucherServiceImpl implements IVoucherService {
     @Autowired
     IUtilComponent utilComponent;
 
+    @Autowired
+    IIDmissionService idMissionService;
+
    @Value("${voucher.freeze.days}")
    String voucherFreezeDays;
 
@@ -291,6 +294,12 @@ public class VoucherServiceImpl implements IVoucherService {
                 voucher.setActive(false);
                 voucher.setExpired(true);
                 voucher.setUpdateDate(LocalDateTime.now());
+                //check if this transaction is from mymo
+                if(voucher.getTxnCreatedBy().getApplicationId().equals(Constants.ID_MISSION_APP_ID) && !voucher.getTxnCreatedBy().getChannelReference().equals(null)) {
+                    long startTimeProcess = System.currentTimeMillis();
+                    idMissionService.setFailTransaction(voucher.getTxnCreatedBy());
+                    LOG.info("MYMO Txn Id => {}, time process: {} ms.", voucher.getTxnCreatedBy().getId(), System.currentTimeMillis() - startTimeProcess);
+                }
             }
         }
         return this.update(voucher);
@@ -470,7 +479,7 @@ public class VoucherServiceImpl implements IVoucherService {
     }
 
     public VoucherTransactionDTO processCancelVoucher(VoucherTransactionDTO dto) {
-        if(dto.getTransaction().getApplicationId().equals(Constants.GUIP_APP_ID)){
+        if(dto.getTransaction().getApplicationId().equals(Constants.ID_MISSION_APP_ID)){
             Transaction mymoTxn = transaction.getTransactionByApplicationIdAndChannelReference(dto.getTransaction().getApplicationId(),dto.getTransaction().getChannelReference());
             if (mymoTxn == null) {
                 LOG.error("Guip TXN with app ID {} and channelReference {} not found, error {} ", dto.getTransaction().getApplicationId(), dto.getTransaction().getChannelReference(), AuthorizerError.GUIP_TXN_NOT_FOUND);

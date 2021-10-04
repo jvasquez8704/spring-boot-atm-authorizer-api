@@ -56,7 +56,9 @@ public class Constants {
     public static final long WITHDRAW_VOUCHER_USE_CASE =  800;
     public static final int INT_VOUCHER_USE_CASE =  174;
     public static final int INT_VOUCHER_USE_CASE_QR =  177;
+    public static final int INT_CASH_OUT_KEYBOARD_USE_CASE =  176;
     public static final int INT_WITHDRAW_VOUCHER_USE_CASE =  800;
+    public static final String STR_WITHDRAW_MYMO =  "WITHDRAWAL";
 
     /*CURRENCY CODES*/
     public static final long HN_CURRENCY_ID =  1;
@@ -93,6 +95,7 @@ public class Constants {
     public static final String MSG_ATM_TO_BANK_ACCOUNT =  "TRANSFER OCB USER ACCOUNT TO ATM AUTHORIZER BANK ACCOUNT";
     public static final String STR_ID_RETIRO_SIN_TARGETA =  "RETIRO_SIN_TARJETA";
     public static final String STR_ID_RETIRO_SIN_TARGETA_QR =  "RETIRO_SIN_TARJETA QR";
+    public static final String STR_RTS_MYMO_CORE_DESC =  "RST Teclado Atlantida";
     public static final String STR_DASH_SEPARATOR =  "-";
 
     /*NOTIFICATION TYPES*/
@@ -109,7 +112,7 @@ public class Constants {
 
     /*application Id*/
     public static final String OCB_APP_ID = "001";
-    public static final String GUIP_APP_ID = "2278";
+    public static final String ID_MISSION_APP_ID = "2278";
     public static final String VOUCHER_BASA_APP_ID = "2272";
 
 }

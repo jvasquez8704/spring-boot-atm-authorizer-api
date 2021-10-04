@@ -1,5 +1,6 @@
 package com.bancatlan.atmauthorizer.service.impl;
 
+import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.model.Transaction;
 import com.bancatlan.atmauthorizer.service.IIDmissionService;
 import mymo.infatlan.hn.ws.mymo001.out.updatetransaction.*;
@@ -13,10 +14,13 @@ import java.math.BigInteger;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.URL;
+import java.time.LocalDateTime;
 
 @Service
 public class IDmissionServiceImpl implements IIDmissionService {
     Logger LOG = LoggerFactory.getLogger(IDmissionServiceImpl.class);
+    String SUCCESS_TXN_STATUS = "Approved";
+    String FAIL_TXN_STATUS = "DISPENSE_FAIL";
     /**
      * references Files and Endpoints WSDL's
      */
@@ -26,24 +30,30 @@ public class IDmissionServiceImpl implements IIDmissionService {
     @Value("${bus-integration.wsdl.update-txn-name}")
     String updateTxnWSDLName;
 
-    @Value("${bank.service.po.dev1.username}")
-    String busIntegrationDevUsername;
 
-    @Value("${bank.service.po.dev1.password}")
-    String busIntegrationDevPassword;
+    //@Value("${bank.service.po.username}")
+    String busIntegrationUsername = "APPOCH01";
+
+    //@Value("${bank.service.po.password}")
+    String busIntegrationPassword = "Inicio01";
+
+    @Value("${idmission.auth.password}")
+    String idmissionAuthPassword;
+
+    @Value("${idmission.auth.merchantid}")
+    String idmissionAuthMerchantId;
 
     @Value("${bus-integration.wsdl.update-txn-endpoint}")
     String updateTxnSOAPEndpoint;
 
-    @Override
-    public Boolean updateTransaction(Transaction txn) {
+    private Boolean updateTransaction(Transaction txn, String status) {
         boolean retVal = true;
-        LOG.info("updateTransaction: txn {} ", txn.getId());
+        LOG.info("updateTransaction: txn {} , id_mission_status: {}", txn.getId(), status);
 
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(busIntegrationDevUsername,
-                        busIntegrationDevPassword.toCharArray());
+                return new PasswordAuthentication(busIntegrationUsername,
+                        busIntegrationPassword.toCharArray());
             }
         });
 
@@ -56,11 +66,14 @@ public class IDmissionServiceImpl implements IIDmissionService {
             SIOSUpdateTransactionService port = new SIOSUpdateTransactionService(url);
             SIOSUpdateTransaction updateTransactionService = port.getHTTPPort();
 
+            BindingProvider provider = (BindingProvider) updateTransactionService;
+            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, updateTxnSOAPEndpoint);
+
             /**
              * identificadorColeccion
              */
             DTIdentificadorColeccion identificadorColeccion = new DTIdentificadorColeccion();
-            identificadorColeccion.setNumeroTransaccion("90833");
+            identificadorColeccion.setNumeroTransaccion(txn.getChannelReference());
 
             /**
              * parametroAdicionalColeccion
@@ -69,7 +82,7 @@ public class IDmissionServiceImpl implements IIDmissionService {
             DTParametroAdicionalItem username = new DTParametroAdicionalItem();
             username.setLinea(new BigInteger("1"));
             username.setTipoRegistro("Login_Id");
-            username.setValor("atlmymo_integ");
+            username.setValor("Atl_MyMoUat");
             parametroAdicionalColeccion.getParametroAdicionalItem().add(username);
 
 
@@ -84,35 +97,22 @@ public class IDmissionServiceImpl implements IIDmissionService {
              */
             DTUpdateTransactionColeccion updateTransactionColeccion = new DTUpdateTransactionColeccion();
             DTUpdateTransactionItem transactionItem = new DTUpdateTransactionItem();
-            transactionItem.setFechaHora("16/07/2020 13:11:18");
-            transactionItem.setTipoAccion("TRANSFER");
-            transactionItem.setAccion("Approved");
-            transactionItem.setMonto("100.0");
-            transactionItem.setMoneda("USD");
-            transactionItem.setPais("United States");
+            transactionItem.setFechaHora(LocalDateTime.now().toString());
+            transactionItem.setTipoAccion(Constants.STR_WITHDRAW_MYMO);
+            transactionItem.setAccion(status);//Approved --- DISPENSE_FAIL
+            transactionItem.setMonto(txn.getAmount().toString());
+            transactionItem.setMoneda(txn.getCurrency().getCode());
             transactionItem.setFuente("KBAPP");
             transactionItem.setFlujoAtm("Y");
             transactionItem.setGeneraUrl("Y");
-            transactionItem.setCuenta("10111004791");
-            transactionItem.setBanco("Banco Atltida");
-            transactionItem.setTipoCuenta("Default");
-
             /**
              * parametroAdicionalColeccion to updateTransaction
              */
-            /*DTParametroAdicionalColeccion parameterAdditionalCollectionUpdateTransaction = new DTParametroAdicionalColeccion();
-            DTParametroAdicionalItem parametroAdicionalItem = new DTParametroAdicionalItem();
-            parametroAdicionalItem.setLinea(new BigInteger("0"));
-            parametroAdicionalItem.setTipoRegistro("?");
-            parametroAdicionalItem.setValor("?");
-            parameterAdditionalCollectionUpdateTransaction.getParametroAdicionalItem().add(parametroAdicionalItem);
-            transactionItem.setParametroAdicionalColeccion(parameterAdditionalCollectionUpdateTransaction);*/
             updateTransactionColeccion.getUpdateTransactionItem().add(transactionItem);
 
             DTUpdateTransaction updateTransaction = new DTUpdateTransaction();
-            updateTransaction.setVersion("6.4.7.11");
-            updateTransaction.setLlaveSesion("Merchant#123");
-            updateTransaction.setToken("14196");
+            updateTransaction.setLlaveSesion(idmissionAuthPassword);
+            updateTransaction.setToken(idmissionAuthMerchantId);
 
             /**
              * Adding all objects to main body
@@ -125,7 +125,7 @@ public class IDmissionServiceImpl implements IIDmissionService {
 
             if (response != null && response.getEstado() != null && response.getEstado().getCodigo() != null
                     && response.getEstado().getCodigo().equals("0000")) {
-                LOG.info("Successful Response IDmission txn => {}", response.getEstado().getDetalleTecnico());
+                LOG.info("Successful Response IDmission txn => {}", response.getEstado().getDescripcion());
             } else {
                 LOG.info("Custom response error IDmission txn => {}", response.getEstado().getDescripcion());
                 retVal = false;
@@ -139,4 +139,13 @@ public class IDmissionServiceImpl implements IIDmissionService {
         return retVal;
     }
 
+    @Override
+    public Boolean setSuccessTransaction(Transaction txn) {
+        return updateTransaction(txn, SUCCESS_TXN_STATUS);
+    }
+
+    @Override
+    public Boolean setFailTransaction(Transaction txn) {
+        return updateTransaction(txn, FAIL_TXN_STATUS);
+    }
 }

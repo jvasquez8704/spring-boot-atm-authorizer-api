@@ -46,6 +46,9 @@ public class TransactionServiceImpl implements ITransactionService {
     @Autowired
     private IVoucherService voucherService;
 
+    @Autowired
+    private IIDmissionService idMissionService;
+
     @Override
     public Transaction create(Transaction txn) {
         txn.setCreationDate(LocalDateTime.now());
@@ -229,6 +232,11 @@ public class TransactionServiceImpl implements ITransactionService {
                 long startTimeProcess = System.currentTimeMillis();
                 this.processBatchConfirm(txn);
                 LOG.info("Id => {}, Amount {},  Paid Voucher {} , time process: {} ms.", txn.getId(), txn.getAmount(), txn.getVoucher().getId(), System.currentTimeMillis() - startTimeProcess);
+                if(txn.getVoucher().getTxnCreatedBy().getApplicationId().equals(Constants.ID_MISSION_APP_ID) && !txn.getVoucher().getTxnCreatedBy().getChannelReference().equals(null)) {
+                    long startingTimeProcess = System.currentTimeMillis();
+                    idMissionService.setSuccessTransaction(txn.getVoucher().getTxnCreatedBy());
+                    LOG.info("MYMO Txn Id => {}, time process: {} ms.", txn.getVoucher().getTxnCreatedBy().getId(), System.currentTimeMillis() - startingTimeProcess);
+                }
             }
             LOG.info("ExecuteAllConfirmedWithDrawls: Finishing bash process, which it took {} ms", System.currentTimeMillis() - startTime);
         } else {
@@ -267,6 +275,7 @@ public class TransactionServiceImpl implements ITransactionService {
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
             case Constants.INT_VOUCHER_USE_CASE_QR:
+            case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 initTxn.setAmount(txn.getAmount());
                 break;
             case Constants.INT_WITHDRAW_VOUCHER_USE_CASE:
@@ -314,6 +323,7 @@ public class TransactionServiceImpl implements ITransactionService {
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
             case Constants.INT_VOUCHER_USE_CASE_QR:
+            case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 //CHECK PAYER USER AND PAYEE NO CLIENT
                 if (txn.getPayer() == null || txn.getPayer().getUsername() == null || txn.getPayer().getUsername().equals("")) {
                     LOG.error("processAuthentication: {}", AuthorizerError.MISSING_OCB_USER);
@@ -446,6 +456,7 @@ public class TransactionServiceImpl implements ITransactionService {
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
             case Constants.INT_VOUCHER_USE_CASE_QR:
+            case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 //Todo verifyBasaUser , here code things related with permissions, privileges, user roles etc...
                 //Todo account
                 break;
@@ -462,6 +473,7 @@ public class TransactionServiceImpl implements ITransactionService {
         switch (txn.getUseCase().getId().intValue()){
             case Constants.INT_VOUCHER_USE_CASE:
             case Constants.INT_VOUCHER_USE_CASE_QR:
+            case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 if(!this.verifyTxnParticipants(txn) && !this.verifyTxnLimits(txn)){
                     throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.ERROR_ON_VERIFY);
                 }
@@ -479,6 +491,7 @@ public class TransactionServiceImpl implements ITransactionService {
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
             case Constants.INT_VOUCHER_USE_CASE_QR:
+            case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 //Freeze founds for ocb user
                 PaymentInstrument cstBank = paymentInstrumentService.getById(txn.getPayer().getId());
                 LOG.info(" {} account number of customer {}",cstBank, txn.getPayer().getId());
@@ -526,8 +539,8 @@ public class TransactionServiceImpl implements ITransactionService {
         PaymentInstrument payerPI = creatorTxn.getPayerPaymentInstrument();
         PaymentInstrument accountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
         Customer payee = creatorTxn.getPayee();
-
-        String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
+        String prefix_core_desc = (!creatorTxn.getApplicationId().equals(null) && creatorTxn.getApplicationId().equals(Constants.ID_MISSION_APP_ID)) ? Constants.STR_RTS_MYMO_CORE_DESC : Constants.STR_ID_RETIRO_SIN_TARGETA;
+        String customComment = prefix_core_desc + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
         String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), accountATMBASA.getStrIdentifier(), txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment);
         txn.setCoreReference(coreRef);
         //Update balance payee
