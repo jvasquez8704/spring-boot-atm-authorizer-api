@@ -120,6 +120,7 @@ public class IDmissionServiceImpl implements IIDmissionService {
             transactionItem.setFuente(idmissionSource);
             transactionItem.setFlujoAtm(idmissionisATMProcess);
             transactionItem.setGeneraUrl(idmissionisCreatedURL);
+            transactionItem.setCuenta(txn.getPayerPaymentInstrument().getStrIdentifier());
             /**
              * parametroAdicionalColeccion to updateTransaction
              */
