@@ -21,6 +21,7 @@ public class IDmissionServiceImpl implements IIDmissionService {
     Logger LOG = LoggerFactory.getLogger(IDmissionServiceImpl.class);
     String SUCCESS_TXN_STATUS = "Approved";
     String FAIL_TXN_STATUS = "DISPENSE_FAIL";
+    String IDMISSION_TXN_TYPE = "Default";
     /**
      * references Files and Endpoints WSDL's
      */
@@ -121,6 +122,7 @@ public class IDmissionServiceImpl implements IIDmissionService {
             transactionItem.setFlujoAtm(idmissionisATMProcess);
             transactionItem.setGeneraUrl(idmissionisCreatedURL);
             transactionItem.setCuenta(txn.getPayerPaymentInstrument().getStrIdentifier());
+            transactionItem.setTipoCuenta(IDMISSION_TXN_TYPE);
             /**
              * parametroAdicionalColeccion to updateTransaction
              */
