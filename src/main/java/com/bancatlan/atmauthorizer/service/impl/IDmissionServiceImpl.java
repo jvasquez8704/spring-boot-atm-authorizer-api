@@ -21,6 +21,7 @@ public class IDmissionServiceImpl implements IIDmissionService {
     Logger LOG = LoggerFactory.getLogger(IDmissionServiceImpl.class);
     String SUCCESS_TXN_STATUS = "Approved";
     String FAIL_TXN_STATUS = "DISPENSE_FAIL";
+    String IDMISSION_TXN_TYPE = "Default";
     /**
      * references Files and Endpoints WSDL's
      */
@@ -42,6 +43,21 @@ public class IDmissionServiceImpl implements IIDmissionService {
 
     @Value("${idmission.auth.merchantid}")
     String idmissionAuthMerchantId;
+
+    @Value("${idmission.auth.loginid}")
+    String idmissionAuthLoginId;
+
+    @Value("${idmission.auth.appcode}")
+    String idmissionAuthAppCode;
+
+    @Value("${idmission.source}")
+    String idmissionSource;
+
+    @Value("${idmission.isATMProcess}")
+    String idmissionisATMProcess;
+
+    @Value("${idmission.isCreatedURL}")
+    String idmissionisCreatedURL;
 
     @Value("${bus-integration.wsdl.update-txn-endpoint}")
     String updateTxnSOAPEndpoint;
@@ -82,14 +98,14 @@ public class IDmissionServiceImpl implements IIDmissionService {
             DTParametroAdicionalItem username = new DTParametroAdicionalItem();
             username.setLinea(new BigInteger("1"));
             username.setTipoRegistro("Login_Id");
-            username.setValor("Atl_MyMoUat");
+            username.setValor(idmissionAuthLoginId);
             parametroAdicionalColeccion.getParametroAdicionalItem().add(username);
 
 
             DTParametroAdicionalItem password = new DTParametroAdicionalItem();
             password.setLinea(new BigInteger("2"));
             password.setTipoRegistro("Application_Code");
-            password.setValor("CUX");
+            password.setValor(idmissionAuthAppCode);
             parametroAdicionalColeccion.getParametroAdicionalItem().add(password);
 
             /**
@@ -102,9 +118,11 @@ public class IDmissionServiceImpl implements IIDmissionService {
             transactionItem.setAccion(status);//Approved --- DISPENSE_FAIL
             transactionItem.setMonto(txn.getAmount().toString());
             transactionItem.setMoneda(txn.getCurrency().getCode());
-            transactionItem.setFuente("KBAPP");
-            transactionItem.setFlujoAtm("Y");
-            transactionItem.setGeneraUrl("Y");
+            transactionItem.setFuente(idmissionSource);
+            transactionItem.setFlujoAtm(idmissionisATMProcess);
+            transactionItem.setGeneraUrl(idmissionisCreatedURL);
+            transactionItem.setCuenta(txn.getPayerPaymentInstrument().getStrIdentifier());
+            transactionItem.setTipoCuenta(IDMISSION_TXN_TYPE);
             /**
              * parametroAdicionalColeccion to updateTransaction
              */
@@ -124,7 +142,7 @@ public class IDmissionServiceImpl implements IIDmissionService {
             DTResponse response = updateTransactionService.siOSUpdateTransaction(updateTransaction);
 
             if (response != null && response.getEstado() != null && response.getEstado().getCodigo() != null
-                    && response.getEstado().getCodigo().equals("0000")) {
+                    && response.getEstado().getCodigo().equals(Constants.BANK_SUCCESS_STATUS_CODE)) {
                 LOG.info("Successful Response IDmission txn => {}", response.getEstado().getDescripcion());
             } else {
                 LOG.info("Custom response error IDmission txn => {}", response.getEstado().getDescripcion());

@@ -103,7 +103,7 @@ public class Constants {
     public static final String BANK_NOTIFICATION_SMS =  "SMS";
     public static final String BANK_NOTIFICATION_EMAIL =  "EMAIL";
     //public static String TEMPLATE_NOTIFICATION_SMS =  "Envio de dinero Atlantida Retiro sin tarjeta. Monto: L. %s Codigo de retiro %s";
-    public static String TEMPLATE_NOTIFICATION_SMS =  "Retiro de dinero sin tarjeta Atlantida Monto: L. %s, codigo de retiro %s";
+    public static String TEMPLATE_NOTIFICATION_SMS =  "Retiro de dinero sin tarjeta Atlantida Monto: L. %s, codigo de beneficiario %s Aprende a utilizarlo en tutoriales.bancatlan.hn No compartas tu informacion personal";
 
     /**/
     public static final String STR_ACCOUNTING_TRANSFER_SERVICE_NAME = "Transferencia Contable";
