@@ -18,4 +18,5 @@ public interface IUtilComponent {
     String generateAtmReference(String key1, String key2);
     String encryptCode(String code);
     String decryptCode(String encryptedCode);
+    String getBankCommentPrefix(int useCase);
 }

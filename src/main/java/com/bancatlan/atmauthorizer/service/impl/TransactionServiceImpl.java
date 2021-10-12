@@ -496,7 +496,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 PaymentInstrument cstBank = paymentInstrumentService.getById(txn.getPayer().getId());
                 LOG.info(" {} account number of customer {}",cstBank, txn.getPayer().getId());
                 //Account Payer, Amount, comment
-                String freezeFoundsComment = txn.getUseCase().getId().equals(Constants.INT_VOUCHER_USE_CASE) ? Constants.STR_ID_RETIRO_SIN_TARGETA : Constants.STR_ID_RETIRO_SIN_TARGETA_QR;
+                String freezeFoundsComment = utilComponent.getBankCommentPrefix(txn.getUseCase().getId().intValue());
                 freezeFoundsComment += Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
                 String freezeFoundsCoreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_FREEZE, txn.getPayer().getUsername(), freezeFoundsComment);
                 txn.setCoreReference(freezeFoundsCoreRef);
@@ -513,7 +513,7 @@ public class TransactionServiceImpl implements ITransactionService {
 
                 //Account Payer, Account Payee, Amount = cta contable qa => 750099900684 RT-USECASE-CTA_ORIGEN-MSISDN_DESTINO
                 //this is a bank transfer with a implicit defrost
-                String customComment = Constants.STR_ID_RETIRO_SIN_TARGETA + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
+                String customComment = Constants.PREFIX_RTS_DEFAULT + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
                 String coreRef = bankService.transferMoney(payerPI.getStrIdentifier(), accountATMBASA.getStrIdentifier(), txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment);
                 txn.setCoreReference(coreRef);
                 //Update balance payee
@@ -539,7 +539,7 @@ public class TransactionServiceImpl implements ITransactionService {
         PaymentInstrument payerPI = creatorTxn.getPayerPaymentInstrument();
         PaymentInstrument accountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
         Customer payee = creatorTxn.getPayee();
-        String prefix_core_desc = (!creatorTxn.getApplicationId().equals(null) && creatorTxn.getApplicationId().equals(Constants.ID_MISSION_APP_ID)) ? Constants.STR_RTS_MYMO_CORE_DESC : Constants.STR_ID_RETIRO_SIN_TARGETA;
+        String prefix_core_desc = (!creatorTxn.getApplicationId().equals(null) && creatorTxn.getApplicationId().equals(Constants.ID_MISSION_APP_ID)) ? Constants.PREFIX_RTS_MYMO : Constants.PREFIX_RTS_DEFAULT;
         String customComment = prefix_core_desc + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
         String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), accountATMBASA.getStrIdentifier(), txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment);
         txn.setCoreReference(coreRef);

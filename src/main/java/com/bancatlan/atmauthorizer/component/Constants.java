@@ -94,9 +94,9 @@ public class Constants {
 
     /*GENERIC MESSAGES*/
     public static final String MSG_ATM_TO_BANK_ACCOUNT =  "TRANSFER OCB USER ACCOUNT TO ATM AUTHORIZER BANK ACCOUNT";
-    public static final String STR_ID_RETIRO_SIN_TARGETA =  "RETIRO_SIN_TARJETA";
-    public static final String STR_ID_RETIRO_SIN_TARGETA_QR =  "RQR";
-    public static final String STR_RTS_MYMO_CORE_DESC =  "RST Teclado Atlantida";
+    public static final String PREFIX_RTS_DEFAULT =  "RETIRO_SIN_TARJETA";
+    public static final String PREFIX_RTS_QR =  "RQR";
+    public static final String PREFIX_RTS_MYMO =  "RST Teclado Atlantida";
     public static final String STR_DASH_SEPARATOR =  "-";
 
     /*NOTIFICATION TYPES*/

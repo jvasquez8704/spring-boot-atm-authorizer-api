@@ -232,6 +232,19 @@ public class UtilComponentImpl implements IUtilComponent {
         }
     }
 
+    @Override
+    public String getBankCommentPrefix(int useCase) {
+        switch (useCase) {
+            case Constants.INT_VOUCHER_USE_CASE:
+                return Constants.PREFIX_RTS_DEFAULT;
+            case Constants.INT_VOUCHER_USE_CASE_QR:
+                return Constants.PREFIX_RTS_QR;
+            case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
+                return Constants.PREFIX_RTS_MYMO;
+        }
+        return Constants.PREFIX_RTS_DEFAULT;
+    }
+
     /**
      *It generates a code for verification in a measure time configured
      * @param value it should be cellphone number, email or user
