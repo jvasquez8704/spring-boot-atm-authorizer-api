@@ -40,9 +40,9 @@ public enum AtmError implements IError{
     ERROR_62("62","Restricted card [For example in country exclusion table]"),
     ERROR_63("63","Security violation"),/**/
     ERROR_65("65","Activity count limit exceeded"),/**/
-    ERROR_68("68","Response received too late"),/*When a voucher already expired*/
-    ERROR_75("75","Allowable number of PIN entry tries exceeded"), /*Attempts validation*/
-    ERROR_76("76","missing reference in atm request, this process require a unique reference"), /* Unavailable to located previous message (Not match on retrieval reference number)*/
+    ERROR_68("76","Voucher not found"),/*When a voucher already expired*/
+    ERROR_75("76","Voucher found is not valid"), /*Attempts validation*/
+    ERROR_76("76","Atm reference is required"), /* Unavailable to located previous message (Not match on retrieval reference number)*/
     ERROR_77("77","atm reference not found"),/*Previous message located for a repeat or reversal, but repeat or reversal data are inconsistent with original message*/
     ERROR_78("78","Block first used. The transaction is from a new cardholder, and the card has not been properly unblock"),
     ERROR_80("80","VISA transactions credit issuer unavailable, private label and check acceptance: Invalid Date"),

@@ -413,9 +413,14 @@ public class VoucherServiceImpl implements IVoucherService {
         }
 
         Voucher voucher = this.findVoucherToWithdraw(dto.getVoucher().getPickupCode(), dto.getVoucher().getSecretCode(), txn.getPayer());
+        if ( voucher == null ) {
+            LOG.error("{} ITM Request {}", AtmError.ERROR_68, dto);
+            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_68, dto);
+        }
+
         if (!this.isValidVoucherToWithDraw(voucher, dto)) {
-            LOG.error("Voucher found is not valid {} ", dto);
-            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76, dto);
+            LOG.error("{} ITM Request {}", AtmError.ERROR_75, dto);
+            throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_75, dto);
         }
         /**
          * Amount validation all or nothing
@@ -808,14 +813,14 @@ public class VoucherServiceImpl implements IVoucherService {
 
     private void validateAtmRequest(VoucherTransactionDTO dto) {
         if (dto.getTransaction() == null || dto.getTransaction().getAtmReference() == null || dto.getTransaction().getAtmReference().equals("")) {
-            LOG.error("AtmReference in request is not defined {}", AtmError.ERROR_76);
+            LOG.error("{}", AtmError.ERROR_76);
             throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_76, dto);
         }
 
         if (dto.getAction().equals(Constants.ITM_MTI_WITHDRAW)) {
             Transaction txn = transaction.getTransactionByAtmReference(utilComponent.generateAtmReference(dto.getAtmBody().getF11(), dto.getTransaction().getAtmReference()), Constants.CONFIRM_TXN_STATUS);
             if (txn != null) {
-                LOG.error("txn already exist with atmReference in request {}", AtmError.ERROR_94);
+                LOG.error("{}", AtmError.ERROR_94);
                 throw new ModelAtmErrorException(Constants.ATM_EXCEPTION_TYPE, AtmError.ERROR_94, dto);
             }
         }
