@@ -539,7 +539,7 @@ public class TransactionServiceImpl implements ITransactionService {
         PaymentInstrument payerPI = creatorTxn.getPayerPaymentInstrument();
         PaymentInstrument accountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
         Customer payee = creatorTxn.getPayee();
-        String prefix_core_desc = (!creatorTxn.getApplicationId().equals(null) && creatorTxn.getApplicationId().equals(Constants.ID_MISSION_APP_ID)) ? Constants.PREFIX_RTS_MYMO : Constants.PREFIX_RTS_DEFAULT;
+        String prefix_core_desc = utilComponent.getBankCommentPrefix(creatorTxn.getUseCase().getId().intValue());
         String customComment = prefix_core_desc + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
         String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), accountATMBASA.getStrIdentifier(), txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment);
         txn.setCoreReference(coreRef);
