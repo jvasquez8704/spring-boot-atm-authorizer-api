@@ -20,4 +20,9 @@ public interface IVoucherRepo extends JpaRepository<Voucher, Long> {
     List<Voucher> findAllActiveByOcbUser(String username);
     List<Voucher> getVouchersByIsActiveAndExpirationDateGreaterThanEqual(Boolean isActive, LocalDateTime now);
     List<Voucher> getVouchersByIsActiveAndExpirationDateIsBefore(Boolean isActive, LocalDateTime now);
+    List<Voucher> getVouchersByIsActiveAndIsCanceled(Boolean isActive, Boolean isCanceled);
+    /*@Query(value = "SELECT * FROM voucher \n" +
+            "WHERE is_active =:isActive AND is_canceled =: isCancelled AND is_deleted:isDeleted AND is_expired:isExpired \n" +
+            "AND id_txn_created_by in (SELECT id FROM txn WHERE id_use_case =:useCaseId AND id_status =:statusTxnId)", nativeQuery = true)
+    List<Voucher> findAllByFlagsAndCreatorTxnTypeAndCreatorTxnStatus(Boolean isActive, Boolean isCancelled, Boolean isDeleted, Boolean isExpired, Integer useCaseId, Integer statusTxnId);*/
 }

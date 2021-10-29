@@ -24,4 +24,5 @@ public interface IVoucherService extends ICRUD<Voucher> {
     List<Voucher> getAllByOcbUser(String ocbUser);
     Voucher getVoucherByCreatorTransaction(Transaction transaction);
     void reverseExpiredVouchers();
+    void reverseCanceledVouchersFromKeyBoardTxns();
 }

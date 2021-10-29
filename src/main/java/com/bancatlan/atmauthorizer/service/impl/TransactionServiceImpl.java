@@ -154,7 +154,7 @@ public class TransactionServiceImpl implements ITransactionService {
         LOG.info("Current txn {}", txn.getId());
 
         //this line verify if txn is confirm status and this one is a init voucher use case
-        if (!txn.getTxnStatus().getId().equals(Constants.CONFIRM_TXN_STATUS) || !txn.getUseCase().getId().equals(Constants.VOUCHER_USE_CASE)) {
+        if (!txn.getTxnStatus().getId().equals(Constants.CONFIRM_TXN_STATUS) || txn.getUseCase().getId().equals(Constants.WITHDRAW_VOUCHER_USE_CASE)) {
             LOG.info("Rejected txn in process txn status {}, txn use case {}", txn.getTxnStatus().getId(), txn.getUseCase().getId());
             return false;
         }
@@ -559,6 +559,7 @@ public class TransactionServiceImpl implements ITransactionService {
         switch (txn.getUseCase().getId().intValue()) {
             case Constants.INT_VOUCHER_USE_CASE:
             case Constants.INT_VOUCHER_USE_CASE_QR:
+            case Constants.INT_CASH_OUT_KEYBOARD_USE_CASE:
                 //Defrost founds user
                 LOG.info("Cancel txn {}", txn.getId());
                 //Account Payer, Amount, comment

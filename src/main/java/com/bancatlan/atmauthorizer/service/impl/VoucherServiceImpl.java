@@ -362,6 +362,21 @@ public class VoucherServiceImpl implements IVoucherService {
     }
 
     @Override
+    public void reverseCanceledVouchersFromKeyBoardTxns() {
+        long startTime = System.currentTimeMillis();
+        List<Voucher> canceledVouchers = repo.getVouchersByIsActiveAndIsCanceled(false, true);
+        if (!canceledVouchers.isEmpty()) {
+            for (Voucher vou : canceledVouchers) {
+                boolean isSuccessProcess = transaction.processBatchCancelConfirm(vou.getTxnCreatedBy());
+                LOG.info("Voucher Id => {}, txn cancelled => {}, is cancellation process success {}", vou.getId(), vou.getTxnCreatedBy().getId(), isSuccessProcess);
+            }
+            LOG.info("ReverseCancelledVouchers: Finishing bash process, which it took {} ml", System.currentTimeMillis() - startTime);
+        } else {
+            LOG.info("ReverseCancelledVouchers: No transactions found");
+        }
+    }
+
+    @Override
     public Voucher update(Voucher voucher) {
         voucher.setUpdateDate(LocalDateTime.now());
         return repo.save(voucher);

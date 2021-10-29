@@ -50,6 +50,8 @@ public class Constants {
     public static final long WAITING_AUTOMATIC_PROCESS_TXN_STATUS = 25;
     public static final long CONFIRM_TXN_STATUS = 30;
     public static final long CANCEL_CONFIRM_TXN_STATUS = 70;
+    public static final int INT_CANCEL_CONFIRM_TXN_STATUS = 70;
+    public static final int INT_PRE_CANCEL_CONFIRM_TXN_STATUS = 61;
 
     /*TXN USE CASE CODES*/
     public static final long VOUCHER_USE_CASE =  174;
