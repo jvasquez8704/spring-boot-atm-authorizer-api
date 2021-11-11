@@ -254,7 +254,7 @@ public class UtilComponentImpl implements IUtilComponent {
     private String getOTP(final String value) throws ModelCustomErrorException {
         String val = "";
 
-        String addedValue = value + LocalDateTime.now().getDayOfMonth() + LocalDateTime.now().getMinute();
+        String addedValue = value + LocalDateTime.now().getDayOfMonth() + LocalDateTime.now().getMinute() + LocalDateTime.now().getSecond();
 
         val = encryptString(addedValue, Constants.SIZE_PICKUP_CODE);
 
