@@ -32,11 +32,11 @@ public class IDmissionServiceImpl implements IIDmissionService {
     String updateTxnWSDLName;
 
 
-    //@Value("${bank.service.po.username}")
-    String busIntegrationUsername = "APPOCH01";
+    @Value("${idmission.service.po.username}")
+    String busIntegrationUsername;
 
-    //@Value("${bank.service.po.password}")
-    String busIntegrationPassword = "Inicio01";
+    @Value("${idmission.service.po.password}")
+    String busIntegrationPassword;
 
     @Value("${idmission.auth.password}")
     String idmissionAuthPassword;
