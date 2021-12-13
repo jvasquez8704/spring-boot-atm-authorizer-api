@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/vouchers")
 public class VoucherController {
-    CustomStatus successStatus = new CustomStatus(Constants.INT_BANK_SUCCESS_STATUS_CODE, Constants.BANK_SUCCESS_STATUS_TYPE, Constants.BANK_SUCCESS_STATUS_MESSAGE, Constants.BANK_STRING_ZERO);
+    CustomStatus bankingSuccessStatus = new CustomStatus(Constants.BANK_SUCCESS_STATUS_CODE, Constants.BANK_SUCCESS_STATUS_TYPE, Constants.BANK_SUCCESS_STATUS_MESSAGE, Constants.BANK_STRING_ZERO);
+    CustomStatus atmSuccessStatus = new CustomStatus(Constants.ATM_SUCCESS_STATUS_CODE, Constants.BANK_SUCCESS_STATUS_TYPE, Constants.BANK_SUCCESS_STATUS_MESSAGE, Constants.BANK_STRING_ZERO);
 
     @Autowired
     IVoucherService service;
@@ -27,10 +28,7 @@ public class VoucherController {
 
     @PostMapping("/process")
     private ResponseEntity<CustomResponse> processVoucher(@RequestBody VoucherTransactionDTO dto) {
-        successStatus.setCode(Constants.BANK_SUCCESS_STATUS_CODE);
-        successStatus.setType(Constants.BANK_SUCCESS_TYPE);
-        successStatus.setMessage(Constants.BANK_SUCCESS_STATUS_MESSAGE);
-        return new ResponseEntity<>(new CustomResponse(service.voucherProcess(dto), successStatus), HttpStatus.CREATED);
+        return new ResponseEntity<>(new CustomResponse(service.voucherProcess(dto), bankingSuccessStatus), HttpStatus.CREATED);
     }
 
     @PostMapping("/query")
@@ -38,35 +36,32 @@ public class VoucherController {
         if (dto.getTransaction() == null || dto.getTransaction().getPayer() == null || dto.getTransaction().getPayer().getUsername() == null || dto.getTransaction().getPayer().getUsername().equals("")) {
             throw new ModelCustomErrorException("Some parameter required on request is missing", AuthorizerError.MALFORMED_URL);
         }
-        return new ResponseEntity<>(new CustomResponse(service.getAllByOcbUser(dto.getTransaction().getPayer().getUsername()), successStatus), HttpStatus.CREATED);
+        return new ResponseEntity<>(new CustomResponse(service.getAllByOcbUser(dto.getTransaction().getPayer().getUsername()), bankingSuccessStatus), HttpStatus.CREATED);
     }
 
     @PostMapping("/withdraw")
     private ResponseEntity<CustomResponse> withdrawVoucher(@RequestBody VoucherTransactionDTO dto){
-        return new ResponseEntity<>(new CustomResponse(service.withdraw(dto), successStatus),HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse(service.withdraw(dto), bankingSuccessStatus),HttpStatus.OK);
     }
 
     @PostMapping("/cancel")
     private ResponseEntity<CustomResponse> updateVoucher(@RequestBody VoucherTransactionDTO dto){
-         return new ResponseEntity<CustomResponse>(new CustomResponse(service.cancelWithdraw(dto), successStatus),HttpStatus.OK);
+         return new ResponseEntity<CustomResponse>(new CustomResponse(service.cancelWithdraw(dto), bankingSuccessStatus),HttpStatus.OK);
     }
 
     @PostMapping("/atm-process")
     private ResponseEntity<CustomResponse> atmProcessVoucher(@RequestBody VoucherTransactionDTO dto){
-        successStatus.setCode(Constants.ATM_SUCCESS_STATUS_CODE);
-        return new ResponseEntity<CustomResponse>(new CustomResponse(service.voucherProcess(dto), successStatus),HttpStatus.OK);
+        return new ResponseEntity<CustomResponse>(new CustomResponse(service.voucherProcess(dto), atmSuccessStatus),HttpStatus.OK);
     }
 
     @PostMapping("/verify")
     private ResponseEntity<CustomResponse> verifyVoucher(@RequestBody OcbVoucherDTO dto){
-        successStatus.setCode(Constants.BANK_SUCCESS_STATUS_CODE);
-        return new ResponseEntity<>(new CustomResponse(cardlessWithdrawalService.verify(dto), successStatus),HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse(cardlessWithdrawalService.verify(dto), bankingSuccessStatus),HttpStatus.OK);
     }
 
     @PostMapping("/confirm")
     private ResponseEntity<CustomResponse> confirmVoucher(@RequestBody OcbVoucherDTO dto){
-        successStatus.setCode(Constants.BANK_SUCCESS_STATUS_CODE);
-        return new ResponseEntity<>(new CustomResponse(cardlessWithdrawalService.confirm(dto), successStatus),HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse(cardlessWithdrawalService.confirm(dto), bankingSuccessStatus),HttpStatus.OK);
     }
 
       /*
