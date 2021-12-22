@@ -188,6 +188,12 @@ public class TransactionServiceImpl implements ITransactionService {
     }
 
     @Override
+    public Boolean verifyMixedTxnLimits(Transaction txn) {
+
+        return null;
+    }
+
+    @Override
     public List<Transaction> getTransactionByAtmReference(String atmReference) {
         return repo.getTransactionByAtmReference(atmReference);
     }

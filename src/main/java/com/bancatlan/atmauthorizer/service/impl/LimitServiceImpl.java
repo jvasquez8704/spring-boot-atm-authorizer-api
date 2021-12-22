@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalField;
 import java.time.temporal.WeekFields;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -72,12 +73,10 @@ public class LimitServiceImpl implements ILimitService {
     @Override
     public Boolean verifyTxnParticipantsLimits(Transaction txn) {
         //checking customer, customerType and global limits
-        return isWithInCustomerDebitLimits(txn.getPayer()) &&
-                 isWithInCustomerCreditLimits(txn.getPayee()) &&
-                    isWithInCustomerTypeDebitLimits(txn) &&
-                        isWithInCustomerTypeCreditLimits(txn) &&
-                            isWithInGlobalDebitLimits(txn.getPayer()) &&
-                                isWithInGlobalCreditLimits(txn.getPayee());
+        return isWithInCustomerDebitLimits(txn.getPayer()) && isWithInCustomerCreditLimits(txn.getPayee()) &&
+                isWithInCustomerTypeDebitLimits(txn) && isWithInCustomerTypeCreditLimits(txn) &&
+                isWithInCustomerTypeCreditMixedLimits(txn) && isWithInCustomerTypeDebitMixedLimits(txn) &&
+                isWithInGlobalDebitLimits(txn.getPayer()) && isWithInGlobalCreditLimits(txn.getPayee());
     }
 
     @Override
@@ -209,6 +208,92 @@ public class LimitServiceImpl implements ILimitService {
             if (getMovementAmountByCurrentDateRange(txn, txn.getPayee(), txn.getUseCase(), Constants.MONTHLY_RANGE, false) > limit.getMonthlyCreditLimit()) {
                 LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_MONTHLY_CREDIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_MONTHLY_CREDIT_LIMIT_EXCEEDED);
+            }
+        }
+        return true;
+    }
+    private Boolean isWithInCustomerTypeCreditMixedLimits(Transaction txn) {
+        //Check config if exist
+        List<Long> mixedUseCaseLimitConfigured = new ArrayList<>();
+        mixedUseCaseLimitConfigured.add(new Long(174));
+        mixedUseCaseLimitConfigured.add(new Long(176));
+        mixedUseCaseLimitConfigured.add(new Long(177));
+
+        Limit payeeLimitConfig = txn.getPayee().getCustomerType().getLimit();
+        if(payeeLimitConfig != null && payeeLimitConfig.getActive()) {
+            Double dailyCreditAmountCounter = new Double(0);
+            for(Long useCase: mixedUseCaseLimitConfigured) {
+                UseCase currentUC = new UseCase();
+                currentUC.setId(useCase);
+                dailyCreditAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayee(), currentUC, Constants.DAILY_RANGE, false);
+            }
+            if (dailyCreditAmountCounter > payeeLimitConfig.getDailyCreditLimit()) {
+                LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_DAILY_CREDIT_LIMIT_EXCEEDED);
+                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_DAILY_CREDIT_LIMIT_EXCEEDED);
+            }
+            Double WeeklyCreditAmountCounter = new Double(0);
+            for(Long useCase: mixedUseCaseLimitConfigured) {
+                UseCase currentUC = new UseCase();
+                currentUC.setId(useCase);
+                WeeklyCreditAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayee(), currentUC, Constants.WEEKLY_RANGE, false);
+            }
+            if (WeeklyCreditAmountCounter > payeeLimitConfig.getWeeklyCreditLimit()) {
+                LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_WEEKLY_CREDIT_LIMIT_EXCEEDED);
+                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_WEEKLY_CREDIT_LIMIT_EXCEEDED);
+            }
+
+            Double monthlyCreditAmountCounter = new Double(0);
+            for(Long useCase: mixedUseCaseLimitConfigured) {
+                UseCase currentUC = new UseCase();
+                currentUC.setId(useCase);
+                monthlyCreditAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayee(), currentUC, Constants.MONTHLY_RANGE, false);
+            }
+            if (monthlyCreditAmountCounter > payeeLimitConfig.getMonthlyCreditLimit()) {
+                LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_MONTHLY_CREDIT_LIMIT_EXCEEDED);
+                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_MONTHLY_CREDIT_LIMIT_EXCEEDED);
+            }
+        }
+        return true;
+    }
+    private Boolean isWithInCustomerTypeDebitMixedLimits(Transaction txn) {
+        //Check config if exist
+        List<Long> mixedUseCaseLimitConfigured = new ArrayList<>();
+        mixedUseCaseLimitConfigured.add(new Long(174));
+        mixedUseCaseLimitConfigured.add(new Long(176));
+        mixedUseCaseLimitConfigured.add(new Long(177));
+
+        Limit payerLimitConfig = txn.getPayer().getCustomerType().getLimit();
+        if(payerLimitConfig != null && payerLimitConfig.getActive()) {
+            Double dailyDebitAmountCounter = new Double(0);
+            for(Long useCase: mixedUseCaseLimitConfigured) {
+                UseCase currentUC = new UseCase();
+                currentUC.setId(useCase);
+                dailyDebitAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayee(), currentUC, Constants.DAILY_RANGE, false);
+            }
+            if (dailyDebitAmountCounter > payerLimitConfig.getDailyCreditLimit()) {
+                LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_DAILY_DEBIT_LIMIT_EXCEEDED);
+                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_DAILY_DEBIT_LIMIT_EXCEEDED);
+            }
+            Double WeeklyDebitAmountCounter = new Double(0);
+            for(Long useCase: mixedUseCaseLimitConfigured) {
+                UseCase currentUC = new UseCase();
+                currentUC.setId(useCase);
+                WeeklyDebitAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayee(), currentUC, Constants.WEEKLY_RANGE, false);
+            }
+            if (WeeklyDebitAmountCounter > payerLimitConfig.getWeeklyCreditLimit()) {
+                LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_WEEKLY_DEBIT_LIMIT_EXCEEDED);
+                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_WEEKLY_DEBIT_LIMIT_EXCEEDED);
+            }
+
+            Double monthlyDebitAmountCounter = new Double(0);
+            for(Long useCase: mixedUseCaseLimitConfigured) {
+                UseCase currentUC = new UseCase();
+                currentUC.setId(useCase);
+                monthlyDebitAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayee(), currentUC, Constants.MONTHLY_RANGE, false);
+            }
+            if (monthlyDebitAmountCounter > payerLimitConfig.getMonthlyCreditLimit()) {
+                LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_MONTHLY_DEBIT_LIMIT_EXCEEDED);
+                throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_MONTHLY_DEBIT_LIMIT_EXCEEDED);
             }
         }
         return true;
