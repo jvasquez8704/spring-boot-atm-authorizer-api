@@ -106,7 +106,8 @@ public class LimitServiceImpl implements ILimitService {
     * Get total of debits or credits for a customer in period time specified
     * */
     private Double getMovementAmountByCurrentDateRange(Transaction currentTxn ,Customer customer, UseCase useCase, String dateRangeType, Boolean isDebit) {
-        Double amountResult = currentTxn.getAmount();
+//        Double amountResult = currentTxn.getAmount();
+        Double amountResult = 0.0;
         TxnStatus status = txnStatusService.getById(Constants.CONFIRM_TXN_STATUS);
         LocalDateTime startDay = null;
         LocalDateTime endDay = null;
@@ -227,6 +228,7 @@ public class LimitServiceImpl implements ILimitService {
                 currentUC.setId(useCase);
                 dailyCreditAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayee(), currentUC, Constants.DAILY_RANGE, false);
             }
+            dailyCreditAmountCounter+= txn.getAmount();
             if (dailyCreditAmountCounter > payeeLimitConfig.getDailyCreditLimit()) {
                 LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_DAILY_CREDIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_DAILY_CREDIT_LIMIT_EXCEEDED);
@@ -237,6 +239,7 @@ public class LimitServiceImpl implements ILimitService {
                 currentUC.setId(useCase);
                 WeeklyCreditAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayee(), currentUC, Constants.WEEKLY_RANGE, false);
             }
+            WeeklyCreditAmountCounter += txn.getAmount();
             if (WeeklyCreditAmountCounter > payeeLimitConfig.getWeeklyCreditLimit()) {
                 LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_WEEKLY_CREDIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_WEEKLY_CREDIT_LIMIT_EXCEEDED);
@@ -248,6 +251,7 @@ public class LimitServiceImpl implements ILimitService {
                 currentUC.setId(useCase);
                 monthlyCreditAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayee(), currentUC, Constants.MONTHLY_RANGE, false);
             }
+            monthlyCreditAmountCounter += txn.getAmount();
             if (monthlyCreditAmountCounter > payeeLimitConfig.getMonthlyCreditLimit()) {
                 LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_MONTHLY_CREDIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYEE_MONTHLY_CREDIT_LIMIT_EXCEEDED);
