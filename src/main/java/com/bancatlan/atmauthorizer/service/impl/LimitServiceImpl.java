@@ -272,8 +272,9 @@ public class LimitServiceImpl implements ILimitService {
             for(Long useCase: mixedUseCaseLimitConfigured) {
                 UseCase currentUC = new UseCase();
                 currentUC.setId(useCase);
-                dailyDebitAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayee(), currentUC, Constants.DAILY_RANGE, false);
+                dailyDebitAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayer(), currentUC, Constants.DAILY_RANGE, true);
             }
+            dailyDebitAmountCounter+= txn.getAmount();
             if (dailyDebitAmountCounter > payerLimitConfig.getDailyCreditLimit()) {
                 LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_DAILY_DEBIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_DAILY_DEBIT_LIMIT_EXCEEDED);
@@ -282,8 +283,9 @@ public class LimitServiceImpl implements ILimitService {
             for(Long useCase: mixedUseCaseLimitConfigured) {
                 UseCase currentUC = new UseCase();
                 currentUC.setId(useCase);
-                WeeklyDebitAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayee(), currentUC, Constants.WEEKLY_RANGE, false);
+                WeeklyDebitAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayer(), currentUC, Constants.WEEKLY_RANGE, true);
             }
+            WeeklyDebitAmountCounter += txn.getAmount();
             if (WeeklyDebitAmountCounter > payerLimitConfig.getWeeklyCreditLimit()) {
                 LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_WEEKLY_DEBIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_WEEKLY_DEBIT_LIMIT_EXCEEDED);
@@ -293,8 +295,9 @@ public class LimitServiceImpl implements ILimitService {
             for(Long useCase: mixedUseCaseLimitConfigured) {
                 UseCase currentUC = new UseCase();
                 currentUC.setId(useCase);
-                monthlyDebitAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayee(), currentUC, Constants.MONTHLY_RANGE, false);
+                monthlyDebitAmountCounter += getMovementAmountByCurrentDateRange(txn, txn.getPayer(), currentUC, Constants.MONTHLY_RANGE, true);
             }
+            monthlyDebitAmountCounter += txn.getAmount();
             if (monthlyDebitAmountCounter > payerLimitConfig.getMonthlyCreditLimit()) {
                 LOG.info("{},  error: {}", Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_MONTHLY_DEBIT_LIMIT_EXCEEDED);
                 throw new ModelCustomErrorException(Constants.CUSTOM_MESSAGE_ERROR, AuthorizerError.PAYER_MONTHLY_DEBIT_LIMIT_EXCEEDED);
