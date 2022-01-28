@@ -116,4 +116,6 @@ public class Constants {
     public static final String ID_MISSION_APP_ID = "2278";
     public static final String VOUCHER_BASA_APP_ID = "2272";
 
+    /*configs*/
+    public static final String STR_USE_CASE_ACCOUNTING_CONFIG_PREFIX = "ACCOUNT_USE_CASE_";
 }

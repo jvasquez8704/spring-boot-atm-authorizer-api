@@ -348,6 +348,7 @@ public class VoucherServiceImpl implements IVoucherService {
         long startTime = System.currentTimeMillis();
         List<Voucher> voucherList = repo.getVouchersByIsActiveAndExpirationDateIsBefore(true, LocalDateTime.now());
         if (!voucherList.isEmpty()) {
+            LOG.info("size => {}", voucherList.size());
             for (Voucher vou : voucherList) {
                 if (vou.getTxnCreatedBy().getCreationDate() == null) {
                     vou.getTxnCreatedBy().setCreationDate(vou.getTxnCreatedBy().getUpdateDate());

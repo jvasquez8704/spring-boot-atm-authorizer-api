@@ -49,6 +49,9 @@ public class TransactionServiceImpl implements ITransactionService {
     @Autowired
     private IIDmissionService idMissionService;
 
+    @Autowired
+    private IConfigService configService;
+
     @Override
     public Transaction create(Transaction txn) {
         txn.setCreationDate(LocalDateTime.now());
@@ -243,6 +246,7 @@ public class TransactionServiceImpl implements ITransactionService {
                     idMissionService.setSuccessTransaction(txn.getVoucher().getTxnCreatedBy());
                     LOG.info("MYMO Txn Id => {}, time process: {} ms.", txn.getVoucher().getTxnCreatedBy().getId(), System.currentTimeMillis() - startingTimeProcess);
                 }
+                //call to don Albert Service
             }
             LOG.info("ExecuteAllConfirmedWithDrawls: Finishing bash process, which it took {} ms", System.currentTimeMillis() - startTime);
         } else {
@@ -543,19 +547,21 @@ public class TransactionServiceImpl implements ITransactionService {
     private Transaction processBatchConfirm(Transaction txn) {
         Transaction creatorTxn = txn.getVoucher().getTxnCreatedBy();
         PaymentInstrument payerPI = creatorTxn.getPayerPaymentInstrument();
-        PaymentInstrument accountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
+        PaymentInstrument defaultAccountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
+        Config configAccount = configService.getConfigByPropertyName(Constants.STR_USE_CASE_ACCOUNTING_CONFIG_PREFIX + creatorTxn.getUseCase().getId().toString());
+        String selectedBankAccount = (configAccount != null && configAccount.getPropertyValue() != null && !configAccount.getPropertyValue().equals("")) ? configAccount.getPropertyValue() : defaultAccountATMBASA.getStrIdentifier();
         Customer payee = creatorTxn.getPayee();
         String prefix_core_desc = utilComponent.getBankCommentPrefix(creatorTxn.getUseCase().getId().intValue());
         String customComment = prefix_core_desc + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
-        String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), accountATMBASA.getStrIdentifier(), txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment);
+        String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), selectedBankAccount, txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment);
         txn.setCoreReference(coreRef);
         //Update balance payee
         if (!coreRef.equals(Constants.STR_CUSTOM_ERR) && !coreRef.equals(Constants.STR_EXCEPTION_ERR) && !coreRef.equals(Constants.STR_DASH_SEPARATOR) && !coreRef.equals(Constants.STR_ZERO)) {
-            Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
-            accountATMBASA.setBalance(newBalance);
+            Double newBalance = defaultAccountATMBASA.getBalance() + txn.getAmount();
+            defaultAccountATMBASA.setBalance(newBalance);
             LOG.info("CORE REFERENCE: {}", coreRef);
             txn.setPayerPaymentInstrument(payerPI);
-            txn.setPayeePaymentInstrument(accountATMBASA);
+            txn.setPayeePaymentInstrument(defaultAccountATMBASA);
             txn.setTxnStatus(status.getById(Constants.CONFIRM_TXN_STATUS));
         }
         return this.update(txn);
