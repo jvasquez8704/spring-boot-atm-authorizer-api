@@ -1,6 +1,7 @@
 package com.bancatlan.atmauthorizer.service;
 
 import com.bancatlan.atmauthorizer.model.PaymentInstrument;
+import com.bancatlan.atmauthorizer.model.Transaction;
 
 import java.util.List;
 
@@ -12,4 +13,5 @@ public interface IBankService {
     String freezeFoundsProcess(String accountDebit, Double amount, Long ref, String action, String userName, String customComment);
     String freezeFounds(String accountDebit, Double amount, Long ref, String action, String userName, String customComment);
     List<PaymentInstrument> getBankAccountsByUserId(String userId);
+    Boolean sendWithdrawalToAccountingClosing(Transaction startTxn, Transaction withdrawalTxn);
 }

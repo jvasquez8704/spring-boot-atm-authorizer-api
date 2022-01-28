@@ -246,7 +246,10 @@ public class TransactionServiceImpl implements ITransactionService {
                     idMissionService.setSuccessTransaction(txn.getVoucher().getTxnCreatedBy());
                     LOG.info("MYMO Txn Id => {}, time process: {} ms.", txn.getVoucher().getTxnCreatedBy().getId(), System.currentTimeMillis() - startingTimeProcess);
                 }
-                //call to don Albert Service
+                //call accounting closing service
+                long startingTime = System.currentTimeMillis();
+                bankService.sendWithdrawalToAccountingClosing(txn.getVoucher().getTxnCreatedBy(), txn);
+                LOG.info("Accounting Closing service Txn Id => {}, time process: {} ms.", txn.getId(), System.currentTimeMillis() - startingTime);
             }
             LOG.info("ExecuteAllConfirmedWithDrawls: Finishing bash process, which it took {} ms", System.currentTimeMillis() - startTime);
         } else {

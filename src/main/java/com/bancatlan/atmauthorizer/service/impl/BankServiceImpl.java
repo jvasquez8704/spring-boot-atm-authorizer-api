@@ -6,6 +6,7 @@ import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.model.PaymentInstrument;
 import com.bancatlan.atmauthorizer.model.PaymentInstrumentType;
+import com.bancatlan.atmauthorizer.model.Transaction;
 import com.bancatlan.atmauthorizer.service.IBankService;
 import infatlan.hn.acd169.out.congelamientocuentas.*;
 import infatlan.hn.entrust.core.external.message.*;
@@ -777,5 +778,27 @@ public class BankServiceImpl implements IBankService {
         }
 
         return retVal;
+    }
+
+    @Override
+    public Boolean sendWithdrawalToAccountingClosing(Transaction startTxn,Transaction withdrawalTxn) {
+        LOG.info("sendWithdrawalToAccountingClosing:");
+        LOG.info("idAdquirente {}", "001");
+        LOG.info("cantidad, monto {}", withdrawalTxn.getAmount().toString());
+        LOG.info("numeroTarjeta {}", withdrawalTxn.getPayer().getMsisdn());
+        LOG.info("monedaTransaccion {}", withdrawalTxn.getCurrency().getCode());
+        //LOG.info("fechaProcesamiento {}", startTxn.getCreationDate().toString());
+        LOG.info("idEmisor map use_case config {}", withdrawalTxn.getUseCase().getId().toString());
+        //CVA Credit Voucher
+        //GUI  DIDO
+        //CQR  codigo QR
+        LOG.info("referencia => campo numero 37 {}", withdrawalTxn.getAtmReference().substring(6, withdrawalTxn.getAtmReference().length()));
+        LOG.info("codigoRespuesta {}", "00");
+        LOG.info("identificacionTerminal {}", withdrawalTxn.getStrIdTerminal());
+        LOG.info("tiempoProcesamiento {}", withdrawalTxn.getOrderId());
+        LOG.info("tipoTransaccion {}", withdrawalTxn.getOrderId());
+        LOG.info("idAutorizacion {}", withdrawalTxn.getStrAuthorizationCode());
+
+        return true;
     }
 }
