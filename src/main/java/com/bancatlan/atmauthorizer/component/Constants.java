@@ -85,6 +85,9 @@ public class Constants {
     public static final long ATM_USER_ID = 1;
     public static final long CUSTOMER_TYPE_CONSUMER_ID = 2;
     public static final String ATM_USER_STR = "ATM_USER";
+    public static final String DEFAULT_PROCESSING_CODE = "01";
+    public static final String ACQUIRING_ID = "001";
+    public static final String DEFAULT_ISSUER = "CVA";
 
     /*PI TYPES*/
     public static final long PI_TYPE_BANK_ACCOUNT_ID =  40;
@@ -118,4 +121,7 @@ public class Constants {
 
     /*configs*/
     public static final String STR_USE_CASE_ACCOUNTING_CONFIG_PREFIX = "ACCOUNT_USE_CASE_";
+    public static final String STR_USE_CASE_ISSUER_CONFIG_PREFIX = "ISSUER_USE_CASE_";
+    public static final String STR_USE_CASE_ISSUER_DEFAULT = "ISSUER_USE_CASE_DEFAULT";
+    public static final String STR_USE_CASE_ACCOUNT_DEFAULT = "ACCOUNT_USE_CASE_DEFAULT";
 }

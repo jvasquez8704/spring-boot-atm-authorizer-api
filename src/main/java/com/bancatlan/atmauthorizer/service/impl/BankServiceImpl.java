@@ -1,25 +1,26 @@
 package com.bancatlan.atmauthorizer.service.impl;
 
 import com.bancatlan.atmauthorizer.component.Constants;
+import com.bancatlan.atmauthorizer.component.IUtilComponent;
 import com.bancatlan.atmauthorizer.component.impl.UtilComponentImpl;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
+import com.bancatlan.atmauthorizer.model.Config;
 import com.bancatlan.atmauthorizer.model.PaymentInstrument;
 import com.bancatlan.atmauthorizer.model.PaymentInstrumentType;
 import com.bancatlan.atmauthorizer.model.Transaction;
 import com.bancatlan.atmauthorizer.service.IBankService;
+import com.bancatlan.atmauthorizer.service.IConfigService;
+import hn.bancatlan.rat002._1_0.out.registrotransaccionatm.*;
 import infatlan.hn.acd169.out.congelamientocuentas.*;
 import infatlan.hn.entrust.core.external.message.*;
+import infatlan.hn.entrust.core.external.message.DTPeticionGeneral;
 import och.infatlan.hn.ws.acd088.out.transferenciacontable.*;
-import och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion;
-import och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem;
 import och.infatlan.hn.ws.acd088.out.transferenciacontable.DTEstado;
-import och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion;
 import och.infatlan.hn.ws.acd101.out.consultasaldov2.*;
-import och.infatlan.hn.ws.acd101.out.consultasaldov2.DTParametroAdicionalColeccion;
-import och.infatlan.hn.ws.acd101.out.consultasaldov2.DTParametroAdicionalItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -159,6 +160,12 @@ public class BankServiceImpl implements IBankService {
     @Value("${bus-integration.wsdl.freeze-endpoint}")
     String freezeSOAPEndpoint;
 
+    @Autowired
+    IUtilComponent utilComponent;
+
+    @Autowired
+    private IConfigService configService;
+
     @Override
     public Boolean verifyAccountByOcbUser(String ocbUser, String strAccount) {
         LOG.info("verifyAccountByOcbUser: ");
@@ -264,7 +271,7 @@ public class BankServiceImpl implements IBankService {
             mtTransferenciaContable.setEmpresaId(BigInteger.ZERO);
             mtTransferenciaContable.setCanalId(transferChannelId);
 
-            DTIdentificadorColeccion identificadorColeccion = new DTIdentificadorColeccion();
+            och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion identificadorColeccion = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion();
             //identificadorColeccion.setOmniCanal(transactionId.toString());
             identificadorColeccion.setOmniCanal("");
             mtTransferenciaContable.getIdentificadorColeccion().add(identificadorColeccion);
@@ -372,7 +379,8 @@ public class BankServiceImpl implements IBankService {
             mtTransferenciaContable.setEmpresaId(BigInteger.ZERO);
             mtTransferenciaContable.setCanalId(transferChannelId);
 
-            DTIdentificadorColeccion identificadorColeccion = new DTIdentificadorColeccion();
+
+            och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion identificadorColeccion = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion();
             identificadorColeccion.setOmniCanal("");
             mtTransferenciaContable.getIdentificadorColeccion().add(identificadorColeccion);
 
@@ -787,11 +795,7 @@ public class BankServiceImpl implements IBankService {
         LOG.info("cantidad, monto {}", withdrawalTxn.getAmount().toString());
         LOG.info("numeroTarjeta {}", withdrawalTxn.getPayer().getMsisdn());
         LOG.info("monedaTransaccion {}", withdrawalTxn.getCurrency().getCode());
-        //LOG.info("fechaProcesamiento {}", startTxn.getCreationDate().toString());
         LOG.info("idEmisor map use_case config {}", withdrawalTxn.getUseCase().getId().toString());
-        //CVA Credit Voucher
-        //GUI  DIDO
-        //CQR  codigo QR
         LOG.info("referencia => campo numero 37 {}", withdrawalTxn.getAtmReference().substring(6, withdrawalTxn.getAtmReference().length()));
         LOG.info("codigoRespuesta {}", "00");
         LOG.info("identificacionTerminal {}", withdrawalTxn.getStrIdTerminal());
@@ -799,6 +803,73 @@ public class BankServiceImpl implements IBankService {
         LOG.info("tipoTransaccion {}", withdrawalTxn.getOrderId());
         LOG.info("idAutorizacion {}", withdrawalTxn.getStrAuthorizationCode());
 
+
+        try {
+            String urlService = absolutePathWSDLResources + "SI_OS_RegistroTransaccionATMService.wsdl";
+            LOG.info("URL: {}", urlService);
+            URL url;
+            url = new URL(urlService);
+
+
+            SIOSRegistroTransaccionATMService port = new SIOSRegistroTransaccionATMService(url);
+            SIOSRegistroTransaccionATM registroTransaccionATM = port.getHTTPPort();
+
+            BindingProvider provider = (BindingProvider) registroTransaccionATM;
+            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, "http://hndespombapp.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_registroTransaccionATM&interfaceNamespace=http://bancatlan.hn/RAT002/1.0/out/RegistroTransaccionATM");
+            DTRegistroTransaccionATMRequest dtRegistroTransaccionATMRequest = new DTRegistroTransaccionATMRequest();
+
+
+            hn.bancatlan.rat002._1_0.out.registrotransaccionatm.DTPeticionGeneral dtPeticionGeneral = new hn.bancatlan.rat002._1_0.out.registrotransaccionatm.DTPeticionGeneral();
+            dtPeticionGeneral.setTransaccionId(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setAplicacionId(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setPaisId(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setInstitucionId(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setRegionId(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setCanalId(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setIdioma(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setVersion(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setLlaveSesion(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setUsuarioId(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setToken(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setClienteCoreId(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setIp(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setDispositivoId(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setPaso(Constants.STR_QUESTION_MARK);
+            dtPeticionGeneral.setAmbiente(Constants.STR_QUESTION_MARK);
+
+            DTRegistroTransaccionATM dtRegistroTransaccionATM = new DTRegistroTransaccionATM();
+            dtRegistroTransaccionATM.setIdAdquirente(Constants.ACQUIRING_ID);
+            dtRegistroTransaccionATM.setCantidad(withdrawalTxn.getAmount());
+            dtRegistroTransaccionATM.setMonto(withdrawalTxn.getAmount());
+            dtRegistroTransaccionATM.setNumeroTarjeta(withdrawalTxn.getStrIdentifierPayee());//F2
+            dtRegistroTransaccionATM.setMonedaTransaccion(startTxn.getCurrency().getCode());
+            dtRegistroTransaccionATM.setFechaProcesamiento(utilComponent.getProcessingDateTime(withdrawalTxn.getStrIdentifierPayer()));//F7
+
+            //switch config
+            Config configIssuer = configService.getConfigByPropertyName(Constants.STR_USE_CASE_ISSUER_CONFIG_PREFIX + startTxn.getUseCase().getId().toString());
+            String selectedIssuerId = (configIssuer != null && configIssuer.getPropertyValue() != null && !configIssuer.getPropertyValue().equals("")) ? configIssuer.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_USE_CASE_ISSUER_DEFAULT).getPropertyValue();
+            dtRegistroTransaccionATM.setIdEmisor(selectedIssuerId);
+            dtRegistroTransaccionATM.setReferencia(withdrawalTxn.getChannelReference());//F37 o AtmReference
+            dtRegistroTransaccionATM.setCodigoRespuesta(Constants.ATM_SUCCESS_STATUS_CODE);
+            dtRegistroTransaccionATM.setIdentificacionTerminal(withdrawalTxn.getStrIdTerminal());
+            dtRegistroTransaccionATM.setTiempoProcesamiento(utilComponent.getProcessingDateTime(withdrawalTxn.getChannelId()));//F3
+            dtRegistroTransaccionATM.setTipoTransaccion(utilComponent.getProcessingCode(withdrawalTxn.getChannelId()));//F3 substring(1,2)
+            dtRegistroTransaccionATM.setIdAutorizacion(withdrawalTxn.getStrAuthorizationCode().trim());
+
+            dtRegistroTransaccionATMRequest.setPeticionGeneral(dtPeticionGeneral);
+            dtRegistroTransaccionATMRequest.setRegistroTransaccionATM(dtRegistroTransaccionATM);
+            DTRegistroTransaccionATMResponse response = registroTransaccionATM.siOSRegistroTransaccionATM(dtRegistroTransaccionATMRequest);
+
+            if (response != null && response.getEstado() != null && response.getEstado().getCodigo() != null
+                    && response.getEstado().getCodigo().equals(Constants.BANK_SUCCESS_STATUS_CODE)) {
+                LOG.info("Success RegistroTransaccionATM txn => {}", response.getEstado().getDescripcion());
+            } else {
+                LOG.info("Custom response error RegistroTransaccionATM => {}", response.getEstado().getDescripcion());
+                //retVal = false;
+            }
+        } catch (Exception ex) {
+            LOG.info("General exception on RegistroTransaccionATM {}", ex.getMessage());
+        }
         return true;
     }
 }

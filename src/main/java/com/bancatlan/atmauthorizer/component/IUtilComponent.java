@@ -19,4 +19,6 @@ public interface IUtilComponent {
     String encryptCode(String code);
     String decryptCode(String encryptedCode);
     String getBankCommentPrefix(int useCase);
+    String getProcessingCode(String rawCode);
+    int getProcessingDateTime(String processingDate);
 }

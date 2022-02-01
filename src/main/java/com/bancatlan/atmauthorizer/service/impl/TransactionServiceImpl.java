@@ -247,9 +247,11 @@ public class TransactionServiceImpl implements ITransactionService {
                     LOG.info("MYMO Txn Id => {}, time process: {} ms.", txn.getVoucher().getTxnCreatedBy().getId(), System.currentTimeMillis() - startingTimeProcess);
                 }
                 //call accounting closing service
-                long startingTime = System.currentTimeMillis();
-                bankService.sendWithdrawalToAccountingClosing(txn.getVoucher().getTxnCreatedBy(), txn);
-                LOG.info("Accounting Closing service Txn Id => {}, time process: {} ms.", txn.getId(), System.currentTimeMillis() - startingTime);
+                if(txn.getUseCase().getId().equals(Long.valueOf(Constants.CONFIRM_TXN_STATUS))) {
+                    long startingTime = System.currentTimeMillis();
+                    bankService.sendWithdrawalToAccountingClosing(txn.getVoucher().getTxnCreatedBy(), txn);
+                    LOG.info("Accounting Closing service Txn Id => {}, time process: {} ms.", txn.getId(), System.currentTimeMillis() - startingTime);
+                }
             }
             LOG.info("ExecuteAllConfirmedWithDrawls: Finishing bash process, which it took {} ms", System.currentTimeMillis() - startTime);
         } else {
@@ -552,7 +554,7 @@ public class TransactionServiceImpl implements ITransactionService {
         PaymentInstrument payerPI = creatorTxn.getPayerPaymentInstrument();
         PaymentInstrument defaultAccountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
         Config configAccount = configService.getConfigByPropertyName(Constants.STR_USE_CASE_ACCOUNTING_CONFIG_PREFIX + creatorTxn.getUseCase().getId().toString());
-        String selectedBankAccount = (configAccount != null && configAccount.getPropertyValue() != null && !configAccount.getPropertyValue().equals("")) ? configAccount.getPropertyValue() : defaultAccountATMBASA.getStrIdentifier();
+        String selectedBankAccount = (configAccount != null && configAccount.getPropertyValue() != null && !configAccount.getPropertyValue().equals("")) ? configAccount.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_USE_CASE_ACCOUNT_DEFAULT).getPropertyValue();
         Customer payee = creatorTxn.getPayee();
         String prefix_core_desc = utilComponent.getBankCommentPrefix(creatorTxn.getUseCase().getId().intValue());
         String customComment = prefix_core_desc + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();

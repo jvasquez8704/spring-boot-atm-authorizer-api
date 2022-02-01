@@ -245,6 +245,18 @@ public class UtilComponentImpl implements IUtilComponent {
         return Constants.PREFIX_RTS_DEFAULT;
     }
 
+    @Override
+    public String getProcessingCode(String rawCode) {
+        Optional<String> code = Optional.ofNullable(rawCode);
+        return code.orElse(Constants.DEFAULT_PROCESSING_CODE).substring(0,2);
+    }
+
+    @Override
+    public int getProcessingDateTime(String processingDate) {
+        Optional<String> processDate = Optional.ofNullable(processingDate);
+        return Integer.valueOf(processDate.orElse(String.valueOf(LocalDateTime.now().getNano())));
+    }
+
     /**
      *It generates a code for verification in a measure time configured
      * @param value it should be cellphone number, email or user
