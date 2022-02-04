@@ -239,7 +239,7 @@ public class TransactionServiceImpl implements ITransactionService {
         if (!transactionList.isEmpty()) {
             for (Transaction txn : transactionList) {
                 long startTimeProcess = System.currentTimeMillis();
-                this.processBatchConfirm(txn);
+                //this.processBatchConfirm(txn);
                 LOG.info("Id => {}, Amount {},  Paid Voucher {} , time process: {} ms.", txn.getId(), txn.getAmount(), txn.getVoucher().getId(), System.currentTimeMillis() - startTimeProcess);
                 if(txn.getVoucher().getTxnCreatedBy().getApplicationId().equals(Constants.ID_MISSION_APP_ID) && !txn.getVoucher().getTxnCreatedBy().getChannelReference().equals(null)) {
                     long startingTimeProcess = System.currentTimeMillis();
@@ -247,7 +247,7 @@ public class TransactionServiceImpl implements ITransactionService {
                     LOG.info("MYMO Txn Id => {}, time process: {} ms.", txn.getVoucher().getTxnCreatedBy().getId(), System.currentTimeMillis() - startingTimeProcess);
                 }
                 //call accounting closing service
-                if(txn.getUseCase().getId().equals(Long.valueOf(Constants.CONFIRM_TXN_STATUS))) {
+                if(txn.getTxnStatus().getId().equals(Long.valueOf(Constants.CONFIRM_TXN_STATUS))) {
                     long startingTime = System.currentTimeMillis();
                     bankService.sendWithdrawalToAccountingClosing(txn.getVoucher().getTxnCreatedBy(), txn);
                     LOG.info("Accounting Closing service Txn Id => {}, time process: {} ms.", txn.getId(), System.currentTimeMillis() - startingTime);

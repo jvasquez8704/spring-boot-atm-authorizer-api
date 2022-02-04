@@ -790,19 +790,26 @@ public class BankServiceImpl implements IBankService {
 
     @Override
     public Boolean sendWithdrawalToAccountingClosing(Transaction startTxn,Transaction withdrawalTxn) {
-        LOG.info("sendWithdrawalToAccountingClosing:");
-        LOG.info("idAdquirente {}", "001");
-        LOG.info("cantidad, monto {}", withdrawalTxn.getAmount().toString());
-        LOG.info("numeroTarjeta {}", withdrawalTxn.getPayer().getMsisdn());
-        LOG.info("monedaTransaccion {}", withdrawalTxn.getCurrency().getCode());
-        LOG.info("idEmisor map use_case config {}", withdrawalTxn.getUseCase().getId().toString());
-        LOG.info("referencia => campo numero 37 {}", withdrawalTxn.getAtmReference().substring(6, withdrawalTxn.getAtmReference().length()));
-        LOG.info("codigoRespuesta {}", "00");
+        LOG.info("SendWithdrawalToAccountingClosing Summary:");
+        LOG.info("idAdquirente {}", Constants.ACQUIRING_ID);
+        LOG.info("cantidad, monto {}", withdrawalTxn.getAmount());
+        LOG.info("numeroTarjeta {}", withdrawalTxn.getStrIdentifierPayee());
+        LOG.info("monedaTransaccion {}", startTxn.getCurrency().getCode());
+        LOG.info("Fecha Procesamiento {}", utilComponent.getProcessingDateTime(withdrawalTxn.getStrIdentifierPayer()));
+        LOG.info("use_case for config {}", startTxn.getUseCase().getId().toString());
+        LOG.info("referencia {}", withdrawalTxn.getChannelReference());
+        LOG.info("codigoRespuesta {}", Constants.ATM_SUCCESS_STATUS_CODE);
         LOG.info("identificacionTerminal {}", withdrawalTxn.getStrIdTerminal());
-        LOG.info("tiempoProcesamiento {}", withdrawalTxn.getOrderId());
-        LOG.info("tipoTransaccion {}", withdrawalTxn.getOrderId());
-        LOG.info("idAutorizacion {}", withdrawalTxn.getStrAuthorizationCode());
+        LOG.info("tiempoProcesamiento {}", utilComponent.getProcessingDateTime(withdrawalTxn.getChannelId()));
+        LOG.info("tipoTransaccion {}", utilComponent.getProcessingCode(withdrawalTxn.getChannelId()));
+        LOG.info("idAutorizacion {}", withdrawalTxn.getStrAuthorizationCode().trim());
 
+        Authenticator.setDefault(new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication("APPOCH01",
+                        "Inicio01".toCharArray());
+            }
+        });
 
         try {
             String urlService = absolutePathWSDLResources + "SI_OS_RegistroTransaccionATMService.wsdl";
@@ -839,8 +846,8 @@ public class BankServiceImpl implements IBankService {
 
             DTRegistroTransaccionATM dtRegistroTransaccionATM = new DTRegistroTransaccionATM();
             dtRegistroTransaccionATM.setIdAdquirente(Constants.ACQUIRING_ID);
-            dtRegistroTransaccionATM.setCantidad(withdrawalTxn.getAmount());
-            dtRegistroTransaccionATM.setMonto(withdrawalTxn.getAmount());
+            dtRegistroTransaccionATM.setCantidad(withdrawalTxn.getAmount().toString());
+            dtRegistroTransaccionATM.setMonto(withdrawalTxn.getAmount().toString());
             dtRegistroTransaccionATM.setNumeroTarjeta(withdrawalTxn.getStrIdentifierPayee());//F2
             dtRegistroTransaccionATM.setMonedaTransaccion(startTxn.getCurrency().getCode());
             dtRegistroTransaccionATM.setFechaProcesamiento(utilComponent.getProcessingDateTime(withdrawalTxn.getStrIdentifierPayer()));//F7
@@ -849,10 +856,12 @@ public class BankServiceImpl implements IBankService {
             Config configIssuer = configService.getConfigByPropertyName(Constants.STR_USE_CASE_ISSUER_CONFIG_PREFIX + startTxn.getUseCase().getId().toString());
             String selectedIssuerId = (configIssuer != null && configIssuer.getPropertyValue() != null && !configIssuer.getPropertyValue().equals("")) ? configIssuer.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_USE_CASE_ISSUER_DEFAULT).getPropertyValue();
             dtRegistroTransaccionATM.setIdEmisor(selectedIssuerId);
+            LOG.info("idEmisor map use_case config {}", selectedIssuerId);
             dtRegistroTransaccionATM.setReferencia(withdrawalTxn.getChannelReference());//F37 o AtmReference
             dtRegistroTransaccionATM.setCodigoRespuesta(Constants.ATM_SUCCESS_STATUS_CODE);
             dtRegistroTransaccionATM.setIdentificacionTerminal(withdrawalTxn.getStrIdTerminal());
-            dtRegistroTransaccionATM.setTiempoProcesamiento(utilComponent.getProcessingDateTime(withdrawalTxn.getChannelId()));//F3
+            //dtRegistroTransaccionATM.setTiempoProcesamiento(utilComponent.getProcessingDateTime(withdrawalTxn.getChannelId()));//F3
+            dtRegistroTransaccionATM.setTiempoProcesamiento(Constants.STR_QUESTION_MARK);//Hasta que PO repare esta validacion se podra enviar F3
             dtRegistroTransaccionATM.setTipoTransaccion(utilComponent.getProcessingCode(withdrawalTxn.getChannelId()));//F3 substring(1,2)
             dtRegistroTransaccionATM.setIdAutorizacion(withdrawalTxn.getStrAuthorizationCode().trim());
 

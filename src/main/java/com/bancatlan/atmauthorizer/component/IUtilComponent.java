@@ -20,5 +20,5 @@ public interface IUtilComponent {
     String decryptCode(String encryptedCode);
     String getBankCommentPrefix(int useCase);
     String getProcessingCode(String rawCode);
-    int getProcessingDateTime(String processingDate);
+    String getProcessingDateTime(String processingDate);
 }

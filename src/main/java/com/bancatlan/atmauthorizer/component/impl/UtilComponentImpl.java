@@ -252,9 +252,9 @@ public class UtilComponentImpl implements IUtilComponent {
     }
 
     @Override
-    public int getProcessingDateTime(String processingDate) {
+    public String getProcessingDateTime(String processingDate) {
         Optional<String> processDate = Optional.ofNullable(processingDate);
-        return Integer.valueOf(processDate.orElse(String.valueOf(LocalDateTime.now().getNano())));
+        return processDate.orElse(String.valueOf(LocalDateTime.now().getNano()));
     }
 
     /**
