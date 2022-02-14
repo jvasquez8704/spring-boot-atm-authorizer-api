@@ -252,9 +252,23 @@ public class UtilComponentImpl implements IUtilComponent {
     }
 
     @Override
+    public String getProcessingTime(String processingDate) {
+        Optional<String> processDate = Optional.ofNullable(processingDate);
+        return processDate.orElse(String.valueOf(LocalDateTime.now().getNano())).toString().substring(2,8);
+    }
+
+    @Override
     public String getProcessingDateTime(String processingDate) {
         Optional<String> processDate = Optional.ofNullable(processingDate);
         return processDate.orElse(String.valueOf(LocalDateTime.now().getNano()));
+    }
+
+    @Override
+    public String getCurrencyTransactionCode(String currency) {
+        if(currency.equals(Constants.HN_CURRENCY)){
+           return Constants.HN_CURRENCY_TRANSACTION_CODE;
+        };
+        return Constants.HN_CURRENCY_TRANSACTION_CODE;
     }
 
     /**

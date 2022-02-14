@@ -21,4 +21,6 @@ public interface IUtilComponent {
     String getBankCommentPrefix(int useCase);
     String getProcessingCode(String rawCode);
     String getProcessingDateTime(String processingDate);
+    String getProcessingTime(String processingDate);
+    String getCurrencyTransactionCode(String currency);
 }

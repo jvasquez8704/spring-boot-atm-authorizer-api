@@ -844,12 +844,13 @@ public class BankServiceImpl implements IBankService {
             dtPeticionGeneral.setPaso(Constants.STR_QUESTION_MARK);
             dtPeticionGeneral.setAmbiente(Constants.STR_QUESTION_MARK);
 
+
             DTRegistroTransaccionATM dtRegistroTransaccionATM = new DTRegistroTransaccionATM();
             dtRegistroTransaccionATM.setIdAdquirente(Constants.ACQUIRING_ID);
             dtRegistroTransaccionATM.setCantidad(withdrawalTxn.getAmount().toString());
             dtRegistroTransaccionATM.setMonto(withdrawalTxn.getAmount().toString());
             dtRegistroTransaccionATM.setNumeroTarjeta(withdrawalTxn.getStrIdentifierPayee());//F2
-            dtRegistroTransaccionATM.setMonedaTransaccion(startTxn.getCurrency().getCode());
+            dtRegistroTransaccionATM.setMonedaTransaccion(utilComponent.getCurrencyTransactionCode(startTxn.getCurrency().getCode()));
             dtRegistroTransaccionATM.setFechaProcesamiento(utilComponent.getProcessingDateTime(withdrawalTxn.getStrIdentifierPayer()));//F7
 
             //switch config
@@ -860,8 +861,8 @@ public class BankServiceImpl implements IBankService {
             dtRegistroTransaccionATM.setReferencia(withdrawalTxn.getChannelReference());//F37 o AtmReference
             dtRegistroTransaccionATM.setCodigoRespuesta(Constants.ATM_SUCCESS_STATUS_CODE);
             dtRegistroTransaccionATM.setIdentificacionTerminal(withdrawalTxn.getStrIdTerminal());
-            //dtRegistroTransaccionATM.setTiempoProcesamiento(utilComponent.getProcessingDateTime(withdrawalTxn.getChannelId()));//F3
-            dtRegistroTransaccionATM.setTiempoProcesamiento(Constants.STR_QUESTION_MARK);//Hasta que PO repare esta validacion se podra enviar F3
+            dtRegistroTransaccionATM.setTiempoProcesamiento(utilComponent.getProcessingTime(withdrawalTxn.getChannelId()));//F3
+//            dtRegistroTransaccionATM.setTiempoProcesamiento("12");//Hasta que PO repare esta validacion se podra enviar F3
             dtRegistroTransaccionATM.setTipoTransaccion(utilComponent.getProcessingCode(withdrawalTxn.getChannelId()));//F3 substring(1,2)
             dtRegistroTransaccionATM.setIdAutorizacion(withdrawalTxn.getStrAuthorizationCode().trim());
 
