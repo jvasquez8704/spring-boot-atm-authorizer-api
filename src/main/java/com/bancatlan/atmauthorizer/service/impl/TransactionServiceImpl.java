@@ -239,7 +239,7 @@ public class TransactionServiceImpl implements ITransactionService {
         if (!transactionList.isEmpty()) {
             for (Transaction txn : transactionList) {
                 long startTimeProcess = System.currentTimeMillis();
-                this.processBatchConfirm(txn);
+                //this.processBatchConfirm(txn);
                 LOG.info("Id => {}, Amount {},  Paid Voucher {} , time process: {} ms.", txn.getId(), txn.getAmount(), txn.getVoucher().getId(), System.currentTimeMillis() - startTimeProcess);
                 if(txn.getVoucher().getTxnCreatedBy().getApplicationId().equals(Constants.ID_MISSION_APP_ID) && !txn.getVoucher().getTxnCreatedBy().getChannelReference().equals(null)) {
                     long startingTimeProcess = System.currentTimeMillis();

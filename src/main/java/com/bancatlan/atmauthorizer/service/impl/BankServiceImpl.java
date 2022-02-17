@@ -795,12 +795,12 @@ public class BankServiceImpl implements IBankService {
         LOG.info("cantidad, monto {}", withdrawalTxn.getAmount());
         LOG.info("numeroTarjeta {}", withdrawalTxn.getStrIdentifierPayee());
         LOG.info("monedaTransaccion {}", startTxn.getCurrency().getCode());
-        LOG.info("Fecha Procesamiento {}", utilComponent.getProcessingDateTime(withdrawalTxn.getStrIdentifierPayer()));
+        LOG.info("Fecha Procesamiento {}", utilComponent.getProcessingDate(withdrawalTxn.getStrIdentifierPayer()));
         LOG.info("use_case for config {}", startTxn.getUseCase().getId().toString());
         LOG.info("referencia {}", withdrawalTxn.getChannelReference());
         LOG.info("codigoRespuesta {}", Constants.ATM_SUCCESS_STATUS_CODE);
         LOG.info("identificacionTerminal {}", withdrawalTxn.getStrIdTerminal());
-        LOG.info("tiempoProcesamiento {}", utilComponent.getProcessingDateTime(withdrawalTxn.getChannelId()));
+        LOG.info("tiempoProcesamiento {}", utilComponent.getProcessingTime(withdrawalTxn.getStrIdentifierPayer()));
         LOG.info("tipoTransaccion {}", utilComponent.getProcessingCode(withdrawalTxn.getChannelId()));
         LOG.info("idAutorizacion {}", withdrawalTxn.getStrAuthorizationCode().trim());
 
@@ -851,7 +851,7 @@ public class BankServiceImpl implements IBankService {
             dtRegistroTransaccionATM.setMonto(withdrawalTxn.getAmount().toString());
             dtRegistroTransaccionATM.setNumeroTarjeta(withdrawalTxn.getStrIdentifierPayee());//F2
             dtRegistroTransaccionATM.setMonedaTransaccion(utilComponent.getCurrencyTransactionCode(startTxn.getCurrency().getCode()));
-            dtRegistroTransaccionATM.setFechaProcesamiento(utilComponent.getProcessingDateTime(withdrawalTxn.getStrIdentifierPayer()));//F7
+            dtRegistroTransaccionATM.setFechaProcesamiento(utilComponent.getProcessingDate(withdrawalTxn.getStrIdentifierPayer()));//F7
 
             //switch config
             Config configIssuer = configService.getConfigByPropertyName(Constants.STR_USE_CASE_ISSUER_CONFIG_PREFIX + startTxn.getUseCase().getId().toString());
@@ -861,8 +861,7 @@ public class BankServiceImpl implements IBankService {
             dtRegistroTransaccionATM.setReferencia(withdrawalTxn.getChannelReference());//F37 o AtmReference
             dtRegistroTransaccionATM.setCodigoRespuesta(Constants.ATM_SUCCESS_STATUS_CODE);
             dtRegistroTransaccionATM.setIdentificacionTerminal(withdrawalTxn.getStrIdTerminal());
-            dtRegistroTransaccionATM.setTiempoProcesamiento(utilComponent.getProcessingTime(withdrawalTxn.getChannelId()));//F3
-//            dtRegistroTransaccionATM.setTiempoProcesamiento("12");//Hasta que PO repare esta validacion se podra enviar F3
+            dtRegistroTransaccionATM.setTiempoProcesamiento(utilComponent.getProcessingTime(withdrawalTxn.getStrIdentifierPayer()));//F3
             dtRegistroTransaccionATM.setTipoTransaccion(utilComponent.getProcessingCode(withdrawalTxn.getChannelId()));//F3 substring(1,2)
             dtRegistroTransaccionATM.setIdAutorizacion(withdrawalTxn.getStrAuthorizationCode().trim());
 
@@ -871,7 +870,7 @@ public class BankServiceImpl implements IBankService {
             DTRegistroTransaccionATMResponse response = registroTransaccionATM.siOSRegistroTransaccionATM(dtRegistroTransaccionATMRequest);
 
             if (response != null && response.getEstado() != null && response.getEstado().getCodigo() != null
-                    && response.getEstado().getCodigo().equals(Constants.BANK_SUCCESS_STATUS_CODE)) {
+                    && response.getEstado().getCodigo().equals(BigInteger.ZERO)) {
                 LOG.info("Success RegistroTransaccionATM txn => {}", response.getEstado().getDescripcion());
             } else {
                 LOG.info("Custom response error RegistroTransaccionATM => {}", response.getEstado().getDescripcion());

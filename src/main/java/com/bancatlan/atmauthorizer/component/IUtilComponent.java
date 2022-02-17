@@ -20,7 +20,7 @@ public interface IUtilComponent {
     String decryptCode(String encryptedCode);
     String getBankCommentPrefix(int useCase);
     String getProcessingCode(String rawCode);
-    String getProcessingDateTime(String processingDate);
+    String getProcessingDate(String processingDate);
     String getProcessingTime(String processingDate);
     String getCurrencyTransactionCode(String currency);
 }

@@ -254,13 +254,21 @@ public class UtilComponentImpl implements IUtilComponent {
     @Override
     public String getProcessingTime(String processingDate) {
         Optional<String> processDate = Optional.ofNullable(processingDate);
-        return processDate.orElse(String.valueOf(LocalDateTime.now().getNano())).toString().substring(2,8);
+        String defaultTime = LocalDateTime.now().format(DateTimeFormatter.ISO_TIME).replace(":", "").replace(".","");
+        String result = processDate.orElse(defaultTime.substring(0, Constants.INT_DATE_TIME_SIZE));
+        int length =  result.length();
+        int sizeResult = (Constants.INT_DATE_TIME_SIZE > length ? length : Constants.INT_DATE_TIME_SIZE);
+
+        result = result.substring(length - sizeResult, length);
+        return result;
     }
 
     @Override
-    public String getProcessingDateTime(String processingDate) {
+    public String getProcessingDate(String processingDate) {
+        String defaultDate = LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+        defaultDate = defaultDate.substring(defaultDate.length() - Constants.INT_DATE_TIME_SIZE);
         Optional<String> processDate = Optional.ofNullable(processingDate);
-        return processDate.orElse(String.valueOf(LocalDateTime.now().getNano()));
+        return processDate.orElse(defaultDate).substring(0,Constants.INT_DATE_TIME_SIZE);
     }
 
     @Override

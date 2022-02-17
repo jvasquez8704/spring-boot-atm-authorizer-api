@@ -60,6 +60,7 @@ public class Constants {
     public static final int INT_VOUCHER_USE_CASE_QR =  177;
     public static final int INT_CASH_OUT_KEYBOARD_USE_CASE =  176;
     public static final int INT_WITHDRAW_VOUCHER_USE_CASE =  800;
+    public static final int INT_DATE_TIME_SIZE =  6;
     public static final String STR_WITHDRAW_MYMO =  "WITHDRAWAL";
 
     /*CURRENCY CODES*/
