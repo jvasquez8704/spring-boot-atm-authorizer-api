@@ -264,6 +264,12 @@ public class UtilComponentImpl implements IUtilComponent {
     }
 
     @Override
+    public String getProcessingDate(LocalDateTime processingDate) {
+        Optional<LocalDateTime> processDate = Optional.ofNullable(processingDate);
+        return processDate.orElse(LocalDateTime.now()).format(DateTimeFormatter.ofPattern("YYMMdd"));
+    }
+
+    @Override
     public String getProcessingDate(String processingDate) {
         String defaultDate = LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE);
         defaultDate = defaultDate.substring(defaultDate.length() - Constants.INT_DATE_TIME_SIZE);

@@ -1,6 +1,8 @@
 package com.bancatlan.atmauthorizer.component;
 
 
+import java.time.LocalDateTime;
+
 public interface IUtilComponent {
     String getPickupCodeByCellPhoneNumber(String cellPhoneNumber);
     String getSecretCodeByCellPhoneNumber(String seed);
@@ -21,6 +23,7 @@ public interface IUtilComponent {
     String getBankCommentPrefix(int useCase);
     String getProcessingCode(String rawCode);
     String getProcessingDate(String processingDate);
+    String getProcessingDate(LocalDateTime processingDate);
     String getProcessingTime(String processingDate);
     String getCurrencyTransactionCode(String currency);
 }

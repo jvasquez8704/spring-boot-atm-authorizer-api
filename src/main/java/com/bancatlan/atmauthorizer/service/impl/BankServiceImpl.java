@@ -795,7 +795,7 @@ public class BankServiceImpl implements IBankService {
         LOG.info("cantidad, monto {}", withdrawalTxn.getAmount());
         LOG.info("numeroTarjeta {}", withdrawalTxn.getStrIdentifierPayee());
         LOG.info("monedaTransaccion {}", startTxn.getCurrency().getCode());
-        LOG.info("Fecha Procesamiento {}", utilComponent.getProcessingDate(withdrawalTxn.getStrIdentifierPayer()));
+        LOG.info("Fecha Procesamiento {}", utilComponent.getProcessingDate(withdrawalTxn.getCreationDate()));
         LOG.info("use_case for config {}", startTxn.getUseCase().getId().toString());
         LOG.info("referencia {}", withdrawalTxn.getChannelReference());
         LOG.info("codigoRespuesta {}", Constants.ATM_SUCCESS_STATUS_CODE);
@@ -851,7 +851,7 @@ public class BankServiceImpl implements IBankService {
             dtRegistroTransaccionATM.setMonto(withdrawalTxn.getAmount().toString());
             dtRegistroTransaccionATM.setNumeroTarjeta(withdrawalTxn.getStrIdentifierPayee());//F2
             dtRegistroTransaccionATM.setMonedaTransaccion(utilComponent.getCurrencyTransactionCode(startTxn.getCurrency().getCode()));
-            dtRegistroTransaccionATM.setFechaProcesamiento(utilComponent.getProcessingDate(withdrawalTxn.getStrIdentifierPayer()));//F7
+            dtRegistroTransaccionATM.setFechaProcesamiento(utilComponent.getProcessingDate(withdrawalTxn.getCreationDate()));//F7
 
             //switch config
             Config configIssuer = configService.getConfigByPropertyName(Constants.STR_USE_CASE_ISSUER_CONFIG_PREFIX + startTxn.getUseCase().getId().toString());
