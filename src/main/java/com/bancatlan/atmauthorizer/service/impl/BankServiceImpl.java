@@ -52,6 +52,12 @@ public class BankServiceImpl implements IBankService {
     @Value("${bank.service.po.dev.password}")
     String busIntegrationDevPassword;
 
+    @Value("${register.service.po.username}")
+    String registerBusIntegrationUsername;
+
+    @Value("${register.service.po.password}")
+    String registerBusIntegrationPassword;
+
     /*Balance*/
     @Value("${bank.service.account.list.transaction.id}")
     String transactionId;
@@ -157,8 +163,14 @@ public class BankServiceImpl implements IBankService {
     @Value("${bus-integration.wsdl.freeze-name}")
     String freezeWSDLName;
 
+    @Value("${bus-integration.wsdl.txn-register-name}")
+    String registerWSDLName;
+
     @Value("${bus-integration.wsdl.freeze-endpoint}")
     String freezeSOAPEndpoint;
+
+    @Value("${bus-integration.wsdl.txn-register-endpoint}")
+    String registerSOAPEndpoint;
 
     @Autowired
     IUtilComponent utilComponent;
@@ -806,13 +818,14 @@ public class BankServiceImpl implements IBankService {
 
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("APPOCH01",
-                        "Inicio01".toCharArray());
+                return new PasswordAuthentication(registerBusIntegrationUsername,
+                        registerBusIntegrationPassword.toCharArray());
             }
         });
 
         try {
-            String urlService = absolutePathWSDLResources + "SI_OS_RegistroTransaccionATMService.wsdl";
+            //String urlService = absolutePathWSDLResources + "SI_OS_RegistroTransaccionATMService.wsdl";
+            String urlService = absolutePathWSDLResources + registerWSDLName;
             LOG.info("URL: {}", urlService);
             URL url;
             url = new URL(urlService);
@@ -822,7 +835,8 @@ public class BankServiceImpl implements IBankService {
             SIOSRegistroTransaccionATM registroTransaccionATM = port.getHTTPPort();
 
             BindingProvider provider = (BindingProvider) registroTransaccionATM;
-            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, "http://hndespombapp.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_registroTransaccionATM&interfaceNamespace=http://bancatlan.hn/RAT002/1.0/out/RegistroTransaccionATM");
+            //provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, "http://hndespombapp.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_registroTransaccionATM&interfaceNamespace=http://bancatlan.hn/RAT002/1.0/out/RegistroTransaccionATM");
+            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, registerSOAPEndpoint);
             DTRegistroTransaccionATMRequest dtRegistroTransaccionATMRequest = new DTRegistroTransaccionATMRequest();
 
 
