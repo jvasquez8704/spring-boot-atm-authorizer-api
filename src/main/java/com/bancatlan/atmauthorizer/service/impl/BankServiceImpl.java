@@ -300,8 +300,9 @@ public class BankServiceImpl implements IBankService {
             transferenciaContableItem.setCuentaDebito(accountDebit);
             transferenciaContableItem.setMonedaDebito(transferDebitCurrency);
 
-
-            transferenciaContableItem.setDebitoDescripcion(customComment);
+            //Se redujo la cantidad de caracteres por pruebas ya que solo soporta 44 caracteres
+            String commentSubString = customComment.substring(0,40);
+            transferenciaContableItem.setDebitoDescripcion(commentSubString);
             transferenciaContableItem.setComentario(customComment + "TRANSFER_TESTQA");
             transferenciaContableItem.setMovimientoDebito(transferDebitMovement);
 
@@ -410,8 +411,9 @@ public class BankServiceImpl implements IBankService {
             transferenciaContableItem.setCuentaDebito(accountDebit);
             transferenciaContableItem.setMonedaDebito(transferDebitCurrency);
 
-
-            transferenciaContableItem.setDebitoDescripcion(customComment);
+            //Se redujo la cantidad de caracteres por pruebas ya que solo soporta 44 caracteres
+            String commentSubString = customComment.substring(0,40);
+            transferenciaContableItem.setDebitoDescripcion(commentSubString);
             transferenciaContableItem.setComentario(customComment + "DEFROST_TRANSFER");
             transferenciaContableItem.setMovimientoDebito(transferDebitMovement);
 
