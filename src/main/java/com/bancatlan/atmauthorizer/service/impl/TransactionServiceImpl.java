@@ -529,7 +529,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 //Account Payer, Account Payee, Amount = cta contable qa => 750099900684 RT-USECASE-CTA_ORIGEN-MSISDN_DESTINO
                 //this is a bank transfer with a implicit defrost
                 String customComment = Constants.PREFIX_RTS_DEFAULT + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
-                String coreRef = bankService.transferMoney(payerPI.getStrIdentifier(), accountATMBASA.getStrIdentifier(), txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment);
+                String coreRef = bankService.transferMoney(payerPI.getStrIdentifier(), accountATMBASA.getStrIdentifier(), txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment,txn.getUseCase().getId().toString());
                 txn.setCoreReference(coreRef);
                 //Update balance payee
                 Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
@@ -558,7 +558,7 @@ public class TransactionServiceImpl implements ITransactionService {
         Customer payee = creatorTxn.getPayee();
         String prefix_core_desc = utilComponent.getBankCommentPrefix(creatorTxn.getUseCase().getId().intValue());
         String customComment = prefix_core_desc + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
-        String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), selectedBankAccount, txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment);
+        String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), selectedBankAccount, txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment,creatorTxn.getUseCase().getId().toString());
         txn.setCoreReference(coreRef);
         //Update balance payee
         if (!coreRef.equals(Constants.STR_CUSTOM_ERR) && !coreRef.equals(Constants.STR_EXCEPTION_ERR) && !coreRef.equals(Constants.STR_DASH_SEPARATOR) && !coreRef.equals(Constants.STR_ZERO)) {

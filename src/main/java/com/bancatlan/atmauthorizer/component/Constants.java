@@ -126,4 +126,6 @@ public class Constants {
     public static final String STR_USE_CASE_ISSUER_CONFIG_PREFIX = "ISSUER_USE_CASE_";
     public static final String STR_USE_CASE_ISSUER_DEFAULT = "ISSUER_USE_CASE_DEFAULT";
     public static final String STR_USE_CASE_ACCOUNT_DEFAULT = "ACCOUNT_USE_CASE_DEFAULT";
+    public static final String STR_ACCOUNTING_TRANSFERS_ID = "ACCOUNTING_TRANSFERS_ID_";
+    public static final String STR_ACCOUNTING_TRANSFERS_DEFAULT_ID = "ACCOUNTING_TRANSFERS_ID_DEFAULT";
 }

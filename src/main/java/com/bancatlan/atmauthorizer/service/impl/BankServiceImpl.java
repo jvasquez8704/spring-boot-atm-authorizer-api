@@ -255,14 +255,14 @@ public class BankServiceImpl implements IBankService {
     }
 
     @Override
-    public String transferMoney(String accountDebit, String accountCredit, Double amount, Long ref, String action, String customComment) {
+    public String transferMoney(String accountDebit, String accountCredit, Double amount, Long ref, String action, String customComment,String useCase) {
         LOG.info("transferMoney: ");
         LOG.info("accountDebit: " + accountDebit + " accountCredit: " + accountCredit + " amount: " + amount + " comment: " + customComment);
         //String toAccNum, String fromAccNum, double payerNetAmount, Long transactionId, Integer useCaseId, String customDesc, Long customerId
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(busIntegrationUsername,
-                        busIntegrationPassword.toCharArray());
+                return new PasswordAuthentication(busIntegrationDevUsername,
+                        busIntegrationDevPassword.toCharArray());
             }
         });
         String urlS = absolutePathWSDLResources + transferWSDLName;
@@ -277,7 +277,9 @@ public class BankServiceImpl implements IBankService {
             DTTransferenciaContable mtTransferenciaContable = new DTTransferenciaContable();
             mtTransferenciaContable.setActivarMultipleEntrada(BigInteger.ZERO);
             mtTransferenciaContable.setActivarParametroAdicional("");
-            mtTransferenciaContable.setTransaccionId(transferTransactionId);
+            Config configIssuer = configService.getConfigByPropertyName(Constants.STR_ACCOUNTING_TRANSFERS_ID + useCase);
+            String selectedIssuerId = (configIssuer != null && configIssuer.getPropertyValue() != null && !configIssuer.getPropertyValue().equals("")) ? configIssuer.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_ACCOUNTING_TRANSFERS_DEFAULT_ID ).getPropertyValue();
+            mtTransferenciaContable.setTransaccionId(selectedIssuerId);
             mtTransferenciaContable.setAplicacionId(transferApplicationId);
             mtTransferenciaContable.setPaisId(BigInteger.ZERO);
             mtTransferenciaContable.setEmpresaId(BigInteger.ZERO);
@@ -366,12 +368,12 @@ public class BankServiceImpl implements IBankService {
     }
 
     @Override
-    public String transferMoneyProcess(String accountDebit, String accountCredit, Double amount, Long ref, String action, String customComment) {
+    public String transferMoneyProcess(String accountDebit, String accountCredit, Double amount, Long ref, String action, String customComment,String useCase) {
         LOG.info("transferMoney in bach process: accountDebit: {} , accountCredit {} , amount: {} , comment: {}", accountDebit, accountCredit, amount, customComment);
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(busIntegrationUsername,
-                        busIntegrationPassword.toCharArray());
+                return new PasswordAuthentication(busIntegrationDevUsername,
+                        busIntegrationDevPassword.toCharArray());
             }
         });
         String urlWs = absolutePathWSDLResources + transferWSDLName;
@@ -385,7 +387,9 @@ public class BankServiceImpl implements IBankService {
             DTTransferenciaContable mtTransferenciaContable = new DTTransferenciaContable();
             mtTransferenciaContable.setActivarMultipleEntrada(BigInteger.ZERO);
             mtTransferenciaContable.setActivarParametroAdicional("");
-            mtTransferenciaContable.setTransaccionId(transferTransactionId);
+            Config configIssuer = configService.getConfigByPropertyName(Constants.STR_ACCOUNTING_TRANSFERS_ID + useCase);
+            String selectedIssuerId = (configIssuer != null && configIssuer.getPropertyValue() != null && !configIssuer.getPropertyValue().equals("")) ? configIssuer.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_ACCOUNTING_TRANSFERS_DEFAULT_ID ).getPropertyValue();
+            mtTransferenciaContable.setTransaccionId(selectedIssuerId);
             mtTransferenciaContable.setAplicacionId(transferApplicationId);
             mtTransferenciaContable.setPaisId(BigInteger.ZERO);
             mtTransferenciaContable.setEmpresaId(BigInteger.ZERO);
