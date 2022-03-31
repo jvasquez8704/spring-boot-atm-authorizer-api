@@ -6,8 +6,11 @@ import com.bancatlan.atmauthorizer.component.IUtilComponent;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
+import com.bancatlan.atmauthorizer.model.Config;
+import com.bancatlan.atmauthorizer.service.IConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -423,4 +426,15 @@ public class UtilComponentImpl implements IUtilComponent {
         }
         return null;
     }
+
+    @Autowired
+    private IConfigService configService;
+
+    public  String getAccountingTranferChannelId(String useCase){
+        Config configIssuer = configService.getConfigByPropertyName(Constants.STR_ACCOUNTING_TRANSFERS_CHANNEL_ID + useCase);
+        String accountingTransfersChannelId = (configIssuer != null && configIssuer.getPropertyValue() != null && !configIssuer.getPropertyValue().equals("")) ? configIssuer.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_ACCOUNTING_TRANSFERS_CHANNEL_ID_DEFAULT ).getPropertyValue();
+
+        return accountingTransfersChannelId;
+    }
+
 }

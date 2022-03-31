@@ -283,7 +283,7 @@ public class BankServiceImpl implements IBankService {
             mtTransferenciaContable.setAplicacionId(transferApplicationId);
             mtTransferenciaContable.setPaisId(BigInteger.ZERO);
             mtTransferenciaContable.setEmpresaId(BigInteger.ZERO);
-            mtTransferenciaContable.setCanalId(transferChannelId);
+            mtTransferenciaContable.setCanalId(utilComponent.getAccountingTranferChannelId(useCase));
 
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion identificadorColeccion = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion();
             //identificadorColeccion.setOmniCanal(transactionId.toString());
@@ -394,7 +394,7 @@ public class BankServiceImpl implements IBankService {
             mtTransferenciaContable.setAplicacionId(transferApplicationId);
             mtTransferenciaContable.setPaisId(BigInteger.ZERO);
             mtTransferenciaContable.setEmpresaId(BigInteger.ZERO);
-            mtTransferenciaContable.setCanalId(transferChannelId);
+            mtTransferenciaContable.setCanalId(utilComponent.getAccountingTranferChannelId(useCase));
 
 
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion identificadorColeccion = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion();

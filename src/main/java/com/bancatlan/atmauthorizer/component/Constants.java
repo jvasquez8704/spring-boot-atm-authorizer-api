@@ -59,6 +59,9 @@ public class Constants {
     public static final int INT_VOUCHER_USE_CASE =  174;
     public static final int INT_VOUCHER_USE_CASE_QR =  177;
     public static final int INT_CASH_OUT_KEYBOARD_USE_CASE =  176;
+    public static final String STR_VOUCHER_USE_CASE =  "174";
+    public static final String STR_VOUCHER_USE_CASE_QR =  "177";
+    public static final String STR_CASH_OUT_KEYBOARD_USE_CASE =  "176";
     public static final int INT_WITHDRAW_VOUCHER_USE_CASE =  800;
     public static final int INT_DATE_TIME_SIZE =  6;
     public static final String STR_WITHDRAW_MYMO =  "WITHDRAWAL";
@@ -128,4 +131,7 @@ public class Constants {
     public static final String STR_USE_CASE_ACCOUNT_DEFAULT = "ACCOUNT_USE_CASE_DEFAULT";
     public static final String STR_ACCOUNTING_TRANSFERS_ID = "ACCOUNTING_TRANSFERS_ID_";
     public static final String STR_ACCOUNTING_TRANSFERS_DEFAULT_ID = "ACCOUNTING_TRANSFERS_ID_DEFAULT";
+    public static final String STR_ACCOUNTING_TRANSFERS_CHANNEL_ID_DEFAULT = "ACCOUNTING_TRANSFERS_CHANNEL_ID_DEFAULT ";
+    public static final String STR_ACCOUNTING_TRANSFERS_CHANNEL_ID = "ACCOUNTING_TRANSFERS_CHANNEL_ID_";
+
 }
