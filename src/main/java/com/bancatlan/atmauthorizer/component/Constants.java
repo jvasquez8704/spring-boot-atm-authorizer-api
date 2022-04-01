@@ -124,6 +124,9 @@ public class Constants {
     public static final String ID_MISSION_APP_ID = "2278";
     public static final String VOUCHER_BASA_APP_ID = "2272";
 
+    /*accounting transfer code*/
+    public static final String COD_ATM = "CODATM";
+
     /*configs*/
     public static final String STR_USE_CASE_ACCOUNTING_CONFIG_PREFIX = "ACCOUNT_USE_CASE_";
     public static final String STR_USE_CASE_ISSUER_CONFIG_PREFIX = "ISSUER_USE_CASE_";

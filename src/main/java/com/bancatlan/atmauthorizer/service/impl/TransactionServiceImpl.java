@@ -558,7 +558,8 @@ public class TransactionServiceImpl implements ITransactionService {
         Customer payee = creatorTxn.getPayee();
         String prefix_core_desc = utilComponent.getBankCommentPrefix(creatorTxn.getUseCase().getId().intValue());
         String customComment = prefix_core_desc + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
-        String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), selectedBankAccount, txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment,creatorTxn.getUseCase().getId().toString());
+//        String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), selectedBankAccount, txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment,creatorTxn.getUseCase().getId().toString());
+        String coreRef = bankService.transferMoneyProcess(txn);
         txn.setCoreReference(coreRef);
         //Update balance payee
         if (!coreRef.equals(Constants.STR_CUSTOM_ERR) && !coreRef.equals(Constants.STR_EXCEPTION_ERR) && !coreRef.equals(Constants.STR_DASH_SEPARATOR) && !coreRef.equals(Constants.STR_ZERO)) {
