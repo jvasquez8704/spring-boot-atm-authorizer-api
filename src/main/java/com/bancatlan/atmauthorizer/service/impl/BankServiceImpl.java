@@ -308,9 +308,7 @@ public class BankServiceImpl implements IBankService {
             transferenciaContableItem.setCuentaDebito(accountDebit);
             transferenciaContableItem.setMonedaDebito(transferDebitCurrency);
 
-            //Se redujo la cantidad de caracteres por pruebas ya que solo soporta 44 caracteres
-            String commentSubString = customComment.substring(1,customComment.length() -5);
-            transferenciaContableItem.setDebitoDescripcion(commentSubString);
+            transferenciaContableItem.setDebitoDescripcion(customComment);
             transferenciaContableItem.setComentario(customComment + "TRANSFER_TESTQA");
             transferenciaContableItem.setMovimientoDebito(transferDebitMovement);
 
@@ -419,9 +417,7 @@ public class BankServiceImpl implements IBankService {
             transferenciaContableItem.setCuentaDebito(accountDebit);
             transferenciaContableItem.setMonedaDebito(transferDebitCurrency);
 
-            //Se redujo la cantidad de caracteres por pruebas ya que solo soporta 44 caracteres
-            String commentSubString = customComment.substring(1,customComment.length() -5);
-            transferenciaContableItem.setDebitoDescripcion(commentSubString);
+            transferenciaContableItem.setDebitoDescripcion(customComment);
             transferenciaContableItem.setComentario(customComment + "DEFROST_TRANSFER");
             transferenciaContableItem.setMovimientoDebito(transferDebitMovement);
 
@@ -549,9 +545,7 @@ public class BankServiceImpl implements IBankService {
             transferenciaContableItem.setCuentaDebito(accountDebit);
             transferenciaContableItem.setMonedaDebito(transferDebitCurrency);
 
-            //Se redujo la cantidad de caracteres por pruebas ya que solo soporta 44 caracteres
-            String commentSubString = customComment.substring(1,customComment.length() -5);
-            transferenciaContableItem.setDebitoDescripcion(commentSubString);
+            transferenciaContableItem.setDebitoDescripcion(customComment);
             transferenciaContableItem.setComentario(customComment + "DEFROST_TRANSFER");
             transferenciaContableItem.setMovimientoDebito(transferDebitMovement);
 
