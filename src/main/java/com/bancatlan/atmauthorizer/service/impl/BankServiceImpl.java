@@ -588,7 +588,7 @@ public class BankServiceImpl implements IBankService {
             // Check if the response is successful
             if (Constants.BANK_SUCCESS_STATUS_CODE.equals(responseState.getCodigo())) {
                 // Response is successful.
-                uniqueTransNum = "" + responseTransferenciaContableItem.getNumeroTransaccionUnico();
+                uniqueTransNum = "" + responseTransferenciaContableItem.getRespuesta();
                 LOG.debug("{} successful, txnUniqueNumber:{} ", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME, uniqueTransNum);
             } else {
                 uniqueTransNum = Constants.STR_CUSTOM_ERR;// indicates Error.
