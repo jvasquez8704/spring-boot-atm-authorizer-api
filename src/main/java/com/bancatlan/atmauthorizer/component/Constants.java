@@ -102,7 +102,7 @@ public class Constants {
 
     /*GENERIC MESSAGES*/
     public static final String MSG_ATM_TO_BANK_ACCOUNT =  "TRANSFER OCB USER ACCOUNT TO ATM AUTHORIZER BANK ACCOUNT";
-    public static final String PREFIX_RTS_DEFAULT =  "RTS";
+    public static final String PREFIX_RTS_DEFAULT =  "RST";
     public static final String PREFIX_RTS_QR =  "RQR";
     public static final String PREFIX_RTS_MYMO =  "RTA";
     public static final String STR_DASH_SEPARATOR =  "-";
