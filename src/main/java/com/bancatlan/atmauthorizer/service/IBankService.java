@@ -11,8 +11,8 @@ public interface IBankService {
     String transferMoney(String accountDebit, String accountCredit, Double amount, Long ref, String action, String customComment,String useCase);
     String transferMoneyProcess(String accountDebit, String accountCredit, Double amount, Long ref, String action, String customComment,String useCase);
     String transferMoneyProcess(Transaction txn);
-    String freezeFoundsProcess(String accountDebit, Double amount, Long ref, String action, String userName, String customComment);
-    String freezeFounds(String accountDebit, Double amount, Long ref, String action, String userName, String customComment);
+    String freezeFoundsProcess(String accountDebit, Double amount, Long ref, String action, String userName, String customComment, String useCase);
+    String freezeFounds(String accountDebit, Double amount, Long ref, String action, String userName, String customComment,String useCase);
     List<PaymentInstrument> getBankAccountsByUserId(String userId);
     Boolean sendWithdrawalToAccountingClosing(Transaction startTxn, Transaction withdrawalTxn);
 }

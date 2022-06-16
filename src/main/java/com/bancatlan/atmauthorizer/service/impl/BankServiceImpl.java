@@ -606,7 +606,7 @@ public class BankServiceImpl implements IBankService {
     }
 
     @Override
-    public String freezeFoundsProcess(String accountDebit, Double amount, Long ref, String action, String userName, String customComment) {
+    public String freezeFoundsProcess(String accountDebit, Double amount, Long ref, String action, String userName, String customComment,String useCase) {
         LOG.info("FreezeFounds PROCESS function: comment {}, amount {}, accountDebit {}, action {}", customComment, amount, accountDebit, action);
         String urlS = absolutePathWSDLResources + freezeWSDLName;
         String coreReference = Constants.STR_DASH_SEPARATOR;
@@ -632,7 +632,9 @@ public class BankServiceImpl implements IBankService {
             provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, freezeSOAPEndpoint);
 
             DTPeticion dtPeticion = new DTPeticion();
-            dtPeticion.setTransaccionId(freezeTransactionId);
+            Config configIssuer = configService.getConfigByPropertyName(Constants.STR_FREEZE_FOUND_ACCOUNTING_TRANSFERS_ID + useCase);
+            String selectedIssuerId = (configIssuer != null && configIssuer.getPropertyValue() != null && !configIssuer.getPropertyValue().equals("")) ? configIssuer.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_FREEZE_FOUND_ACCOUNTING_TRANSFERS_DEFAULT_ID ).getPropertyValue();
+            dtPeticion.setTransaccionId(selectedIssuerId);
             dtPeticion.setAplicacionId(freezeApplicationId);
             dtPeticion.setPaisId(Constants.HN_COUNTRY2CODE);
             dtPeticion.setInstitucionId(freezeInstitutionId);
@@ -727,7 +729,7 @@ public class BankServiceImpl implements IBankService {
 
 
     @Override
-    public String freezeFounds(String accountDebit, Double amount, Long ref, String action, String userName, String customComment) {
+    public String freezeFounds(String accountDebit, Double amount, Long ref, String action, String userName, String customComment,String useCase) {
         LOG.info("FreezeFounds function: comment {}, amount {}, accountDebit {}, action {}", customComment, amount, accountDebit, action);
         String urlS = absolutePathWSDLResources + freezeWSDLName;
         String coreReference = "";
@@ -753,7 +755,9 @@ public class BankServiceImpl implements IBankService {
             provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, freezeSOAPEndpoint);
 
             DTPeticion dtPeticion = new DTPeticion();
-            dtPeticion.setTransaccionId(freezeTransactionId);
+            Config configIssuer = configService.getConfigByPropertyName(Constants.STR_FREEZE_FOUND_ACCOUNTING_TRANSFERS_ID + useCase);
+            String selectedIssuerId = (configIssuer != null && configIssuer.getPropertyValue() != null && !configIssuer.getPropertyValue().equals("")) ? configIssuer.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_FREEZE_FOUND_ACCOUNTING_TRANSFERS_DEFAULT_ID ).getPropertyValue();
+            dtPeticion.setTransaccionId(selectedIssuerId);
             dtPeticion.setAplicacionId(freezeApplicationId);
             dtPeticion.setPaisId(Constants.HN_COUNTRY2CODE);
             dtPeticion.setInstitucionId(freezeInstitutionId);
