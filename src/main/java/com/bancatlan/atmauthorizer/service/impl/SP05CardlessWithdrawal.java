@@ -116,11 +116,13 @@ public class SP05CardlessWithdrawal implements ICardlessWithdrawal {
 
     private OcbVoucherDTO validateAndFitOcbRequest(OcbVoucherDTO dto) {
         /*Privilege Validations*/
-        ResponsePrivilege responsePrivilege = new ResponsePrivilege();
-        responsePrivilege = utilPrivilege.AccountAndUserHavePrivilege(dto.getTransaction().getPayer().getUsername(),dto.getTransaction().getPayerPaymentInstrument().getStrIdentifier());
-        if(!responsePrivilege.getStatus().equals(Constants.BANK_SUCCESS_STATUS_CODE)){
-            LOG.error("Privilege Exception {}",responsePrivilege.getMessage() + "code error: "+ responsePrivilege.getStatus());
-            throw new ModelCustomErrorException(responsePrivilege.getMessage() , AuthorizerError.NOT_HAVE_PRIVILEGE_TO_USE_THIS_ACCOUNT);
+        if(utilPrivilege.isPrivilegeValidationActive()){
+              ResponsePrivilege responsePrivilege = new ResponsePrivilege();
+              responsePrivilege = utilPrivilege.AccountAndUserHavePrivilege(dto.getTransaction().getPayer().getUsername(),dto.getTransaction().getPayerPaymentInstrument().getStrIdentifier());
+              if(!responsePrivilege.getStatus().equals(Constants.BANK_SUCCESS_STATUS_CODE)){
+              LOG.error("Privilege Exception {}",responsePrivilege.getMessage() + "code error: "+ responsePrivilege.getStatus());
+              throw new ModelCustomErrorException(responsePrivilege.getMessage() , AuthorizerError.NOT_HAVE_PRIVILEGE_TO_USE_THIS_ACCOUNT);
+          }
         }
 
         /*OCB Validations*/

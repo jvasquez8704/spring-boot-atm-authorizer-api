@@ -4,4 +4,6 @@ import com.bancatlan.atmauthorizer.api.model.ResponsePrivilege;
 
 public interface IUtilPrivilege {
     ResponsePrivilege AccountAndUserHavePrivilege(String username, String AccountNumber);
+    Boolean isPrivilegeValidationActive();
+
 }
