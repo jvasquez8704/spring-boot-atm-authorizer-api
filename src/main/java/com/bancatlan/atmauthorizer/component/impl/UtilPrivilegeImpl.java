@@ -4,9 +4,11 @@ import com.bancatlan.atmauthorizer.api.model.ResponsePrivilege;
 import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.component.IUtilComponent;
 import com.bancatlan.atmauthorizer.component.IUtilPrivilege;
+import com.bancatlan.atmauthorizer.exception.PrivilegeError;
 import com.bancatlan.atmauthorizer.model.Config;
 import com.bancatlan.atmauthorizer.service.IConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -36,6 +38,14 @@ public class UtilPrivilegeImpl implements IUtilPrivilege {
             return true;
         }
         return  false;
+    }
+
+    @Override
+    public PrivilegeError errorMessage(String status) {
+        if(status.toString().equals("203")){
+            return PrivilegeError.IT_IS_SCHEDULED_SAVINGS_ACCOUNTS;
+        }
+        return PrivilegeError.USER_WITHOUT_PERMISSION_FOR_THE_ACCOUNT;
     }
 
 

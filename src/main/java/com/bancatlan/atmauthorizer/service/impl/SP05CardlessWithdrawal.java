@@ -8,6 +8,7 @@ import com.bancatlan.atmauthorizer.dto.OcbVoucherDTO;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
+import com.bancatlan.atmauthorizer.exception.PrivilegeError;
 import com.bancatlan.atmauthorizer.model.Transaction;
 import com.bancatlan.atmauthorizer.model.Voucher;
 import com.bancatlan.atmauthorizer.service.IBankService;
@@ -121,7 +122,7 @@ public class SP05CardlessWithdrawal implements ICardlessWithdrawal {
               responsePrivilege = utilPrivilege.AccountAndUserHavePrivilege(dto.getTransaction().getPayer().getUsername(),dto.getTransaction().getPayerPaymentInstrument().getStrIdentifier());
               if(!responsePrivilege.getStatus().equals(Constants.BANK_SUCCESS_STATUS_CODE)){
               LOG.error("Privilege Exception {}",responsePrivilege.getMessage() + "code error: "+ responsePrivilege.getStatus());
-              throw new ModelCustomErrorException(responsePrivilege.getMessage() , AuthorizerError.NOT_HAVE_PRIVILEGE_TO_USE_THIS_ACCOUNT);
+              throw new ModelCustomErrorException(responsePrivilege.getMessage() , utilPrivilege.errorMessage(responsePrivilege.getStatus()));
           }
         }
 
