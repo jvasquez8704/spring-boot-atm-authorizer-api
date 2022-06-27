@@ -338,7 +338,6 @@ public class BankServiceImpl implements IBankService {
             campoCollection.getCampoItem().add(campoItem);
 
             transferenciaContableItem.setCampoColeccion(campoCollection);
-
             transferenciaContableColeccion.setTransferenciaContableItem(transferenciaContableItem);
             mtTransferenciaContable.setTransferenciaContableColeccion(transferenciaContableColeccion);
 
@@ -442,9 +441,9 @@ public class BankServiceImpl implements IBankService {
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem campoItem = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem();
             campoItem.setLinea(new BigInteger(transferLine));
             campoItem.setTipoCampo(transferFieldType);
-
             campoItem.setValor("800");
             campoCollection.getCampoItem().add(campoItem);
+
             transferenciaContableItem.setCampoColeccion(campoCollection);
             transferenciaContableColeccion.setTransferenciaContableItem(transferenciaContableItem);
             mtTransferenciaContable.setTransferenciaContableColeccion(transferenciaContableColeccion);
@@ -570,9 +569,15 @@ public class BankServiceImpl implements IBankService {
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem campoItem = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem();
             campoItem.setLinea(new BigInteger(transferLine));
             campoItem.setTipoCampo(transferFieldType);
-
             campoItem.setValor("800");
             campoCollection.getCampoItem().add(campoItem);
+
+            campoItem = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem();
+            campoItem.setLinea(new BigInteger(transferLine));
+            campoItem.setTipoCampo(Constants.NRO_AUTORIZADOR);
+            campoItem.setValor(txn.getStrAuthorizationCode());
+            campoCollection.getCampoItem().add(campoItem);
+
             transferenciaContableItem.setCampoColeccion(campoCollection);
             transferenciaContableColeccion.setTransferenciaContableItem(transferenciaContableItem);
             mtTransferenciaContable.setTransferenciaContableColeccion(transferenciaContableColeccion);

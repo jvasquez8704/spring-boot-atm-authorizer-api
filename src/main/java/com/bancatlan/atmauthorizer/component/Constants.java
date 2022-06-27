@@ -126,6 +126,7 @@ public class Constants {
 
     /*accounting transfer code*/
     public static final String COD_ATM = "CODATM";
+    public static final String NRO_AUTORIZADOR ="NRO_AUTORIZADOR";
 
     /*configs*/
     public static final String STR_USE_CASE_ACCOUNTING_CONFIG_PREFIX = "ACCOUNT_USE_CASE_";
