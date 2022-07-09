@@ -56,12 +56,6 @@ public class BankServiceImpl implements IBankService {
     @Value("${bank.service.po.dev.password}")
     String busIntegrationDevPassword;
 
-    @Value("${register.service.po.username}")
-    String registerBusIntegrationUsername;
-
-    @Value("${register.service.po.password}")
-    String registerBusIntegrationPassword;
-
     /*Balance*/
     @Value("${bank.service.account.list.transaction.id}")
     String transactionId;
@@ -167,14 +161,39 @@ public class BankServiceImpl implements IBankService {
     @Value("${bus-integration.wsdl.freeze-name}")
     String freezeWSDLName;
 
+    //regiter transaction
+    @Value("${po.txn-register.username}")
+    String txnRegisterUsername;
+    @Value("${po.txn-register.password}")
+    String txnRegisterPassword;
+    @Value("${po.txn-register.endpoint}")
+    String txnRegisterSOAPEndpoint;
     @Value("${bus-integration.wsdl.txn-register-name}")
     String registerWSDLName;
 
-    @Value("${bus-integration.wsdl.freeze-endpoint}")
+    //freeze
+    @Value("${po.freeze.password}")
+    String freezePassword;
+    @Value("${po.freeze.username}")
+    String freezeUsername;
+    @Value("${po.freeze.endpoint}")
     String freezeSOAPEndpoint;
 
-    @Value("${bus-integration.wsdl.txn-register-endpoint}")
-    String registerSOAPEndpoint;
+    //accounting-transfer
+    @Value("${po.accounting-transfer.endpoint}")
+    String transferSOAPEndpoint;
+    @Value("${po.accounting-transfer.username}")
+    String transferUsername;
+    @Value("${po.accounting-transfer.password}")
+    String transferPassword;
+
+    //notification
+    @Value("${po.notification.endpoint}")
+    String notificationSOAPEndpoint;
+    @Value("${po.notification.username}")
+    String notificationUsername;
+    @Value("${po.notification.password}")
+    String notificationPassword;
 
     @Autowired
     IUtilComponent utilComponent;
@@ -211,6 +230,10 @@ public class BankServiceImpl implements IBankService {
             url = new URL(urlS);
             SIOSEjecutarEnvioNotificacionService port = new SIOSEjecutarEnvioNotificacionService(url);
             SIOSEjecutarEnvioNotificacion sms = port.getHTTPPort();
+
+            //endpoint url config
+            BindingProvider provider = (BindingProvider) sms;
+            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, notificationSOAPEndpoint);
 
             DTDestinoItem dtditem = new DTDestinoItem();
             dtditem.setCategoria(notificationCategory);
@@ -480,7 +503,6 @@ public class BankServiceImpl implements IBankService {
     public String transferMoneyProcess(Transaction txn) {
         Transaction creatorTxn = txn.getVoucher().getTxnCreatedBy();
         PaymentInstrument payerPI = creatorTxn.getPayerPaymentInstrument();
-        PaymentInstrument defaultAccountATMBASA = paymentInstrumentService.getById(Constants.PI_ATM_USER_ID);
         Config configAccount = configService.getConfigByPropertyName(Constants.STR_USE_CASE_ACCOUNTING_CONFIG_PREFIX + creatorTxn.getUseCase().getId().toString());
         String accountCredit = (configAccount != null && configAccount.getPropertyValue() != null && !configAccount.getPropertyValue().equals("")) ? configAccount.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_USE_CASE_ACCOUNT_DEFAULT).getPropertyValue();
         String accountDebit = txn.getVoucher().getTxnCreatedBy().getPayerPaymentInstrument().getStrIdentifier();
@@ -492,11 +514,12 @@ public class BankServiceImpl implements IBankService {
 
         String action = Constants.BANK_ACTION_DEFROST;
 
-        LOG.info("transferMoney in bach process: accountDebit: {} , accountCredit {} , amount: {} , comment: {}", accountDebit, accountCredit, amount, customComment);
+        LOG.info("transferMoneyProcess: accountDebit: {}, accountCredit {}, amount: {}, comment: {}",
+                accountDebit, accountCredit, amount, customComment);
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(busIntegrationDevUsername,
-                        busIntegrationDevPassword.toCharArray());
+                return new PasswordAuthentication(transferUsername,
+                        transferPassword.toCharArray());
             }
         });
         String urlWs = absolutePathWSDLResources + transferWSDLName;
@@ -506,6 +529,10 @@ public class BankServiceImpl implements IBankService {
             url = new URL(urlWs);
             SIOSTransferenciaContableService port = new SIOSTransferenciaContableService(url);
             SIOSTransferenciaContable coreBankingTransferClient = port.getHTTPPort();
+
+            //endpoint url config
+            BindingProvider provider = (BindingProvider) coreBankingTransferClient;
+            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, transferSOAPEndpoint);
 
             DTTransferenciaContable mtTransferenciaContable = new DTTransferenciaContable();
             mtTransferenciaContable.setActivarMultipleEntrada(BigInteger.ZERO);
@@ -622,8 +649,8 @@ public class BankServiceImpl implements IBankService {
         String bankFormatExpirationDate = expirationDate.format(DateTimeFormatter.BASIC_ISO_DATE);
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(busIntegrationDevUsername,
-                        busIntegrationDevPassword.toCharArray());
+                return new PasswordAuthentication(freezeUsername,
+                        freezePassword.toCharArray());
             }
         });
 
@@ -967,15 +994,14 @@ public class BankServiceImpl implements IBankService {
 
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(registerBusIntegrationUsername,
-                        registerBusIntegrationPassword.toCharArray());
+                return new PasswordAuthentication(txnRegisterUsername,
+                        txnRegisterPassword.toCharArray());
             }
         });
 
         try {
-            //String urlService = absolutePathWSDLResources + "SI_OS_RegistroTransaccionATMService.wsdl";
             String urlService = absolutePathWSDLResources + registerWSDLName;
-            LOG.info("URL: {}", urlService);
+            LOG.info("path txnRegister wsdl: {}", urlService);
             URL url;
             url = new URL(urlService);
 
@@ -984,11 +1010,9 @@ public class BankServiceImpl implements IBankService {
             SIOSRegistroTransaccionATM registroTransaccionATM = port.getHTTPPort();
 
             BindingProvider provider = (BindingProvider) registroTransaccionATM;
-            //provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, "http://hndespombapp.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_registroTransaccionATM&interfaceNamespace=http://bancatlan.hn/RAT002/1.0/out/RegistroTransaccionATM");
-            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, registerSOAPEndpoint);
+            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, txnRegisterSOAPEndpoint);
+
             DTRegistroTransaccionATMRequest dtRegistroTransaccionATMRequest = new DTRegistroTransaccionATMRequest();
-
-
             hn.bancatlan.rat002._1_0.out.registrotransaccionatm.DTPeticionGeneral dtPeticionGeneral = new hn.bancatlan.rat002._1_0.out.registrotransaccionatm.DTPeticionGeneral();
             dtPeticionGeneral.setTransaccionId(Constants.STR_QUESTION_MARK);
             dtPeticionGeneral.setAplicacionId(Constants.STR_QUESTION_MARK);

@@ -31,13 +31,6 @@ public class IDmissionServiceImpl implements IIDmissionService {
     @Value("${bus-integration.wsdl.update-txn-name}")
     String updateTxnWSDLName;
 
-
-    @Value("${idmission.service.po.username}")
-    String busIntegrationUsername;
-
-    @Value("${idmission.service.po.password}")
-    String busIntegrationPassword;
-
     @Value("${idmission.auth.password}")
     String idmissionAuthPassword;
 
@@ -59,7 +52,11 @@ public class IDmissionServiceImpl implements IIDmissionService {
     @Value("${idmission.isCreatedURL}")
     String idmissionisCreatedURL;
 
-    @Value("${bus-integration.wsdl.update-txn-endpoint}")
+    @Value("${po.update-txn.username}")
+    String busIntegrationUsername;
+    @Value("${po.update-txn.password}")
+    String busIntegrationPassword;
+    @Value("${po.update-txn.endpoint}")
     String updateTxnSOAPEndpoint;
 
     private Boolean updateTransaction(Transaction txn, String status) {
