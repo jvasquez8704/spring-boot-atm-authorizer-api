@@ -9,14 +9,18 @@ import com.bancatlan.atmauthorizer.model.Config;
 import com.bancatlan.atmauthorizer.model.PaymentInstrument;
 import com.bancatlan.atmauthorizer.model.PaymentInstrumentType;
 import com.bancatlan.atmauthorizer.model.Transaction;
+import com.bancatlan.atmauthorizer.model.Customer;
 import com.bancatlan.atmauthorizer.service.IBankService;
 import com.bancatlan.atmauthorizer.service.IConfigService;
+import com.bancatlan.atmauthorizer.service.IPaymentInstrumentService;
 import hn.bancatlan.rat002._1_0.out.registrotransaccionatm.*;
 import infatlan.hn.acd169.out.congelamientocuentas.*;
 import infatlan.hn.entrust.core.external.message.*;
 import infatlan.hn.entrust.core.external.message.DTPeticionGeneral;
 import och.infatlan.hn.ws.acd088.out.transferenciacontable.*;
 import och.infatlan.hn.ws.acd088.out.transferenciacontable.DTEstado;
+import och.infatlan.hn.ws.acd088.out.transferenciacontable.DTParametroAdicionalColeccion;
+import och.infatlan.hn.ws.acd088.out.transferenciacontable.DTParametroAdicionalItem;
 import och.infatlan.hn.ws.acd101.out.consultasaldov2.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,12 +55,6 @@ public class BankServiceImpl implements IBankService {
 
     @Value("${bank.service.po.dev.password}")
     String busIntegrationDevPassword;
-
-    @Value("${register.service.po.username}")
-    String registerBusIntegrationUsername;
-
-    @Value("${register.service.po.password}")
-    String registerBusIntegrationPassword;
 
     /*Balance*/
     @Value("${bank.service.account.list.transaction.id}")
@@ -163,17 +161,46 @@ public class BankServiceImpl implements IBankService {
     @Value("${bus-integration.wsdl.freeze-name}")
     String freezeWSDLName;
 
+    //regiter transaction
+    @Value("${po.txn-register.username}")
+    String txnRegisterUsername;
+    @Value("${po.txn-register.password}")
+    String txnRegisterPassword;
+    @Value("${po.txn-register.endpoint}")
+    String txnRegisterSOAPEndpoint;
     @Value("${bus-integration.wsdl.txn-register-name}")
     String registerWSDLName;
 
-    @Value("${bus-integration.wsdl.freeze-endpoint}")
+    //freeze
+    @Value("${po.freeze.password}")
+    String freezePassword;
+    @Value("${po.freeze.username}")
+    String freezeUsername;
+    @Value("${po.freeze.endpoint}")
     String freezeSOAPEndpoint;
 
-    @Value("${bus-integration.wsdl.txn-register-endpoint}")
-    String registerSOAPEndpoint;
+    //accounting-transfer
+    @Value("${po.accounting-transfer.endpoint}")
+    String transferSOAPEndpoint;
+    @Value("${po.accounting-transfer.username}")
+    String transferUsername;
+    @Value("${po.accounting-transfer.password}")
+    String transferPassword;
+
+    //notification
+    @Value("${po.notification.endpoint}")
+    String notificationSOAPEndpoint;
+    @Value("${po.notification.username}")
+    String notificationUsername;
+    @Value("${po.notification.password}")
+    String notificationPassword;
 
     @Autowired
     IUtilComponent utilComponent;
+
+    @Autowired
+    private IPaymentInstrumentService paymentInstrumentService;
+
 
     @Autowired
     private IConfigService configService;
@@ -203,6 +230,10 @@ public class BankServiceImpl implements IBankService {
             url = new URL(urlS);
             SIOSEjecutarEnvioNotificacionService port = new SIOSEjecutarEnvioNotificacionService(url);
             SIOSEjecutarEnvioNotificacion sms = port.getHTTPPort();
+
+            //endpoint url config
+            BindingProvider provider = (BindingProvider) sms;
+            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, notificationSOAPEndpoint);
 
             DTDestinoItem dtditem = new DTDestinoItem();
             dtditem.setCategoria(notificationCategory);
@@ -283,7 +314,7 @@ public class BankServiceImpl implements IBankService {
             mtTransferenciaContable.setAplicacionId(transferApplicationId);
             mtTransferenciaContable.setPaisId(BigInteger.ZERO);
             mtTransferenciaContable.setEmpresaId(BigInteger.ZERO);
-            mtTransferenciaContable.setCanalId(transferChannelId);
+            mtTransferenciaContable.setCanalId(utilComponent.getAccountingTranferChannelId(useCase));
 
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion identificadorColeccion = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion();
             //identificadorColeccion.setOmniCanal(transactionId.toString());
@@ -300,9 +331,7 @@ public class BankServiceImpl implements IBankService {
             transferenciaContableItem.setCuentaDebito(accountDebit);
             transferenciaContableItem.setMonedaDebito(transferDebitCurrency);
 
-            //Se redujo la cantidad de caracteres por pruebas ya que solo soporta 44 caracteres
-            String commentSubString = customComment.substring(1,customComment.length() -5);
-            transferenciaContableItem.setDebitoDescripcion(commentSubString);
+            transferenciaContableItem.setDebitoDescripcion(customComment);
             transferenciaContableItem.setComentario(customComment + "TRANSFER_TESTQA");
             transferenciaContableItem.setMovimientoDebito(transferDebitMovement);
 
@@ -332,7 +361,6 @@ public class BankServiceImpl implements IBankService {
             campoCollection.getCampoItem().add(campoItem);
 
             transferenciaContableItem.setCampoColeccion(campoCollection);
-
             transferenciaContableColeccion.setTransferenciaContableItem(transferenciaContableItem);
             mtTransferenciaContable.setTransferenciaContableColeccion(transferenciaContableColeccion);
 
@@ -394,7 +422,7 @@ public class BankServiceImpl implements IBankService {
             mtTransferenciaContable.setAplicacionId(transferApplicationId);
             mtTransferenciaContable.setPaisId(BigInteger.ZERO);
             mtTransferenciaContable.setEmpresaId(BigInteger.ZERO);
-            mtTransferenciaContable.setCanalId(transferChannelId);
+            mtTransferenciaContable.setCanalId(utilComponent.getAccountingTranferChannelId(useCase));
 
 
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion identificadorColeccion = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion();
@@ -411,9 +439,7 @@ public class BankServiceImpl implements IBankService {
             transferenciaContableItem.setCuentaDebito(accountDebit);
             transferenciaContableItem.setMonedaDebito(transferDebitCurrency);
 
-            //Se redujo la cantidad de caracteres por pruebas ya que solo soporta 44 caracteres
-            String commentSubString = customComment.substring(1,customComment.length() -5);
-            transferenciaContableItem.setDebitoDescripcion(commentSubString);
+            transferenciaContableItem.setDebitoDescripcion(customComment);
             transferenciaContableItem.setComentario(customComment + "DEFROST_TRANSFER");
             transferenciaContableItem.setMovimientoDebito(transferDebitMovement);
 
@@ -438,9 +464,9 @@ public class BankServiceImpl implements IBankService {
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem campoItem = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem();
             campoItem.setLinea(new BigInteger(transferLine));
             campoItem.setTipoCampo(transferFieldType);
-
             campoItem.setValor("800");
             campoCollection.getCampoItem().add(campoItem);
+
             transferenciaContableItem.setCampoColeccion(campoCollection);
             transferenciaContableColeccion.setTransferenciaContableItem(transferenciaContableItem);
             mtTransferenciaContable.setTransferenciaContableColeccion(transferenciaContableColeccion);
@@ -474,7 +500,145 @@ public class BankServiceImpl implements IBankService {
     }
 
     @Override
-    public String freezeFoundsProcess(String accountDebit, Double amount, Long ref, String action, String userName, String customComment) {
+    public String transferMoneyProcess(Transaction txn) {
+        Transaction creatorTxn = txn.getVoucher().getTxnCreatedBy();
+        PaymentInstrument payerPI = creatorTxn.getPayerPaymentInstrument();
+        Config configAccount = configService.getConfigByPropertyName(Constants.STR_USE_CASE_ACCOUNTING_CONFIG_PREFIX + creatorTxn.getUseCase().getId().toString());
+        String accountCredit = (configAccount != null && configAccount.getPropertyValue() != null && !configAccount.getPropertyValue().equals("")) ? configAccount.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_USE_CASE_ACCOUNT_DEFAULT).getPropertyValue();
+        String accountDebit = txn.getVoucher().getTxnCreatedBy().getPayerPaymentInstrument().getStrIdentifier();
+        Customer payee = creatorTxn.getPayee();
+        String prefix_core_desc = utilComponent.getBankCommentPrefix(creatorTxn.getUseCase().getId().intValue());
+        String customComment = prefix_core_desc + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
+        String useCase = creatorTxn.getUseCase().getId().toString();
+        Double amount = txn.getAmount();
+
+        String action = Constants.BANK_ACTION_DEFROST;
+
+        LOG.info("transferMoneyProcess: accountDebit: {}, accountCredit {}, amount: {}, comment: {}",
+                accountDebit, accountCredit, amount, customComment);
+        Authenticator.setDefault(new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(transferUsername,
+                        transferPassword.toCharArray());
+            }
+        });
+        String urlWs = absolutePathWSDLResources + transferWSDLName;
+        String uniqueTransNum = Constants.STR_DASH_SEPARATOR;
+        URL url;
+        try {
+            url = new URL(urlWs);
+            SIOSTransferenciaContableService port = new SIOSTransferenciaContableService(url);
+            SIOSTransferenciaContable coreBankingTransferClient = port.getHTTPPort();
+
+            //endpoint url config
+            BindingProvider provider = (BindingProvider) coreBankingTransferClient;
+            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, transferSOAPEndpoint);
+
+            DTTransferenciaContable mtTransferenciaContable = new DTTransferenciaContable();
+            mtTransferenciaContable.setActivarMultipleEntrada(BigInteger.ZERO);
+            mtTransferenciaContable.setActivarParametroAdicional("");
+            Config configIssuer = configService.getConfigByPropertyName(Constants.STR_ACCOUNTING_TRANSFERS_ID + useCase);
+            String selectedIssuerId = (configIssuer != null && configIssuer.getPropertyValue() != null && !configIssuer.getPropertyValue().equals("")) ? configIssuer.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_ACCOUNTING_TRANSFERS_DEFAULT_ID ).getPropertyValue();
+            mtTransferenciaContable.setTransaccionId(selectedIssuerId);
+            mtTransferenciaContable.setAplicacionId(transferApplicationId);
+            mtTransferenciaContable.setPaisId(BigInteger.ZERO);
+            mtTransferenciaContable.setEmpresaId(BigInteger.ZERO);
+            mtTransferenciaContable.setCanalId(utilComponent.getAccountingTranferChannelId(useCase));
+
+
+            DTParametroAdicionalColeccion parametroAdicionalColeccion = new DTParametroAdicionalColeccion();
+            DTParametroAdicionalItem parametroAdicionalItem = new DTParametroAdicionalItem();
+
+            parametroAdicionalItem.setLinea(BigInteger.ONE);
+            parametroAdicionalItem.setTipoRegistro(Constants.COD_ATM);
+            parametroAdicionalItem.setValor(txn.getStrIdTerminal());
+
+
+            parametroAdicionalColeccion.getParametroAdicionalItem().add(parametroAdicionalItem);
+            mtTransferenciaContable.setParametroAdicionalColeccion(parametroAdicionalColeccion);
+
+            och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion identificadorColeccion = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTIdentificadorColeccion();
+            identificadorColeccion.setOmniCanal("");
+            mtTransferenciaContable.getIdentificadorColeccion().add(identificadorColeccion);
+
+            DTTransferenciaContableColeccion transferenciaContableColeccion = new DTTransferenciaContableColeccion();
+
+            DTTransferenciaContableItem transferenciaContableItem = new DTTransferenciaContableItem();
+
+            transferenciaContableItem.setLinea(BigInteger.ONE);
+            transferenciaContableItem.setAccion(transferAction);
+            transferenciaContableItem.setValidar(transferValidate);
+            transferenciaContableItem.setCuentaDebito(accountDebit);
+            transferenciaContableItem.setMonedaDebito(transferDebitCurrency);
+
+            transferenciaContableItem.setDebitoDescripcion(customComment);
+            transferenciaContableItem.setComentario(customComment + "DEFROST_TRANSFER");
+            transferenciaContableItem.setMovimientoDebito(transferDebitMovement);
+
+            transferenciaContableItem.setCuentaCredito(accountCredit);
+            transferenciaContableItem.setMonedaCredito(transferCreditCurrency);
+            transferenciaContableItem.setMontoOriginal(amount);
+            transferenciaContableItem.setMovimientoCredito(transferCreditMovement);
+
+            transferenciaContableItem.setMontoDebito(0);
+            transferenciaContableItem.setMontoCredito(0);
+
+            transferenciaContableItem.setFuente(transferSource);
+            transferenciaContableItem.setSucursalCredito(BigInteger.valueOf(101));
+            transferenciaContableItem.setSucursalDebito(BigInteger.ZERO);
+            transferenciaContableItem.setNumeroTransaccionUnico(Long.valueOf(0));
+            transferenciaContableItem.setNumeroReferencia(creatorTxn.getId());
+            if (action != null && !action.equals("")) {
+                transferenciaContableItem.setRespuesta(action);
+            }
+
+            och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion campoCollection = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion();
+            och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem campoItem = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem();
+            campoItem.setLinea(new BigInteger(transferLine));
+            campoItem.setTipoCampo(transferFieldType);
+            campoItem.setValor("800");
+            campoCollection.getCampoItem().add(campoItem);
+
+            campoItem = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem();
+            campoItem.setLinea(new BigInteger(transferLine));
+            campoItem.setTipoCampo(Constants.NRO_AUTORIZADOR);
+            campoItem.setValor(txn.getStrAuthorizationCode());
+            campoCollection.getCampoItem().add(campoItem);
+
+            transferenciaContableItem.setCampoColeccion(campoCollection);
+            transferenciaContableColeccion.setTransferenciaContableItem(transferenciaContableItem);
+            mtTransferenciaContable.setTransferenciaContableColeccion(transferenciaContableColeccion);
+            DTTransferenciaContableResponse response = coreBankingTransferClient
+                    .siOSTransferenciaContable(mtTransferenciaContable);
+
+            DTTransferenciaContableItem responseTransferenciaContableItem = response.getRespuesta()
+                    .getTransferenciaContableColeccion().getTransferenciaContableItem();
+            LOG.info("{} service Response -> Comment : {}", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME, responseTransferenciaContableItem.getComentario());
+
+            DTEstado responseState = response.getRespuesta().getEstado();
+            LOG.info("{} service Response -> State -> Description: {}", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME, responseState.getDescripcion());
+            // Check if the response is successful
+            if (Constants.BANK_SUCCESS_STATUS_CODE.equals(responseState.getCodigo())) {
+                // Response is successful.
+                uniqueTransNum = "" + responseTransferenciaContableItem.getRespuesta();
+                LOG.debug("{} successful, txnUniqueNumber:{} ", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME, uniqueTransNum);
+            } else {
+                uniqueTransNum = Constants.STR_CUSTOM_ERR;// indicates Error.
+                LOG.error("{}: {} , Type: {}, Code: {}, description {} ", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME,
+                        AuthorizerError.CUSTOM_ERROR_ACCOUNTING_TRANSFER_ESB, responseState.getTipo(),
+                        responseState.getCodigo(), responseState.getDescripcion());
+            }
+
+        } catch (Exception e) {
+            uniqueTransNum = Constants.STR_EXCEPTION_ERR;
+            LOG.error("Exception in {}, {}, message {}, error ", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME, AuthorizerError.ERROR_ACCOUNTING_TRANSFER_FROM_BANK, e.getMessage(), e.getCause());
+        }
+
+        return uniqueTransNum;
+    }
+
+    @Override
+    public String freezeFoundsProcess(String accountDebit, Double amount, Long ref, String action, String userName, String customComment,String useCase) {
         LOG.info("FreezeFounds PROCESS function: comment {}, amount {}, accountDebit {}, action {}", customComment, amount, accountDebit, action);
         String urlS = absolutePathWSDLResources + freezeWSDLName;
         String coreReference = Constants.STR_DASH_SEPARATOR;
@@ -485,8 +649,8 @@ public class BankServiceImpl implements IBankService {
         String bankFormatExpirationDate = expirationDate.format(DateTimeFormatter.BASIC_ISO_DATE);
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(busIntegrationDevUsername,
-                        busIntegrationDevPassword.toCharArray());
+                return new PasswordAuthentication(freezeUsername,
+                        freezePassword.toCharArray());
             }
         });
 
@@ -500,7 +664,9 @@ public class BankServiceImpl implements IBankService {
             provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, freezeSOAPEndpoint);
 
             DTPeticion dtPeticion = new DTPeticion();
-            dtPeticion.setTransaccionId(freezeTransactionId);
+            Config configIssuer = configService.getConfigByPropertyName(Constants.STR_FREEZE_FOUND_ACCOUNTING_TRANSFERS_ID + useCase);
+            String selectedIssuerId = (configIssuer != null && configIssuer.getPropertyValue() != null && !configIssuer.getPropertyValue().equals("")) ? configIssuer.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_FREEZE_FOUND_ACCOUNTING_TRANSFERS_DEFAULT_ID ).getPropertyValue();
+            dtPeticion.setTransaccionId(selectedIssuerId);
             dtPeticion.setAplicacionId(freezeApplicationId);
             dtPeticion.setPaisId(Constants.HN_COUNTRY2CODE);
             dtPeticion.setInstitucionId(freezeInstitutionId);
@@ -592,8 +758,10 @@ public class BankServiceImpl implements IBankService {
         return coreReference;
     }
 
+
+
     @Override
-    public String freezeFounds(String accountDebit, Double amount, Long ref, String action, String userName, String customComment) {
+    public String freezeFounds(String accountDebit, Double amount, Long ref, String action, String userName, String customComment,String useCase) {
         LOG.info("FreezeFounds function: comment {}, amount {}, accountDebit {}, action {}", customComment, amount, accountDebit, action);
         String urlS = absolutePathWSDLResources + freezeWSDLName;
         String coreReference = "";
@@ -619,7 +787,9 @@ public class BankServiceImpl implements IBankService {
             provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, freezeSOAPEndpoint);
 
             DTPeticion dtPeticion = new DTPeticion();
-            dtPeticion.setTransaccionId(freezeTransactionId);
+            Config configIssuer = configService.getConfigByPropertyName(Constants.STR_FREEZE_FOUND_ACCOUNTING_TRANSFERS_ID + useCase);
+            String selectedIssuerId = (configIssuer != null && configIssuer.getPropertyValue() != null && !configIssuer.getPropertyValue().equals("")) ? configIssuer.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_FREEZE_FOUND_ACCOUNTING_TRANSFERS_DEFAULT_ID ).getPropertyValue();
+            dtPeticion.setTransaccionId(selectedIssuerId);
             dtPeticion.setAplicacionId(freezeApplicationId);
             dtPeticion.setPaisId(Constants.HN_COUNTRY2CODE);
             dtPeticion.setInstitucionId(freezeInstitutionId);
@@ -824,15 +994,14 @@ public class BankServiceImpl implements IBankService {
 
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(registerBusIntegrationUsername,
-                        registerBusIntegrationPassword.toCharArray());
+                return new PasswordAuthentication(txnRegisterUsername,
+                        txnRegisterPassword.toCharArray());
             }
         });
 
         try {
-            //String urlService = absolutePathWSDLResources + "SI_OS_RegistroTransaccionATMService.wsdl";
             String urlService = absolutePathWSDLResources + registerWSDLName;
-            LOG.info("URL: {}", urlService);
+            LOG.info("path txnRegister wsdl: {}", urlService);
             URL url;
             url = new URL(urlService);
 
@@ -841,11 +1010,9 @@ public class BankServiceImpl implements IBankService {
             SIOSRegistroTransaccionATM registroTransaccionATM = port.getHTTPPort();
 
             BindingProvider provider = (BindingProvider) registroTransaccionATM;
-            //provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, "http://hndespombapp.adbancat.hn:50000/XISOAPAdapter/MessageServlet?senderParty=&senderService=BS_VBA_DEV_443_HN75ODH&receiverParty=&receiverService=&interface=SI_OS_registroTransaccionATM&interfaceNamespace=http://bancatlan.hn/RAT002/1.0/out/RegistroTransaccionATM");
-            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, registerSOAPEndpoint);
+            provider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, txnRegisterSOAPEndpoint);
+
             DTRegistroTransaccionATMRequest dtRegistroTransaccionATMRequest = new DTRegistroTransaccionATMRequest();
-
-
             hn.bancatlan.rat002._1_0.out.registrotransaccionatm.DTPeticionGeneral dtPeticionGeneral = new hn.bancatlan.rat002._1_0.out.registrotransaccionatm.DTPeticionGeneral();
             dtPeticionGeneral.setTransaccionId(Constants.STR_QUESTION_MARK);
             dtPeticionGeneral.setAplicacionId(Constants.STR_QUESTION_MARK);

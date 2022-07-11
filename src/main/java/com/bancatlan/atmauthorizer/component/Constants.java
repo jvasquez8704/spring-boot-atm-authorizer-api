@@ -59,6 +59,9 @@ public class Constants {
     public static final int INT_VOUCHER_USE_CASE =  174;
     public static final int INT_VOUCHER_USE_CASE_QR =  177;
     public static final int INT_CASH_OUT_KEYBOARD_USE_CASE =  176;
+    public static final String STR_VOUCHER_USE_CASE =  "174";
+    public static final String STR_VOUCHER_USE_CASE_QR =  "177";
+    public static final String STR_CASH_OUT_KEYBOARD_USE_CASE =  "176";
     public static final int INT_WITHDRAW_VOUCHER_USE_CASE =  800;
     public static final int INT_DATE_TIME_SIZE =  6;
     public static final String STR_WITHDRAW_MYMO =  "WITHDRAWAL";
@@ -99,9 +102,9 @@ public class Constants {
 
     /*GENERIC MESSAGES*/
     public static final String MSG_ATM_TO_BANK_ACCOUNT =  "TRANSFER OCB USER ACCOUNT TO ATM AUTHORIZER BANK ACCOUNT";
-    public static final String PREFIX_RTS_DEFAULT =  "RETIRO_SIN_TARJETA";
+    public static final String PREFIX_RTS_DEFAULT =  "RST";
     public static final String PREFIX_RTS_QR =  "RQR";
-    public static final String PREFIX_RTS_MYMO =  "RST Teclado Atlantida";
+    public static final String PREFIX_RTS_MYMO =  "RTA";
     public static final String STR_DASH_SEPARATOR =  "-";
 
     /*NOTIFICATION TYPES*/
@@ -121,6 +124,10 @@ public class Constants {
     public static final String ID_MISSION_APP_ID = "2278";
     public static final String VOUCHER_BASA_APP_ID = "2272";
 
+    /*accounting transfer code*/
+    public static final String COD_ATM = "CODATM";
+    public static final String NRO_AUTORIZADOR ="NRO_AUTORIZADOR";
+
     /*configs*/
     public static final String STR_USE_CASE_ACCOUNTING_CONFIG_PREFIX = "ACCOUNT_USE_CASE_";
     public static final String STR_USE_CASE_ISSUER_CONFIG_PREFIX = "ISSUER_USE_CASE_";
@@ -128,4 +135,8 @@ public class Constants {
     public static final String STR_USE_CASE_ACCOUNT_DEFAULT = "ACCOUNT_USE_CASE_DEFAULT";
     public static final String STR_ACCOUNTING_TRANSFERS_ID = "ACCOUNTING_TRANSFERS_ID_";
     public static final String STR_ACCOUNTING_TRANSFERS_DEFAULT_ID = "ACCOUNTING_TRANSFERS_ID_DEFAULT";
+    public static final String STR_ACCOUNTING_TRANSFERS_CHANNEL_ID_DEFAULT = "ACCOUNTING_TRANSFERS_CHANNEL_ID_DEFAULT ";
+    public static final String STR_ACCOUNTING_TRANSFERS_CHANNEL_ID = "ACCOUNTING_TRANSFERS_CHANNEL_ID_";
+    public static final String STR_FREEZE_FOUND_ACCOUNTING_TRANSFERS_ID = "FREEZE_FOUND_ACCOUNTING_TRANSFERS_ID_";
+    public static final String STR_FREEZE_FOUND_ACCOUNTING_TRANSFERS_DEFAULT_ID = "FREEZE_FOUND_ACCOUNTING_TRANSFERS_ID_DEFAULT";
 }

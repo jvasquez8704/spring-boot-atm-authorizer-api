@@ -163,7 +163,7 @@ public class TransactionServiceImpl implements ITransactionService {
         }
 
         String customComment = Constants.STR_DEFROST_SERVICE_NAME + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getPayerPaymentInstrument().getStrIdentifier() + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
-        String coreRef = bankService.freezeFoundsProcess(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_DEFROST, txn.getPayer().getUsername(), customComment);
+        String coreRef = bankService.freezeFoundsProcess(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_DEFROST, txn.getPayer().getUsername(), customComment, txn.getUseCase().getId().toString());
         txn.setCoreReference(coreRef);
 
         LOG.info("Time process: {} ms, days {}", System.currentTimeMillis() - initTimeProcess, Duration.between(txn.getCreationDate(), LocalDateTime.now()).toDays());
@@ -513,7 +513,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 //Account Payer, Amount, comment
                 String freezeFoundsComment = utilComponent.getBankCommentPrefix(txn.getUseCase().getId().intValue());
                 freezeFoundsComment += Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
-                String freezeFoundsCoreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_FREEZE, txn.getPayer().getUsername(), freezeFoundsComment);
+                String freezeFoundsCoreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_FREEZE, txn.getPayer().getUsername(), freezeFoundsComment,txn.getUseCase().getId().toString());
                 txn.setCoreReference(freezeFoundsCoreRef);
                 //Update balance payer
                 //Double newBalance = accountATMBASA.getBalance() + txn.getAmount();
@@ -558,7 +558,8 @@ public class TransactionServiceImpl implements ITransactionService {
         Customer payee = creatorTxn.getPayee();
         String prefix_core_desc = utilComponent.getBankCommentPrefix(creatorTxn.getUseCase().getId().intValue());
         String customComment = prefix_core_desc + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
-        String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), selectedBankAccount, txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment,creatorTxn.getUseCase().getId().toString());
+//        String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), selectedBankAccount, txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment,creatorTxn.getUseCase().getId().toString());
+        String coreRef = bankService.transferMoneyProcess(txn);
         txn.setCoreReference(coreRef);
         //Update balance payee
         if (!coreRef.equals(Constants.STR_CUSTOM_ERR) && !coreRef.equals(Constants.STR_EXCEPTION_ERR) && !coreRef.equals(Constants.STR_DASH_SEPARATOR) && !coreRef.equals(Constants.STR_ZERO)) {
@@ -581,7 +582,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 LOG.info("Cancel txn {}", txn.getId());
                 //Account Payer, Amount, comment
                 String customComment = Constants.STR_DEFROST_SERVICE_NAME + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getPayerPaymentInstrument().getStrIdentifier() + Constants.STR_DASH_SEPARATOR + txn.getPayee().getMsisdn();
-                String coreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_DEFROST, txn.getPayer().getUsername(), customComment);
+                String coreRef = bankService.freezeFounds(txn.getPayerPaymentInstrument().getStrIdentifier(), txn.getAmount(), txn.getId(), Constants.BANK_ACTION_DEFROST, txn.getPayer().getUsername(), customComment,txn.getUseCase().getId().toString());
                 txn.setCoreReference(coreRef);
 
                 //Cancel Voucher
