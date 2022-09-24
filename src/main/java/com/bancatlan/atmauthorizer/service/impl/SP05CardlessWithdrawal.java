@@ -1,11 +1,14 @@
 package com.bancatlan.atmauthorizer.service.impl;
 
+import com.bancatlan.atmauthorizer.api.model.ResponsePrivilege;
 import com.bancatlan.atmauthorizer.component.Constants;
 import com.bancatlan.atmauthorizer.component.IUtilComponent;
+import com.bancatlan.atmauthorizer.component.IUtilPrivilege;
 import com.bancatlan.atmauthorizer.dto.OcbVoucherDTO;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
 import com.bancatlan.atmauthorizer.exception.ModelNotFoundException;
+import com.bancatlan.atmauthorizer.exception.PrivilegeError;
 import com.bancatlan.atmauthorizer.model.Transaction;
 import com.bancatlan.atmauthorizer.model.Voucher;
 import com.bancatlan.atmauthorizer.service.IBankService;
@@ -32,6 +35,9 @@ public class SP05CardlessWithdrawal implements ICardlessWithdrawal {
 
     @Autowired
     IUtilComponent utilComponent;
+
+    @Autowired
+    IUtilPrivilege utilPrivilege;
 
     @Override
     public OcbVoucherDTO verify(OcbVoucherDTO dto) {
@@ -110,6 +116,16 @@ public class SP05CardlessWithdrawal implements ICardlessWithdrawal {
     }
 
     private OcbVoucherDTO validateAndFitOcbRequest(OcbVoucherDTO dto) {
+        /*Privilege Validations*/
+        if(utilPrivilege.isPrivilegeValidationActive()){
+              ResponsePrivilege responsePrivilege = new ResponsePrivilege();
+              responsePrivilege = utilPrivilege.AccountAndUserHavePrivilege(dto.getTransaction().getPayer().getUsername(),dto.getTransaction().getPayerPaymentInstrument().getStrIdentifier());
+              if(!responsePrivilege.getStatus().equals(Constants.BANK_SUCCESS_STATUS_CODE)){
+              LOG.error("Privilege Exception {}",responsePrivilege.getMessage() + "code error: "+ responsePrivilege.getStatus());
+              throw new ModelCustomErrorException(responsePrivilege.getMessage() , utilPrivilege.errorMessage(responsePrivilege.getStatus()));
+          }
+        }
+
         /*OCB Validations*/
         if (dto.getAuth().getSessionKey() == null || dto.getAuth().getSessionKey().equals("")) {
             LOG.error("Custom Exception {}", AuthorizerError.MISSING_OCB_SESSION_KEY.toString());

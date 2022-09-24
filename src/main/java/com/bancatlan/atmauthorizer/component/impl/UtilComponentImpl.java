@@ -40,6 +40,10 @@ public class UtilComponentImpl implements IUtilComponent {
     private String secretPhrase;
 
     public static final String IV = "1234567890123456";
+
+    @Autowired
+    private IConfigService configService;
+
     @Override
     public String getPickupCodeByCellPhoneNumber(String cellPhoneNumber) {
         /**
@@ -426,10 +430,8 @@ public class UtilComponentImpl implements IUtilComponent {
         }
         return null;
     }
-
-    @Autowired
-    private IConfigService configService;
-
+    
+    @Override
     public  String getAccountingTranferChannelId(String useCase){
         Config configIssuer = configService.getConfigByPropertyName(Constants.STR_ACCOUNTING_TRANSFERS_CHANNEL_ID + useCase);
         String accountingTransfersChannelId = (configIssuer != null && configIssuer.getPropertyValue() != null && !configIssuer.getPropertyValue().equals("")) ? configIssuer.getPropertyValue() : configService.getConfigByPropertyName(Constants.STR_ACCOUNTING_TRANSFERS_CHANNEL_ID_DEFAULT ).getPropertyValue();
@@ -437,4 +439,10 @@ public class UtilComponentImpl implements IUtilComponent {
         return accountingTransfersChannelId;
     }
 
+    @Override
+    public String  getConfigValueByPropertyName(String propertyName, String propertyNameDefault){
+        Config configIssuer = configService.getConfigByPropertyName(propertyName);
+        String propertyValue = (configIssuer != null && configIssuer.getPropertyValue() != null && !configIssuer.getPropertyValue().equals("")) ? configIssuer.getPropertyValue() : configService.getConfigByPropertyName(propertyNameDefault).getPropertyValue();
+        return propertyValue;
+    }
 }
