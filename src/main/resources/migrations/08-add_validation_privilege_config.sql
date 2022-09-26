@@ -8,7 +8,7 @@ VALUES('URL_SERVICE_PRIVILEGE', 'URL_SERVICE_PRIVILEGE', 'http://localhost:8081'
 -- 1 is enable and 0 is disable
 INSERT INTO authorizerdb.dbo.config
 (name, property_name, property_value, data_type, is_active, is_deleted, creation_date)
-VALUES('IS_SCHEDULED_SAVINGS_ACCOUNTS', 'IS_SCHEDULED_SAVINGS_ACCOUNTS', '0', 'STRING', 1, 0, GETDATE());
+VALUES('IS_SCHEDULED_SAVINGS_ACCOUNTS', 'IS_SCHEDULED_SAVINGS_ACCOUNTS', '0', 'STRING', 0, 0, GETDATE());
 
 --add activation or deactivation of the privilege service
 -- 1 is enable and 0 is disable

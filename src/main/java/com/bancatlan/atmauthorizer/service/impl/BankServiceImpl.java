@@ -220,8 +220,8 @@ public class BankServiceImpl implements IBankService {
         LOG.info("body: " + body);
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(busIntegrationUsername,
-                        busIntegrationPassword.toCharArray());
+                return new PasswordAuthentication(notificationUsername,
+                        notificationPassword.toCharArray());
             }
         });
         String urlS = absolutePathWSDLResources + notificationWSDLName;
@@ -292,8 +292,8 @@ public class BankServiceImpl implements IBankService {
         //String toAccNum, String fromAccNum, double payerNetAmount, Long transactionId, Integer useCaseId, String customDesc, Long customerId
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(busIntegrationDevUsername,
-                        busIntegrationDevPassword.toCharArray());
+                return new PasswordAuthentication(transferUsername,
+                        transferPassword.toCharArray());
             }
         });
         String urlS = absolutePathWSDLResources + transferWSDLName;
@@ -401,8 +401,8 @@ public class BankServiceImpl implements IBankService {
         LOG.info("transferMoney in bach process: accountDebit: {} , accountCredit {} , amount: {} , comment: {}", accountDebit, accountCredit, amount, customComment);
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(busIntegrationDevUsername,
-                        busIntegrationDevPassword.toCharArray());
+                return new PasswordAuthentication(transferUsername,
+                        transferPassword.toCharArray());
             }
         });
         String urlWs = absolutePathWSDLResources + transferWSDLName;
@@ -758,8 +758,6 @@ public class BankServiceImpl implements IBankService {
         return coreReference;
     }
 
-
-
     @Override
     public String freezeFounds(String accountDebit, Double amount, Long ref, String action, String userName, String customComment,String useCase) {
         LOG.info("FreezeFounds function: comment {}, amount {}, accountDebit {}, action {}", customComment, amount, accountDebit, action);
@@ -772,8 +770,8 @@ public class BankServiceImpl implements IBankService {
         String bankFormatExpirationDate = expirationDate.format(DateTimeFormatter.BASIC_ISO_DATE);
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(busIntegrationDevUsername,
-                        busIntegrationDevPassword.toCharArray());
+                return new PasswordAuthentication(freezeUsername,
+                        freezePassword.toCharArray());
             }
         });
 
