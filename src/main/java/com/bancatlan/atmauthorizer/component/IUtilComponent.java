@@ -27,4 +27,5 @@ public interface IUtilComponent {
     String getProcessingTime(String processingDate);
     String getCurrencyTransactionCode(String currency);
     String getAccountingTranferChannelId(String useCase);
+    String getConfigValueByPropertyName(String propertyName, String propertyNameDefault);
 }

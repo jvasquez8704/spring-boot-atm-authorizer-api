@@ -101,6 +101,7 @@ public enum AuthorizerError implements IError {
     ERROR_SERVICE_BANK_FREEZE(83,"Error invoking SIOSCongelamientoCuentas service"),
     CUSTOM_ERROR_SERVICE_BANK_FREEZE(84,"Custom error in response SIOSCongelamientoCuentas service"),
     NOT_SUPPORT_CURRENCY_DIFFERENT_HN(85, "Selecciona una cuenta en LPS."),
+    NOT_HAVE_PRIVILEGE_TO_USE_THIS_ACCOUNT(203,"Not have privilege to use this account")
     ;
 
 
