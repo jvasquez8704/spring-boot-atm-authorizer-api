@@ -268,14 +268,12 @@ public class BankServiceImpl implements IBankService {
                         + response.getRespuesta().getEstado().getDescripcion(),AuthorizerError.EXTERNAL_SMS_ERROR);*/
             }
         } catch (ModelCustomErrorException ent) {
-            LOG.error(ent.getMessage(), ent);
-            throw ent;
+            LOG.error("SIOSEjecutarEnvioNotificacion ModelCustomErrorException exception =>  message {}, entire object error {}",ent.getMessage(), ent);
         } catch (MalformedURLException ex) {
-            LOG.error(ex.getMessage(), ex);
-            throw new ModelCustomErrorException(ex.getMessage(), AuthorizerError.MALFORMED_URL);
+            LOG.error("SIOSEjecutarEnvioNotificacion MalformedURLException exception =>  message {}, entire object error {}",ex.getMessage(), ex);
+            //throw new ModelCustomErrorException(ex.getMessage(), AuthorizerError.MALFORMED_URL);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw new ModelCustomErrorException(e.getMessage(), AuthorizerError.UNEXPECTED_ERROR);
+            LOG.error("SIOSEjecutarEnvioNotificacion generic exception =>  message {}, entire object error {}",e.getMessage(), e);
         }
 
         return true;
