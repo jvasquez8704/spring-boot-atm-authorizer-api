@@ -25,5 +25,6 @@ public interface ITransactionService extends ICRUD<Transaction> {
     Transaction getTransactionByApplicationIdAndChannelReference(String applicationId, String channelReference);
     List<Transaction> getTransactionsByCustomerAndRangeTime(Customer customer, UseCase useCase, TxnStatus status, LocalDateTime startDateTime, LocalDateTime endDateTime, Boolean isDebit);
     void executeAllConfirmedWithDrawls();
+    void executeFailedWithDrawls();
     void reverseExpiredTransactions();
 }

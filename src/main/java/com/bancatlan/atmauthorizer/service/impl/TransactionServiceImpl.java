@@ -236,6 +236,8 @@ public class TransactionServiceImpl implements ITransactionService {
         txnStatus.setId(new Long(25));
         List<Transaction> transactionList = repo.getTransactionsByUseCaseAndTxnStatus(useCase, txnStatus);
 
+        LOG.info("ExecuteAllConfirmedWithDrawls count:{}", transactionList.size());
+
         if (!transactionList.isEmpty()) {
             for (Transaction txn : transactionList) {
                 long startTimeProcess = System.currentTimeMillis();
@@ -247,16 +249,37 @@ public class TransactionServiceImpl implements ITransactionService {
                     LOG.info("MYMO Txn Id => {}, time process: {} ms.", txn.getVoucher().getTxnCreatedBy().getId(), System.currentTimeMillis() - startingTimeProcess);
                 }
 
-                //call accounting closing service
-                // if(txn.getTxnStatus().getId().equals(Long.valueOf(Constants.CONFIRM_TXN_STATUS))) {
-                // long startingTime = System.currentTimeMillis();
-                //  bankService.sendWithdrawalToAccountingClosing(txn.getVoucher().getTxnCreatedBy(), txn);
-                //  LOG.info("Accounting Closing service Txn Id => {}, time process: {} ms.", txn.getId(), System.currentTimeMillis() - startingTime);
-                // }
             }
             LOG.info("ExecuteAllConfirmedWithDrawls: Finishing bash process, which it took {} ms", System.currentTimeMillis() - startTime);
         } else {
             LOG.info("ExecuteAllConfirmedWithDrawls: No transactions found");
+        }
+
+    }
+
+    @Override
+    public void executeFailedWithDrawls() {
+        long startTime = System.currentTimeMillis();
+        UseCase useCase = new UseCase();
+        useCase.setId(new Long(800));
+        TxnStatus transitiveStatus = new TxnStatus();
+        transitiveStatus.setId(new Long(21));
+        List<Transaction> transactionListWithOutFreezing = repo.getTransactionsByUseCaseAndTxnStatus(useCase, transitiveStatus);
+        LOG.info("ExecuteTxnsWithoutFreezing count:{}", transactionListWithOutFreezing.size());
+        if (!transactionListWithOutFreezing.isEmpty()) {
+            for (Transaction txn : transactionListWithOutFreezing) {
+                long startTimeProcess = System.currentTimeMillis();
+                this.processForceConfirm(txn);
+                LOG.info("TxnId => {}, Amount {},  Paid Voucher {} , time process: {} ms.", txn.getId(), txn.getAmount(), txn.getVoucher().getId(), System.currentTimeMillis() - startTimeProcess);
+                if(txn.getVoucher().getTxnCreatedBy().getUseCase().getId().equals(Constants.CASH_OUT_KEYBOARD_USE_CASE)) {
+                    long startingTimeProcess = System.currentTimeMillis();
+                    idMissionService.setSuccessTransaction(txn.getVoucher().getTxnCreatedBy());
+                    LOG.info("RE-POST KEYBOARD Txn Id => {}, time process: {} ms.", txn.getVoucher().getTxnCreatedBy().getId(), System.currentTimeMillis() - startingTimeProcess);
+                }
+            }
+            LOG.info("RE-POSTConfirmedWithDrawls: Finishing bash process, which it took {} ms", System.currentTimeMillis() - startTime);
+        } else {
+            LOG.info("RE-POSTConfirmedWithDrawls: No transactions found");
         }
     }
 
@@ -560,7 +583,7 @@ public class TransactionServiceImpl implements ITransactionService {
         String prefix_core_desc = utilComponent.getBankCommentPrefix(creatorTxn.getUseCase().getId().intValue());
         String customComment = prefix_core_desc + Constants.STR_DASH_SEPARATOR + txn.getId() + Constants.STR_DASH_SEPARATOR + txn.getUseCase().getId() + Constants.STR_DASH_SEPARATOR + payerPI.getStrIdentifier() + Constants.STR_DASH_SEPARATOR + payee.getMsisdn();
 //        String coreRef = bankService.transferMoneyProcess(payerPI.getStrIdentifier(), selectedBankAccount, txn.getAmount(), creatorTxn.getId(), Constants.BANK_ACTION_DEFROST, customComment,creatorTxn.getUseCase().getId().toString());
-        String coreRef = bankService.transferMoneyProcess(txn);
+        String coreRef = bankService.transferMoneyProcess(txn, true);
         txn.setCoreReference(coreRef);
         //Update balance payee
         if (!coreRef.equals(Constants.STR_CUSTOM_ERR) && !coreRef.equals(Constants.STR_EXCEPTION_ERR) && !coreRef.equals(Constants.STR_DASH_SEPARATOR) && !coreRef.equals(Constants.STR_ZERO)) {
@@ -570,6 +593,18 @@ public class TransactionServiceImpl implements ITransactionService {
             txn.setPayerPaymentInstrument(payerPI);
             txn.setPayeePaymentInstrument(defaultAccountATMBASA);
             txn.setTxnStatus(status.getById(Constants.CONFIRM_TXN_STATUS));
+        }
+        return this.update(txn);
+    }
+
+    private Transaction processForceConfirm(Transaction txn) {
+        String coreRef = bankService.transferMoneyProcess(txn, false);
+        txn.setCoreReference(coreRef);
+        if (coreRef.equals(Constants.STR_ZERO + Constants.STR_ZERO)) {
+            txn.setPayerPaymentInstrument(txn.getVoucher().getTxnCreatedBy().getPayerPaymentInstrument());
+            txn.setTxnStatus(status.getById(Constants.CONFIRM_TXN_STATUS));
+        } else {
+            txn.setTxnStatus(status.getById(Constants.INQUIRY_TXN_STATUS));
         }
         return this.update(txn);
     }

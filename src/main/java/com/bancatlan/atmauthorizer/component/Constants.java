@@ -46,6 +46,9 @@ public class Constants {
     public static final long PRE_AUTHORIZED_TXN_STATUS = 2;
     public static final long AUTHENTICATED_TXN_STATUS = 10;
     public static final long AUTHORIZED_TXN_STATUS = 20;
+    public static final long TO_RE_POST_TXN_STATUS = 21;
+    public static final long INQUIRY_TXN_STATUS = 22;
+    public static final long MANUALLY_SOLVED_TXN_STATUS = 23;
     public static final long WAITING_AUTOMATIC_PROCESS_TXN_STATUS = 25;
     public static final long CONFIRM_TXN_STATUS = 30;
     public static final long CANCEL_CONFIRM_TXN_STATUS = 70;
@@ -55,6 +58,7 @@ public class Constants {
     /*TXN USE CASE CODES*/
     public static final long VOUCHER_USE_CASE =  174;
     public static final long VOUCHER_USE_CASE_QR =  177;
+    public static final long CASH_OUT_KEYBOARD_USE_CASE =  176;
     public static final long WITHDRAW_VOUCHER_USE_CASE =  800;
     public static final int INT_VOUCHER_USE_CASE =  174;
     public static final int INT_VOUCHER_USE_CASE_QR =  177;

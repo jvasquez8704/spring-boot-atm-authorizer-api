@@ -30,6 +30,7 @@ public class ScheduledTasksComponentImpl implements IScheduledTasksComponent {
     public void runWithdrawConfirmedAsTransferToControlledAccount() {
         LOG.info("WithdrawConfirmed: Name thread => {}" , Thread.currentThread().getName());
         transactionService.executeAllConfirmedWithDrawls();
+        transactionService.executeFailedWithDrawls();
     }
 
     //@Scheduled(fixedRate = 3600000)//1hour

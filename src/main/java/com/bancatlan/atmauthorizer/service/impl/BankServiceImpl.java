@@ -5,11 +5,7 @@ import com.bancatlan.atmauthorizer.component.IUtilComponent;
 import com.bancatlan.atmauthorizer.component.impl.UtilComponentImpl;
 import com.bancatlan.atmauthorizer.exception.AuthorizerError;
 import com.bancatlan.atmauthorizer.exception.ModelCustomErrorException;
-import com.bancatlan.atmauthorizer.model.Config;
-import com.bancatlan.atmauthorizer.model.PaymentInstrument;
-import com.bancatlan.atmauthorizer.model.PaymentInstrumentType;
-import com.bancatlan.atmauthorizer.model.Transaction;
-import com.bancatlan.atmauthorizer.model.Customer;
+import com.bancatlan.atmauthorizer.model.*;
 import com.bancatlan.atmauthorizer.service.IBankService;
 import com.bancatlan.atmauthorizer.service.IConfigService;
 import com.bancatlan.atmauthorizer.service.IPaymentInstrumentService;
@@ -500,7 +496,7 @@ public class BankServiceImpl implements IBankService {
     }
 
     @Override
-    public String transferMoneyProcess(Transaction txn) {
+    public String transferMoneyProcess(Transaction txn, boolean hasApplyFreezing) {
         Transaction creatorTxn = txn.getVoucher().getTxnCreatedBy();
         PaymentInstrument payerPI = creatorTxn.getPayerPaymentInstrument();
         Config configAccount = configService.getConfigByPropertyName(Constants.STR_USE_CASE_ACCOUNTING_CONFIG_PREFIX + creatorTxn.getUseCase().getId().toString());
@@ -512,10 +508,10 @@ public class BankServiceImpl implements IBankService {
         String useCase = creatorTxn.getUseCase().getId().toString();
         Double amount = txn.getAmount();
 
-        String action = Constants.BANK_ACTION_DEFROST;
+        String action = hasApplyFreezing ? Constants.BANK_ACTION_DEFROST : "";
 
-        LOG.info("transferMoneyProcess: accountDebit: {}, accountCredit {}, amount: {}, comment: {}",
-                accountDebit, accountCredit, amount, customComment);
+        LOG.info("transferMoneyProcess: accountDebit: {}, accountCredit {}, amount: {}, comment: {}, hasApplyFreezing{}",
+                accountDebit, accountCredit, amount, customComment, hasApplyFreezing);
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(transferUsername,
@@ -588,15 +584,14 @@ public class BankServiceImpl implements IBankService {
             transferenciaContableItem.setSucursalDebito(BigInteger.ZERO);
             transferenciaContableItem.setNumeroTransaccionUnico(Long.valueOf(0));
             transferenciaContableItem.setNumeroReferencia(creatorTxn.getId());
-            if (action != null && !action.equals("")) {
-                transferenciaContableItem.setRespuesta(action);
-            }
+            transferenciaContableItem.setRespuesta(action);
+
 
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion campoCollection = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoColeccion();
             och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem campoItem = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem();
             campoItem.setLinea(new BigInteger(transferLine));
             campoItem.setTipoCampo(transferFieldType);
-            campoItem.setValor("800");
+            campoItem.setValor(txn.getUseCase().getId().toString());
             campoCollection.getCampoItem().add(campoItem);
 
             campoItem = new och.infatlan.hn.ws.acd088.out.transferenciacontable.DTCampoItem();
@@ -619,10 +614,18 @@ public class BankServiceImpl implements IBankService {
             LOG.info("{} service Response -> State -> Description: {}", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME, responseState.getDescripcion());
             // Check if the response is successful
             if (Constants.BANK_SUCCESS_STATUS_CODE.equals(responseState.getCodigo())) {
-                // Response is successful.
                 uniqueTransNum = "" + responseTransferenciaContableItem.getRespuesta();
-                LOG.debug("{} successful, txnUniqueNumber:{} ", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME, uniqueTransNum);
+                LOG.debug("{} successful, txnUniqueNumber:{} ", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME, responseTransferenciaContableItem.getRespuesta());
             } else {
+                String expectedMsgError = String.format("NotaPrev %s En status ACTIVO no existe",
+                        creatorTxn.getId().toString());
+                if (responseState.getDetalleTecnico().equals(expectedMsgError)) {
+                    TxnStatus transitiveStatus = new TxnStatus();
+                    transitiveStatus.setId(new Long(Constants.TO_RE_POST_TXN_STATUS));
+                    txn.setTxnStatus(transitiveStatus);
+                } else {
+                    //TODO Analizar que hacer con los otros errors, para enviarlos con estado 23 => para revision manual
+                }
                 uniqueTransNum = Constants.STR_CUSTOM_ERR;// indicates Error.
                 LOG.error("{}: {} , Type: {}, Code: {}, description {} ", Constants.STR_ACCOUNTING_TRANSFER_SERVICE_NAME,
                         AuthorizerError.CUSTOM_ERROR_ACCOUNTING_TRANSFER_ESB, responseState.getTipo(),

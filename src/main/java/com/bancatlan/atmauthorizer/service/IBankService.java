@@ -10,7 +10,7 @@ public interface IBankService {
     Boolean sendNotification(String email, String subject, String body, String typeNotification);
     String transferMoney(String accountDebit, String accountCredit, Double amount, Long ref, String action, String customComment,String useCase);
     String transferMoneyProcess(String accountDebit, String accountCredit, Double amount, Long ref, String action, String customComment,String useCase);
-    String transferMoneyProcess(Transaction txn);
+    String transferMoneyProcess(Transaction txn, boolean hasApplyFreezing);
     String freezeFoundsProcess(String accountDebit, Double amount, Long ref, String action, String userName, String customComment, String useCase);
     String freezeFounds(String accountDebit, Double amount, Long ref, String action, String userName, String customComment,String useCase);
     List<PaymentInstrument> getBankAccountsByUserId(String userId);
