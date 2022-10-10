@@ -603,6 +603,7 @@ public class TransactionServiceImpl implements ITransactionService {
         if (coreRef.equals(Constants.STR_ZERO + Constants.STR_ZERO)) {
             txn.setPayerPaymentInstrument(txn.getVoucher().getTxnCreatedBy().getPayerPaymentInstrument());
             txn.setTxnStatus(status.getById(Constants.CONFIRM_TXN_STATUS));
+            txn.setDescription("FAILED_ACCOUNTING_PROCESS");
         } else {
             txn.setTxnStatus(status.getById(Constants.INQUIRY_TXN_STATUS));
         }
